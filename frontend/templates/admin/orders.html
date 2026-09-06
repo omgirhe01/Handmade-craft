@@ -1,0 +1,35 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Orders — Admin{% endblock %}
+{% block page_title %}Orders{% endblock %}
+{% block admin_content %}
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Qty</th><th>Amount</th><th>Phone</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>#{{ o.order_code }}</td>
+        <td>{{ o.customer_name }}</td>
+        <td>{{ o.product.name }}</td>
+        <td>{{ o.quantity }}</td>
+        <td>₹{{ '%.0f'|format(o.total_price) }}</td>
+        <td>{{ o.phone }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.update_order_status', order_id=o.id) }}">
+            <select name="status" onchange="this.form.submit()" class="form-control" style="padding:6px 10px; font-size:.8rem;">
+              {% for s in ['Pending','Confirmed','Preparing','Completed'] %}
+              <option value="{{ s }}" {{ 'selected' if o.status==s }}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" style="text-align:center; color:var(--ink-600);">No orders yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

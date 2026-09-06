@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}My Orders — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section container" style="padding-top:8px;">
+  <h2>My Orders</h2>
+  <p style="color:var(--ink-600); margin-top:-10px; margin-bottom:26px;">Home / My Orders</p>
+
+  {% if not searched %}
+  <div class="filter-card" style="max-width:480px; margin-bottom:30px;">
+    <form method="post" style="display:flex; gap:10px; flex-wrap:wrap;">
+      <input type="tel" name="phone" placeholder="Enter your mobile number" required style="flex:1; min-width:180px;" class="form-control" value="{{ remembered_phone }}">
+      <button type="submit" class="btn btn-primary">Find Orders</button>
+    </form>
+  </div>
+  {% else %}
+  <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
+    <p style="color:var(--ink-600); margin:0;">Showing orders for <strong>{{ remembered_phone }}</strong></p>
+    <form method="post" style="display:flex; gap:8px;">
+      <input type="tel" name="phone" placeholder="Search a different number" style="width:190px;" class="form-control">
+      <button type="submit" class="btn btn-outline btn-sm">Search</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if searched %}
+    {% if orders or custom_orders %}
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr><th>Order ID</th><th>Date</th><th>Item</th><th>Qty</th><th>Amount</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+          <tr>
+            <td>#{{ o.order_code }}</td>
+            <td>{{ o.created_at.strftime('%d %b %Y') }}</td>
+            <td>{{ o.product.name }}</td>
+            <td>{{ o.quantity }}</td>
+            <td>₹{{ '%.0f'|format(o.total_price) }}</td>
+            <td><span class="badge badge-{{ o.status|lower }}">{{ o.status }}</span></td>
+          </tr>
+          {% endfor %}
+          {% for c in custom_orders %}
+          <tr>
+            <td>#{{ c.order_code }}</td>
+            <td>{{ c.created_at.strftime('%d %b %Y') }}</td>
+            <td>Custom Order — {{ c.item_type }}</td>
+            <td>{{ c.quantity }}</td>
+            <td>—</td>
+            <td><span class="badge badge-{{ c.status|lower }}">{{ c.status }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">{{ icon('package', 26) }}</div>
+      <p>No orders found for this mobile number.</p>
+    </div>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

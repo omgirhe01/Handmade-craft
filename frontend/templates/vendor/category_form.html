@@ -1,0 +1,19 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}{{ 'Edit' if category else 'Add' }} Category{% endblock %}
+{% block page_title %}{{ 'Edit Category' if category else 'Add Category' }}{% endblock %}
+{% block vendor_content %}
+
+<div class="panel" style="max-width:480px;">
+  <form method="post">
+    <div class="form-group">
+      <label>Category Name <span class="req">*</span></label>
+      <input type="text" name="name" required value="{{ category.name if category else '' }}">
+    </div>
+    <div style="display:flex; gap:12px; margin-top:10px;">
+      <button type="submit" class="btn btn-primary">{{ 'Save Changes' if category else 'Add Category' }}</button>
+      <a href="{{ url_for('vendor.categories') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Our Products — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section container" style="padding-top:8px;">
+  <h2>Our Products</h2>
+  <p style="color:var(--ink-600); margin-top:-10px; margin-bottom:26px;">Home / Products</p>
+
+  <div class="shop-layout">
+    <aside>
+      <div class="filter-card">
+        <h4>Categories</h4>
+        <ul class="filter-list">
+          <li><a href="{{ url_for('public.products') }}" class="{{ 'active' if active_category=='all' }}">All Products</a></li>
+          {% for c in categories %}
+          <li><a href="{{ url_for('public.products', category=c.slug) }}" class="{{ 'active' if active_category==c.slug }}">{{ c.name }}</a></li>
+          {% endfor %}
+        </ul>
+        <h4>Why Choose Us?</h4>
+        <ul class="filter-list why-us">
+          <li>{{ icon('sparkle', 15) }} Unique &amp; Beautiful Designs</li>
+          <li>{{ icon('sparkle', 15) }} Best Quality Materials</li>
+          <li>{{ icon('sparkle', 15) }} Affordable Prices</li>
+          <li>{{ icon('sparkle', 15) }} Safe &amp; Secure Packaging</li>
+        </ul>
+      </div>
+    </aside>
+
+    <div>
+      <div class="toolbar">
+        <form class="search-box" method="get">
+          {% if active_category and active_category != 'all' %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+          <input type="text" name="q" value="{{ search }}" placeholder="Search products...">
+          <button class="btn btn-primary btn-sm" type="submit">Search</button>
+        </form>
+        <form method="get">
+          {% if active_category and active_category != 'all' %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+          {% if search %}<input type="hidden" name="q" value="{{ search }}">{% endif %}
+          <select name="sort" onchange="this.form.submit()">
+            <option value="">Sort By</option>
+            <option value="price_low" {{ 'selected' if sort=='price_low' }}>Price: Low to High</option>
+            <option value="price_high" {{ 'selected' if sort=='price_high' }}>Price: High to Low</option>
+          </select>
+        </form>
+      </div>
+
+      <div class="grid-products">
+        {% for p in products %}
+        <a href="{{ url_for('public.product_detail', product_id=p.id) }}" class="product-card">
+          <div class="thumb"><img src="{{ url_for('static', filename='uploads/' + p.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=400&auto=format&fit=crop'" alt="{{ p.name }}"></div>
+          <div class="body">
+            <div class="cat">{{ p.category.name }}</div>
+            <h4>{{ p.name }}</h4>
+            <div class="price">₹{{ '%.0f'|format(p.price) }}</div>
+            {% if not p.in_stock %}<span class="stock-out">Out of Stock</span>{% endif %}
+          </div>
+        </a>
+        {% else %}
+        <div class="empty-state" style="grid-column:1/-1;">
+          <div class="icon">{{ icon('search', 26) }}</div>
+          <p>No products found. Try a different search or category.</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon, social_icon %}
+{% block title %}Contact Us — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section container" style="padding-top:8px;">
+  <h2>Contact Us</h2>
+  <p style="color:var(--ink-600); margin-top:-10px; margin-bottom:26px;">Home / Contact Us</p>
+
+  <div class="pd-layout">
+    <div class="filter-card">
+      <h3 class="contact-heading">{{ icon('map-pin', 20) }} Get in Touch</h3>
+      <p class="contact-row">{{ icon('phone', 16) }} {{ PHONE_NUMBER }}</p>
+      <p class="contact-row">{{ social_icon('whatsapp', 16) }} {{ PHONE_NUMBER }} (WhatsApp)</p>
+      <p class="contact-row">{{ icon('mail', 16) }} {{ EMAIL }}</p>
+      <p class="contact-row">{{ icon('map-pin', 16) }} {{ ADDRESS }}</p>
+
+      <h4 style="margin-top:24px;">Follow Us</h4>
+      <div class="socials on-light" style="margin-top:8px;">
+        {% if VENDOR.instagram_url %}<a href="{{ VENDOR.instagram_url }}" aria-label="Instagram" target="_blank" rel="noopener">{{ social_icon('instagram') }}</a>{% endif %}
+        {% if VENDOR.facebook_url %}<a href="{{ VENDOR.facebook_url }}" aria-label="Facebook" target="_blank" rel="noopener">{{ social_icon('facebook') }}</a>{% endif %}
+        {% if WHATSAPP_NUMBER %}<a href="https://wa.me/{{ WHATSAPP_NUMBER }}" aria-label="WhatsApp" target="_blank" rel="noopener">{{ social_icon('whatsapp') }}</a>{% endif %}
+      </div>
+    </div>
+
+    <div class="form-card" style="max-width:none; box-shadow:none; margin:0;">
+      <form method="post">
+        <div class="form-group">
+          <label>Your Name <span class="req">*</span></label>
+          <input type="text" name="name" required placeholder="Enter your name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="Enter your email">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" name="phone" placeholder="Enter your phone number">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Message <span class="req">*</span></label>
+          <textarea name="message" required placeholder="Write your message..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

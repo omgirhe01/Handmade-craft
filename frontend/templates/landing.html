@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ PLATFORM_NAME }} — Build Your Own Handmade Business Website</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+{% from "_icons.html" import icon %}
+<body>
+
+<header class="navbar">
+  <div class="inner">
+    <a href="{{ url_for('landing.home') }}" class="brand">
+      <div class="logo-icon">H</div>
+      <div class="brand-text">
+        <div class="name">{{ PLATFORM_NAME|upper }}</div>
+        <div class="tagline">Your handmade business, online</div>
+      </div>
+    </a>
+    <div class="nav-panel">
+      <nav class="nav-links"></nav>
+      <a href="{{ url_for('vendor.login') }}" class="btn btn-outline btn-sm">Vendor Login</a>
+      <a href="{{ url_for('admin.login') }}" class="btn btn-primary btn-sm">Admin Login</a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="container inner">
+      <div>
+        <h1>Handmade Craft</h1>
+        <div class="script-line">Decor, Online</div>
+        <p class="lede">
+          A ready-made online store for every homemade / handmade business — your own
+          products, categories, photos, story and a unique link you can share on
+          Instagram, Facebook &amp; WhatsApp.
+        </p>
+        <a href="{{ url_for('vendor.login') }}" class="btn btn-primary">Vendor Login →</a>
+      </div>
+      <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1613400549188-b40dbbd0b3f0?q=80&w=800&auto=format&fit=crop" alt="Handmade decorative wall hanging">
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="perk-strip">
+        <div class="perk"><div class="icon">{{ icon('grid') }}</div><div><strong>Your Own Storefront</strong><span>Products, categories &amp; photos</span></div></div>
+        <div class="perk"><div class="icon">{{ icon('globe') }}</div><div><strong>Unique Link</strong><span>yoursite.com/store/your-name</span></div></div>
+        <div class="perk"><div class="icon">{{ icon('edit') }}</div><div><strong>Fully Customisable</strong><span>Story, About Us &amp; Contact</span></div></div>
+        <div class="perk"><div class="icon">{{ icon('package') }}</div><div><strong>Accept Orders</strong><span>Regular &amp; custom orders</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container" style="text-align:center;">
+    <h2>How it works</h2>
+    <p style="color:var(--ink-600); max-width:56ch; margin:8px auto 30px;">
+      New vendor accounts are created by the platform admin. Once your account is
+      ready, log in to your dashboard to build your store.
+    </p>
+    <div class="perk-strip" style="grid-template-columns:repeat(3,1fr);">
+      <div class="filter-card" style="text-align:left;">
+        <h4>1. Get an Account</h4>
+        <p style="color:var(--ink-600); font-size:.9rem;">The admin creates a login for your business.</p>
+      </div>
+      <div class="filter-card" style="text-align:left;">
+        <h4>2. Customize Your Store</h4>
+        <p style="color:var(--ink-600); font-size:.9rem;">Add products, categories, photos, your story &amp; contact info.</p>
+      </div>
+      <div class="filter-card" style="text-align:left;">
+        <h4>3. Share Your Link</h4>
+        <p style="color:var(--ink-600); font-size:.9rem;">Post your store link on Instagram, Facebook or WhatsApp and start taking orders.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container foot-grid">
+    <div>
+      <h5>{{ PLATFORM_NAME|upper }}</h5>
+      <p style="font-size:.85rem; color:#E9CBD6; max-width:34ch;">
+        A platform that helps home-based handmade businesses get their own website.
+      </p>
+    </div>
+    <div>
+      <h5>Access</h5>
+      <p><a href="{{ url_for('vendor.login') }}">Vendor Login</a></p>
+      <p><a href="{{ url_for('admin.login') }}">Admin Login</a></p>
+    </div>
+  </div>
+  <div class="foot-bottom">&copy; {{ PLATFORM_NAME }}. All rights reserved.</div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

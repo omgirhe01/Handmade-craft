@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Custom Order — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section container" style="padding-top:8px;">
+  <div class="form-card">
+    <h2 class="text-center">Custom Order</h2>
+    <p class="text-center" style="color:var(--ink-600); margin-top:-8px;">Tell us exactly what you'd like — we'll craft it by hand.</p>
+
+    <form method="post" style="margin-top:24px;">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" name="full_name" required placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+          <label>Mobile Number <span class="req">*</span></label>
+          <input type="tel" name="mobile" required placeholder="Enter mobile number">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Select Item Type <span class="req">*</span></label>
+          <select name="item_type" required>
+            <option value="">-- Select Item --</option>
+            <option>Toran</option>
+            <option>Flower Decoration</option>
+            <option>Wall Decoration</option>
+            <option>Festival Decoration</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Preferred Colours</label>
+          <input type="text" name="preferred_colours" placeholder="Enter colours (e.g. Red, White, Green)">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Size (in inch)</label>
+          <input type="text" name="size" placeholder="Enter size">
+        </div>
+        <div class="form-group">
+          <label>Quantity <span class="req">*</span></label>
+          <input type="number" name="quantity" min="1" value="1">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Design / Special Requirements</label>
+        <textarea name="design_requirements" placeholder="Describe your design or requirements..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Required Date</label>
+        <input type="date" name="required_date">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Submit Order</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

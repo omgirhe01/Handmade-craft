@@ -1,0 +1,37 @@
+{% extends "admin/base_admin.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Dashboard — Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block admin_content %}
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="icon">{{ icon('grid', 22) }}</div><div><div class="num">{{ total_vendors }}</div><div class="label">Total Vendors</div></div></div>
+  <div class="stat-card"><div class="icon">{{ icon('check-circle', 22) }}</div><div><div class="num">{{ active_vendors }}</div><div class="label">Active Vendors</div></div></div>
+  <div class="stat-card"><div class="icon">{{ icon('package', 22) }}</div><div><div class="num">{{ total_products }}</div><div class="label">Products (All Stores)</div></div></div>
+  <div class="stat-card"><div class="icon">{{ icon('hourglass', 22) }}</div><div><div class="num">{{ total_orders }}</div><div class="label">Orders (All Stores)</div></div></div>
+</div>
+
+<div style="margin:22px 0;">
+  <a href="{{ url_for('admin.add_vendor') }}" class="btn btn-primary">+ Create New Vendor (User)</a>
+</div>
+
+<div class="panel">
+  <h4>Recently Added Vendors</h4>
+  <table>
+    <thead><tr><th>Business</th><th>Owner</th><th>Store Link</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for v in recent_vendors %}
+      <tr>
+        <td>{{ v.business_name }}</td>
+        <td>{{ v.owner_name }}</td>
+        <td><a href="{{ url_for('public.home', slug=v.slug) }}" target="_blank">/store/{{ v.slug }}</a></td>
+        <td>{% if v.is_active %}<span class="badge badge-confirmed">Active</span>{% else %}<span class="badge badge-pending" style="background:#FBE6E9; color:#B23A48;">Inactive</span>{% endif %}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" style="text-align:center; color:var(--ink-600);">No vendors yet. Create your first one!</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

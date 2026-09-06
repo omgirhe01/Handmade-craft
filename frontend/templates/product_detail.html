@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}{{ product.name }} — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section container" style="padding-top:8px;">
+  <p style="color:var(--ink-600); margin-bottom:20px;">
+    <a href="{{ url_for('public.home') }}">Home</a> / <a href="{{ url_for('public.products') }}">Products</a> / {{ product.name }}
+  </p>
+
+  <div class="pd-layout">
+    <div>
+      <div class="hero-image" style="aspect-ratio:1/1;">
+        <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=700&auto=format&fit=crop'" alt="{{ product.name }}">
+      </div>
+    </div>
+
+    <div>
+      <h1 style="font-size:1.8rem;">{{ product.name }}</h1>
+      <div class="price" style="font-size:1.5rem; margin:6px 0 16px;">₹{{ '%.0f'|format(product.price) }}</div>
+      <p style="color:var(--ink-600);">{{ product.description }}</p>
+
+      <ul class="spec-list">
+        <li><span>Material</span><span>{{ product.material }}</span></li>
+        {% if product.size %}<li><span>Size</span><span>{{ product.size }}</span></li>{% endif %}
+        {% if product.colours %}<li><span>Colours Available</span><span>{{ product.colours }}</span></li>{% endif %}
+        <li><span>Care</span><span>{{ product.care }}</span></li>
+        <li><span>Availability</span><span>{{ 'In Stock' if product.in_stock else 'Out of Stock' }}</span></li>
+      </ul>
+
+      {% if product.in_stock %}
+      <div style="display:flex; gap:14px; margin-top:10px; flex-wrap:wrap;">
+        <a href="{{ url_for('public.place_order', product_id=product.id) }}" class="btn btn-primary">{{ icon('cart', 18) }} Order Now</a>
+        <a href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hello%2C%20I%20want%20to%20order%20{{ product.name|urlencode }}.%20Please%20share%20details%20and%20price." target="_blank" class="btn btn-whatsapp">Order on WhatsApp</a>
+      </div>
+      {% else %}
+      <a href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hello%2C%20I%27m%20interested%20in%20{{ product.name|urlencode }}%2C%20please%20let%20me%20know%20when%20it%27s%20back%20in%20stock." target="_blank" class="btn btn-outline">Notify Me on WhatsApp</a>
+      {% endif %}
+
+      <div class="trust-row">
+        <span>{{ icon('check-circle', 16) }} Premium Quality</span>
+        <span>{{ icon('heart', 16) }} Handmade with Love</span>
+        <span>{{ icon('undo', 16) }} Easy Returns</span>
+      </div>
+    </div>
+  </div>
+
+  {% if related %}
+  <div class="section-head" style="margin-top:50px;">
+    <div><h2>You May Also Like</h2></div>
+  </div>
+  <div class="grid-products">
+    {% for p in related %}
+    <a href="{{ url_for('public.product_detail', product_id=p.id) }}" class="product-card">
+      <div class="thumb"><img src="{{ url_for('static', filename='uploads/' + p.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=400&auto=format&fit=crop'" alt="{{ p.name }}"></div>
+      <div class="body">
+        <div class="cat">{{ p.category.name }}</div>
+        <h4>{{ p.name }}</h4>
+        <div class="price">₹{{ '%.0f'|format(p.price) }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

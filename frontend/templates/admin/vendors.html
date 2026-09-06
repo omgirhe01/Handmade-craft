@@ -1,0 +1,43 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Vendors — Admin{% endblock %}
+{% block page_title %}Vendors (Users){% endblock %}
+{% block admin_content %}
+
+<div style="margin-bottom:18px;">
+  <a href="{{ url_for('admin.add_vendor') }}" class="btn btn-primary">+ Add Vendor</a>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>Business</th><th>Owner</th><th>Email</th><th>Store Link</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for v in vendors %}
+      <tr>
+        <td>{{ v.business_name }}</td>
+        <td>{{ v.owner_name }}</td>
+        <td>{{ v.email }}</td>
+        <td>
+          <div class="link-box">
+            <span>/store/{{ v.slug }}</span>
+            <a href="{{ url_for('public.home', slug=v.slug) }}" target="_blank" class="btn btn-outline btn-sm">Visit</a>
+          </div>
+        </td>
+        <td>{% if v.is_active %}<span class="badge badge-confirmed">Active</span>{% else %}<span class="badge badge-pending" style="background:#FBE6E9; color:#B23A48;">Inactive</span>{% endif %}</td>
+        <td style="display:flex; gap:8px; flex-wrap:wrap;">
+          <a href="{{ url_for('admin.edit_vendor', vendor_id=v.id) }}" class="btn btn-outline btn-sm">Edit</a>
+          <form method="post" action="{{ url_for('admin.toggle_vendor', vendor_id=v.id) }}">
+            <button type="submit" class="btn btn-sm" style="background:var(--cream-200);">{{ 'Deactivate' if v.is_active else 'Activate' }}</button>
+          </form>
+          <form method="post" action="{{ url_for('admin.delete_vendor', vendor_id=v.id) }}" onsubmit="return confirm('Delete this vendor and ALL their store data? This cannot be undone.');">
+            <button type="submit" class="btn btn-sm" style="background:#FBE6E9; color:#B23A48;">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center; color:var(--ink-600);">No vendors yet. Add your first one!</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

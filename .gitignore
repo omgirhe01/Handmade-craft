@@ -1,0 +1,28 @@
+# Environment / secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.venv/
+
+# Databases
+database/dev.db
+*.sqlite3
+*.db
+
+# Uploaded product images (keep the folder, ignore its contents)
+frontend/static/uploads/*
+!frontend/static/uploads/.gitkeep
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Flask
+instance/
+.flaskenv

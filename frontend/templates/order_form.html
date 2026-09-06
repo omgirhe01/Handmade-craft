@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Order {{ product.name }} — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section container" style="padding-top:8px;">
+  <div class="form-card">
+    <h2 class="text-center">Order Now</h2>
+    <p class="text-center" style="color:var(--ink-600); margin-top:-8px;">{{ product.name }} — ₹{{ '%.0f'|format(product.price) }} each</p>
+
+    <form method="post" style="margin-top:24px;">
+      <div class="form-group">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" name="customer_name" required placeholder="Enter your name">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Mobile Number <span class="req">*</span></label>
+          <input type="tel" name="phone" required placeholder="Enter mobile number">
+        </div>
+        <div class="form-group">
+          <label>Quantity</label>
+          <input type="number" name="quantity" min="1" value="1">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Delivery Address</label>
+        <textarea name="address" placeholder="Enter your full delivery address"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Confirm Order</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

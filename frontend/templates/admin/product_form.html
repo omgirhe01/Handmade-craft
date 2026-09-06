@@ -1,0 +1,75 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ 'Edit' if product else 'Add' }} Product — Admin{% endblock %}
+{% block page_title %}{{ 'Edit Product' if product else 'Add Product' }}{% endblock %}
+{% block admin_content %}
+
+<div class="panel" style="max-width:640px;">
+  <form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+      <label>Product Name <span class="req">*</span></label>
+      <input type="text" name="name" required value="{{ product.name if product else '' }}">
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Category <span class="req">*</span></label>
+        <select name="category_id" required>
+          {% for c in categories %}
+          <option value="{{ c.id }}" {{ 'selected' if product and product.category_id==c.id }}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Price (₹) <span class="req">*</span></label>
+        <input type="number" step="0.01" name="price" required value="{{ product.price if product else '' }}">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Description</label>
+      <textarea name="description">{{ product.description if product else '' }}</textarea>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Material</label>
+        <input type="text" name="material" value="{{ product.material if product else 'Premium Quality Wool' }}">
+      </div>
+      <div class="form-group">
+        <label>Size</label>
+        <input type="text" name="size" value="{{ product.size if product else '' }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Colours Available</label>
+        <input type="text" name="colours" value="{{ product.colours if product else '' }}">
+      </div>
+      <div class="form-group">
+        <label>Care Instructions</label>
+        <input type="text" name="care" value="{{ product.care if product else 'Dry Clean Only' }}">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Product Image</label>
+      <input type="file" name="image" accept="image/*">
+      {% if product and product.image_filename != 'placeholder.png' %}
+      <span style="font-size:.8rem; color:var(--ink-600);">Current: {{ product.image_filename }}</span>
+      {% endif %}
+    </div>
+
+    <div class="form-group" style="flex-direction:row; align-items:center; gap:10px;">
+      <input type="checkbox" name="in_stock" id="in_stock" style="width:auto;" {{ 'checked' if not product or product.in_stock }}>
+      <label for="in_stock" style="margin:0;">In Stock / Available</label>
+    </div>
+
+    <div style="display:flex; gap:12px; margin-top:10px;">
+      <button type="submit" class="btn btn-primary">{{ 'Save Changes' if product else 'Add Product' }}</button>
+      <a href="{{ url_for('admin.products') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login — {{ PLATFORM_NAME }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="login-shell">
+  <div class="form-card" style="width:380px;">
+    <div class="text-center" style="margin-bottom:20px;">
+      <div class="logo-icon" style="margin:0 auto 10px; width:52px; height:52px;">H</div>
+      <h2 class="mt-0">Admin Login</h2>
+      <p style="color:var(--ink-600); font-size:.88rem;">{{ PLATFORM_NAME }} — Platform Dashboard</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" required placeholder="admin">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" required placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Log In</button>
+    </form>
+    <p class="text-center" style="font-size:.78rem; color:var(--ink-600); margin-top:16px;">
+      Default: admin / admin123 (change after first login)
+    </p>
+    <p class="text-center" style="margin-top:10px;">
+      <a href="{{ url_for('vendor.login') }}" style="color:var(--maroon-700); font-size:.85rem;">Vendor login →</a>
+      &nbsp;·&nbsp;
+      <a href="{{ url_for('landing.home') }}" style="color:var(--maroon-700); font-size:.85rem;">← Back to home</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>

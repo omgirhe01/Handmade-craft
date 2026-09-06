@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}About Us — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section container" style="padding-top:8px; max-width:900px;">
+  <h2>About Us</h2>
+  <p style="color:var(--ink-600); margin-top:-10px; margin-bottom:26px;">Home / About Us</p>
+
+  <div class="filter-card" style="padding:36px;">
+    <p style="font-size:1.02rem; color:var(--ink-900); white-space:pre-line;">
+      {{ VENDOR.about_text if VENDOR.about_text else (SITE_NAME ~ " is a small home-based handmade business. We create beautiful decoration items with creativity, patience and love. Every product is handmade and carefully designed to make your home and celebrations more beautiful.") }}
+    </p>
+    {% if VENDOR.story %}
+    <h4 style="margin-top:24px;">Our Story</h4>
+    <p style="color:var(--ink-600); margin-top:10px; white-space:pre-line;">{{ VENDOR.story }}</p>
+    {% endif %}
+    <div style="margin-top:24px;">
+      <a href="{{ url_for('public.products') }}" class="btn btn-primary">Explore Our Products</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

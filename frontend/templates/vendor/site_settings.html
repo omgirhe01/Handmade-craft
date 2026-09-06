@@ -1,0 +1,126 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Store Settings — {{ current_user.business_name }}{% endblock %}
+{% block page_title %}Store Settings{% endblock %}
+{% block vendor_content %}
+
+<div class="panel" style="margin-bottom:20px;">
+  <h4>Your Store Link</h4>
+  <div class="link-box">
+    <span id="storeLink">{{ store_url }}</span>
+    <button type="button" class="btn btn-primary btn-sm" onclick="copyStoreLink()">Copy Link</button>
+    <a href="{{ store_url }}" target="_blank" class="btn btn-outline btn-sm">Visit</a>
+  </div>
+  <p style="font-size:.78rem; color:var(--ink-600); margin-top:8px;">
+    Share this exact link in your Instagram / Facebook bio and WhatsApp status so customers land only on your store.
+  </p>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+
+  <div class="settings-grid">
+
+    <div class="panel">
+      <h4>Store Identity &amp; Branding</h4>
+      <div class="form-group">
+        <label>Business / Store Name <span class="req">*</span></label>
+        <input type="text" name="business_name" required value="{{ current_user.business_name }}">
+      </div>
+      <div class="form-group">
+        <label>Tagline</label>
+        <input type="text" name="tagline" value="{{ current_user.tagline or '' }}" placeholder="e.g. Handmade with Love">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Logo Image</label>
+          {% if current_user.logo_filename %}
+          <div class="img-preview"><img src="{{ url_for('static', filename='uploads/' + current_user.logo_filename) }}" alt="Logo"></div>
+          {% else %}
+          <div class="img-preview empty">No logo yet</div>
+          {% endif %}
+          <input type="file" name="logo" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label>Cover / Banner Image</label>
+          {% if current_user.cover_filename %}
+          <div class="img-preview"><img src="{{ url_for('static', filename='uploads/' + current_user.cover_filename) }}" alt="Cover"></div>
+          {% else %}
+          <div class="img-preview empty">No cover yet</div>
+          {% endif %}
+          <input type="file" name="cover" accept="image/*">
+        </div>
+      </div>
+      <p style="font-size:.78rem; color:var(--ink-600);">The cover image is shown as the banner on your store's home page.</p>
+    </div>
+
+    <div class="panel">
+      <h4>Story &amp; About</h4>
+      <div class="form-group">
+        <label>Our Story (shown on your About page)</label>
+        <textarea name="story" style="min-height:130px;" placeholder="How did your handmade business start? What makes it special?">{{ current_user.story or '' }}</textarea>
+      </div>
+      <div class="form-group">
+        <label>About Us (short intro)</label>
+        <textarea name="about_text" style="min-height:130px;" placeholder="A short paragraph introducing your business">{{ current_user.about_text or '' }}</textarea>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h4>Contact &amp; Social</h4>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="text" name="phone_number" value="{{ current_user.phone_number or '' }}">
+        </div>
+        <div class="form-group">
+          <label>WhatsApp Number</label>
+          <input type="text" name="whatsapp_number" value="{{ current_user.whatsapp_number or '' }}" placeholder="e.g. 919876543210">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Contact Email</label>
+          <input type="email" name="contact_email" value="{{ current_user.contact_email or '' }}">
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" name="address" value="{{ current_user.address or '' }}">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Instagram Link</label>
+          <input type="text" name="instagram_url" value="{{ current_user.instagram_url or '' }}" placeholder="https://instagram.com/yourpage">
+        </div>
+        <div class="form-group">
+          <label>Facebook Link</label>
+          <input type="text" name="facebook_url" value="{{ current_user.facebook_url or '' }}" placeholder="https://facebook.com/yourpage">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h4>Change Password</h4>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" name="new_password" placeholder="Leave blank to keep current password">
+      </div>
+      <p style="font-size:.78rem; color:var(--ink-600);">Only fill this in if you want to change your login password.</p>
+    </div>
+
+  </div>
+
+  <button type="submit" class="btn btn-primary" style="margin-top:20px;">Save Changes</button>
+</form>
+
+{% endblock %}
+{% block scripts %}
+<script>
+function copyStoreLink() {
+  const text = document.getElementById('storeLink').innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    alert('Store link copied!');
+  });
+}
+</script>
+{% endblock %}

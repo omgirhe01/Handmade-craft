@@ -1,0 +1,25 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Messages — {{ current_user.business_name }}{% endblock %}
+{% block page_title %}Messages{% endblock %}
+{% block vendor_content %}
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Message</th><th>Received</th></tr></thead>
+    <tbody>
+      {% for m in messages %}
+      <tr>
+        <td>{{ m.name }}</td>
+        <td>{{ m.email or '—' }}</td>
+        <td>{{ m.phone or '—' }}</td>
+        <td style="max-width:340px;">{{ m.message }}</td>
+        <td>{{ m.created_at.strftime('%d %b %Y') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" style="text-align:center; color:var(--ink-600);">No messages yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

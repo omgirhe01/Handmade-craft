@@ -1,0 +1,32 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Categories — {{ current_user.business_name }}{% endblock %}
+{% block page_title %}Categories{% endblock %}
+{% block vendor_content %}
+
+<div style="margin-bottom:18px;">
+  <a href="{{ url_for('vendor.add_category') }}" class="btn btn-primary">+ Add Category</a>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>Name</th><th>Products</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for c in categories %}
+      <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.products|length }}</td>
+        <td style="display:flex; gap:8px;">
+          <a href="{{ url_for('vendor.edit_category', category_id=c.id) }}" class="btn btn-outline btn-sm">Edit</a>
+          <form method="post" action="{{ url_for('vendor.delete_category', category_id=c.id) }}" onsubmit="return confirm('Delete this category?');">
+            <button type="submit" class="btn btn-sm" style="background:#FBE6E9; color:#B23A48;">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="3" style="text-align:center; color:var(--ink-600);">No categories yet. Add your first one!</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
