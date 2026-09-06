@@ -42,7 +42,13 @@ class Vendor(UserMixin, db.Model):
     logo_filename = db.Column(db.String(255), default="")
     cover_filename = db.Column(db.String(255), default="")
 
+    # Store personalisation
+    theme_color = db.Column(db.String(10), default="#5E1836")
+    announcement_text = db.Column(db.String(200), default="")
+    meta_description = db.Column(db.String(300), default="")
+
     is_active = db.Column(db.Boolean, default=True)
+    is_maintenance = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     categories = db.relationship(
@@ -59,6 +65,12 @@ class Vendor(UserMixin, db.Model):
     )
     contact_messages = db.relationship(
         "ContactMessage", backref="vendor", lazy=True, cascade="all, delete-orphan"
+    )
+    testimonials = db.relationship(
+        "Testimonial", backref="vendor", lazy=True, cascade="all, delete-orphan"
+    )
+    coupons = db.relationship(
+        "Coupon", backref="vendor", lazy=True, cascade="all, delete-orphan"
     )
 
     def set_password(self, password):

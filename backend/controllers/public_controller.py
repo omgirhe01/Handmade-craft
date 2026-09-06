@@ -6,12 +6,24 @@ from flask import (
     redirect,
     render_template,
     request,
+    send_file,
     session,
     url_for,
 )
 
 from backend.extensions import db
-from backend.models import Category, ContactMessage, CustomOrder, Order, Product, Vendor
+from backend.models import (
+    Category,
+    ContactMessage,
+    Coupon,
+    CustomOrder,
+    Order,
+    Product,
+    Review,
+    Testimonial,
+    Vendor,
+)
+from backend.utils.invoice import generate_custom_order_invoice_pdf, generate_order_invoice_pdf
 
 # url_prefix="/store/<string:slug>" is set when this blueprint is registered
 # in backend/__init__.py. Every route below is automatically scoped to one
@@ -40,6 +52,8 @@ def load_vendor():
     if not vendor:
         abort(404)
     g.vendor = vendor
+    if vendor.is_maintenance:
+        return render_template("maintenance.html"), 503
 
 
 @public_bp.context_processor
@@ -61,13 +75,28 @@ def inject_vendor_settings():
 @public_bp.route("/")
 def home():
     featured = (
-        Product.query.filter_by(vendor_id=g.vendor.id, in_stock=True)
+        Product.query.filter_by(vendor_id=g.vendor.id, in_stock=True, is_featured=True)
         .order_by(Product.created_at.desc())
         .limit(8)
         .all()
     )
+    if not featured:
+        featured = (
+            Product.query.filter_by(vendor_id=g.vendor.id, in_stock=True)
+            .order_by(Product.created_at.desc())
+            .limit(8)
+            .all()
+        )
     categories = Category.query.filter_by(vendor_id=g.vendor.id).all()
-    return render_template("home.html", featured=featured, categories=categories)
+    testimonials = (
+        Testimonial.query.filter_by(vendor_id=g.vendor.id)
+        .order_by(Testimonial.created_at.desc())
+        .limit(6)
+        .all()
+    )
+    return render_template(
+        "home.html", featured=featured, categories=categories, testimonials=testimonials
+    )
 
 
 @public_bp.route("/products")
@@ -123,6 +152,7 @@ def place_order(product_id):
         customer_name = request.form.get("customer_name", "").strip()
         phone = request.form.get("phone", "").strip()
         address = request.form.get("address", "").strip()
+        coupon_input = request.form.get("coupon_code", "").strip()
         try:
             quantity = max(1, int(request.form.get("quantity", 1)))
         except ValueError:
@@ -132,6 +162,20 @@ def place_order(product_id):
             flash("Please enter your name and mobile number.", "danger")
             return render_template("order_form.html", product=product)
 
+        subtotal = product.price * quantity
+        discount_amount = 0
+        applied_coupon = ""
+
+        if coupon_input:
+            coupon = Coupon.query.filter_by(vendor_id=g.vendor.id, code=coupon_input.upper()).first()
+            if coupon and coupon.is_valid():
+                discount_amount = (subtotal * coupon.discount_percent) / 100
+                applied_coupon = coupon.code
+                coupon.times_used += 1
+            else:
+                flash("That coupon code is invalid or has expired.", "danger")
+                return render_template("order_form.html", product=product)
+
         order = Order(
             vendor_id=g.vendor.id,
             product_id=product.id,
@@ -139,9 +183,17 @@ def place_order(product_id):
             phone=phone,
             address=address,
             quantity=quantity,
-            total_price=product.price * quantity,
+            coupon_code=applied_coupon,
+            discount_amount=discount_amount,
+            total_price=subtotal - discount_amount,
         )
         db.session.add(order)
+
+        if product.stock_quantity is not None:
+            product.stock_quantity = max(0, product.stock_quantity - quantity)
+            if product.stock_quantity == 0:
+                product.in_stock = False
+
         db.session.commit()
         session[f"phone_{g.vendor.id}"] = phone
         flash(f"Order placed! Your Order ID is {order.order_code}.", "success")
@@ -214,6 +266,63 @@ def my_orders():
         searched=searched,
         remembered_phone=phone,
     )
+
+
+@public_bp.route("/order/<int:order_id>/invoice")
+def download_invoice(order_id):
+    order = Order.query.filter_by(id=order_id, vendor_id=g.vendor.id).first_or_404()
+    if order.phone != session.get(f"phone_{g.vendor.id}"):
+        abort(403)
+    pdf = generate_order_invoice_pdf(order, g.vendor)
+    return send_file(
+        pdf, mimetype="application/pdf", as_attachment=True,
+        download_name=f"invoice_{order.order_code}.pdf",
+    )
+
+
+@public_bp.route("/custom-order/<int:order_id>/invoice")
+def download_custom_order_invoice(order_id):
+    custom = CustomOrder.query.filter_by(id=order_id, vendor_id=g.vendor.id).first_or_404()
+    if custom.mobile != session.get(f"phone_{g.vendor.id}"):
+        abort(403)
+    pdf = generate_custom_order_invoice_pdf(custom, g.vendor)
+    return send_file(
+        pdf, mimetype="application/pdf", as_attachment=True,
+        download_name=f"receipt_{custom.order_code}.pdf",
+    )
+
+
+@public_bp.route("/review/<int:order_id>", methods=["GET", "POST"])
+def leave_review(order_id):
+    order = Order.query.filter_by(id=order_id, vendor_id=g.vendor.id).first_or_404()
+
+    if order.phone != session.get(f"phone_{g.vendor.id}"):
+        abort(403)
+    if order.status != "Completed":
+        flash("You can leave a review once your order is marked Completed.", "warning")
+        return redirect(url_for("public.my_orders"))
+    if order.review:
+        flash("You've already reviewed this order.", "info")
+        return redirect(url_for("public.my_orders"))
+
+    if request.method == "POST":
+        rating = max(1, min(5, int(request.form.get("rating") or 5)))
+        comment = request.form.get("comment", "").strip()
+        db.session.add(
+            Review(
+                vendor_id=g.vendor.id,
+                product_id=order.product_id,
+                order_id=order.id,
+                customer_name=order.customer_name,
+                rating=rating,
+                comment=comment,
+            )
+        )
+        db.session.commit()
+        flash("Thanks for your review!", "success")
+        return redirect(url_for("public.my_orders"))
+
+    return render_template("leave_review.html", order=order)
 
 
 @public_bp.route("/contact", methods=["GET", "POST"])

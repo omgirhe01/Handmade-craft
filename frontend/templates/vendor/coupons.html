@@ -1,0 +1,41 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Coupons — {{ current_user.business_name }}{% endblock %}
+{% block page_title %}Coupons{% endblock %}
+{% block vendor_content %}
+
+<p style="color:var(--ink-600); font-size:.85rem; margin-top:-10px; margin-bottom:16px; max-width:60ch;">
+  Create discount codes customers can enter at checkout on your product order form.
+</p>
+
+<div style="margin-bottom:18px;">
+  <a href="{{ url_for('vendor.add_coupon') }}" class="btn btn-primary">+ Add Coupon</a>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>Code</th><th>Discount</th><th>Used</th><th>Expires</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for c in coupons %}
+      <tr>
+        <td><code>{{ c.code }}</code></td>
+        <td>{{ c.discount_percent }}% off</td>
+        <td>{{ c.times_used }}{% if c.usage_limit %} / {{ c.usage_limit }}{% endif %}</td>
+        <td>{{ c.expires_on.strftime('%d %b %Y') if c.expires_on else '—' }}</td>
+        <td>{% if c.is_valid() %}<span class="badge badge-confirmed">Active</span>{% else %}<span class="badge badge-pending" style="background:#FBE6E9; color:#B23A48;">Inactive</span>{% endif %}</td>
+        <td style="display:flex; gap:8px;">
+          <form method="post" action="{{ url_for('vendor.toggle_coupon', coupon_id=c.id) }}">
+            <button type="submit" class="btn btn-sm" style="background:var(--cream-200);">{{ 'Deactivate' if c.is_active else 'Activate' }}</button>
+          </form>
+          <form method="post" action="{{ url_for('vendor.delete_coupon', coupon_id=c.id) }}" onsubmit="return confirm('Delete this coupon?');">
+            <button type="submit" class="btn btn-sm" style="background:#FBE6E9; color:#B23A48;">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center; color:var(--ink-600);">No coupons yet. Add your first one!</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

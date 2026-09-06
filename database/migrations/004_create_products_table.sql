@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS products (
     colours VARCHAR(150),
     care VARCHAR(150) DEFAULT 'Dry Clean Only',
     in_stock BOOLEAN DEFAULT TRUE,
+    is_featured BOOLEAN DEFAULT FALSE,
+    stock_quantity INT DEFAULT 10,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (vendor_id) REFERENCES vendors(id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(id)

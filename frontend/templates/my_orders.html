@@ -28,9 +28,10 @@
     <div class="table-card">
       <table>
         <thead>
-          <tr><th>Order ID</th><th>Date</th><th>Item</th><th>Qty</th><th>Amount</th><th>Status</th></tr>
+          <tr><th>Order ID</th><th>Date</th><th>Item</th><th>Qty</th><th>Amount</th><th>Status</th><th>Progress</th><th>Actions</th></tr>
         </thead>
         <tbody>
+          {% set steps = ['Pending','Confirmed','Preparing','Completed'] %}
           {% for o in orders %}
           <tr>
             <td>#{{ o.order_code }}</td>
@@ -39,6 +40,25 @@
             <td>{{ o.quantity }}</td>
             <td>₹{{ '%.0f'|format(o.total_price) }}</td>
             <td><span class="badge badge-{{ o.status|lower }}">{{ o.status }}</span></td>
+            <td>
+              <div class="order-timeline" style="min-width:160px;">
+                {% for s in steps %}
+                <div class="step {{ 'done' if steps.index(s) <= steps.index(o.status) else '' }}">
+                  <div class="dot"></div>{{ s }}
+                </div>
+                {% endfor %}
+              </div>
+            </td>
+            <td style="display:flex; flex-direction:column; gap:6px;">
+              <a href="{{ url_for('public.download_invoice', order_id=o.id) }}" class="btn btn-outline btn-sm">Invoice</a>
+              {% if o.status == 'Completed' %}
+                {% if o.review %}
+                <span style="font-size:.75rem; color:var(--ink-600);">Reviewed ✓</span>
+                {% else %}
+                <a href="{{ url_for('public.leave_review', order_id=o.id) }}" class="btn btn-primary btn-sm">Write Review</a>
+                {% endif %}
+              {% endif %}
+            </td>
           </tr>
           {% endfor %}
           {% for c in custom_orders %}
@@ -49,6 +69,18 @@
             <td>{{ c.quantity }}</td>
             <td>—</td>
             <td><span class="badge badge-{{ c.status|lower }}">{{ c.status }}</span></td>
+            <td>
+              <div class="order-timeline" style="min-width:160px;">
+                {% for s in steps %}
+                <div class="step {{ 'done' if steps.index(s) <= steps.index(c.status) else '' }}">
+                  <div class="dot"></div>{{ s }}
+                </div>
+                {% endfor %}
+              </div>
+            </td>
+            <td>
+              <a href="{{ url_for('public.download_custom_order_invoice', order_id=c.id) }}" class="btn btn-outline btn-sm">Invoice</a>
+            </td>
           </tr>
           {% endfor %}
         </tbody>

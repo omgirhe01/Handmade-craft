@@ -1,8 +1,10 @@
+from datetime import datetime
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from backend.extensions import db
-from backend.models import Admin, ContactMessage, CustomOrder, Order, Product, Vendor
+from backend.models import Admin, ContactMessage, CustomOrder, Order, Product, Vendor, VendorNotification
 from backend.utils.decorators import admin_required
 from backend.utils.helpers import unique_slug
 
@@ -153,3 +155,73 @@ def delete_vendor(vendor_id):
     db.session.commit()
     flash("Vendor and all their store data have been deleted.", "info")
     return redirect(url_for("admin.vendors"))
+
+
+@admin_bp.route("/analytics")
+@admin_required
+def analytics():
+    from collections import defaultdict
+    from datetime import timedelta
+
+    all_orders = Order.query.all()
+    total_revenue = sum(float(o.total_price) for o in all_orders)
+
+    # Revenue for each of the last 7 days across the whole platform
+    today = datetime.utcnow().date()
+    last_7_days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+    revenue_by_day = defaultdict(float)
+    for o in all_orders:
+        revenue_by_day[o.created_at.date()] += float(o.total_price)
+    daily_revenue = [(d.strftime("%d %b"), revenue_by_day.get(d, 0)) for d in last_7_days]
+    max_daily = max([r for _, r in daily_revenue] + [1])
+
+    # Top vendors by revenue
+    revenue_by_vendor = defaultdict(float)
+    orders_by_vendor = defaultdict(int)
+    for o in all_orders:
+        revenue_by_vendor[o.vendor_id] += float(o.total_price)
+        orders_by_vendor[o.vendor_id] += 1
+    top_vendor_ids = sorted(revenue_by_vendor, key=lambda vid: revenue_by_vendor[vid], reverse=True)[:5]
+    top_vendors = [
+        {
+            "vendor": db.session.get(Vendor, vid),
+            "revenue": revenue_by_vendor[vid],
+            "orders": orders_by_vendor[vid],
+        }
+        for vid in top_vendor_ids
+    ]
+
+    # Vendor signups over the last 7 days
+    all_vendors = Vendor.query.all()
+    signups_by_day = defaultdict(int)
+    for v in all_vendors:
+        signups_by_day[v.created_at.date()] += 1
+    daily_signups = [(d.strftime("%d %b"), signups_by_day.get(d, 0)) for d in last_7_days]
+    max_signups = max([s for _, s in daily_signups] + [1])
+
+    return render_template(
+        "admin/analytics.html",
+        total_revenue=total_revenue,
+        total_orders=len(all_orders),
+        total_vendors=len(all_vendors),
+        daily_revenue=daily_revenue,
+        max_daily=max_daily,
+        top_vendors=top_vendors,
+        daily_signups=daily_signups,
+        max_signups=max_signups,
+    )
+
+
+@admin_bp.route("/vendors/<int:vendor_id>/notify", methods=["POST"])
+@admin_required
+def notify_vendor(vendor_id):
+    vendor = Vendor.query.get_or_404(vendor_id)
+    message = request.form.get("message", "").strip()
+    if not message:
+        flash("Please enter a message to send.", "danger")
+        return redirect(url_for("admin.edit_vendor", vendor_id=vendor.id))
+
+    db.session.add(VendorNotification(vendor_id=vendor.id, message=message))
+    db.session.commit()
+    flash(f"Notification sent to '{vendor.business_name}'.", "success")
+    return redirect(url_for("admin.edit_vendor", vendor_id=vendor.id))

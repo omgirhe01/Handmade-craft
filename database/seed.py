@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from backend import create_app
 from backend.extensions import db
-from backend.models import Admin, Category, Product, Vendor
+from backend.models import Admin, Category, Coupon, Product, Testimonial, Vendor
 
 CATEGORY_DATA = [
     ("Toran", "toran"),
@@ -34,25 +34,31 @@ CATEGORY_DATA = [
 PRODUCT_DATA = [
     ("Toran (Traditional)", "toran", 450,
      "Beautiful handmade toran for doors and walls. Perfect for festivals, "
-     "home decoration and gifting.", "Approx 36 inch", "Red, Green, White, Maroon"),
+     "home decoration and gifting.", "Approx 36 inch", "Red, Green, White, Maroon", True, 12),
     ("Flower Bouquet", "flower-decor", 350,
      "A charming bouquet of handmade flowers, perfect as a gift or a "
-     "centrepiece for your living room.", "Approx 12 inch", "Red, Pink, White"),
+     "centrepiece for your living room.", "Approx 12 inch", "Red, Pink, White", True, 2),
     ("Wall Hanging", "wall-decoration", 400,
      "A decorative wall hanging that adds warmth and colour to any wall.",
-     "Approx 18 inch", "Multicolour"),
+     "Approx 18 inch", "Multicolour", False, 8),
     ("Flower Pot", "flower-decor", 300,
      "A cheerful flower arrangement in a decorative pot, made entirely by hand.",
-     "Approx 10 inch", "Red, Green, Yellow"),
+     "Approx 10 inch", "Red, Green, Yellow", False, 15),
     ("Diwali Door Hanging", "festival-decoration", 500,
      "Festive door hanging designed especially for Diwali celebrations.",
-     "Approx 24 inch", "Red, Gold, Green"),
+     "Approx 24 inch", "Red, Gold, Green", True, 6),
     ("Lotus Wall Decor", "wall-decoration", 450,
      "An elegant lotus-inspired wall piece, handcrafted with fine detailing.",
-     "Approx 14 inch", "Pink, White, Green"),
+     "Approx 14 inch", "Pink, White, Green", False, 10),
     ("Pom Pom Hanging Decor", "festival-decoration", 350,
      "Colourful pom-pom hanging decor, perfect for festive and everyday decoration.",
-     "Approx 20 inch", "Multicolour"),
+     "Approx 20 inch", "Multicolour", False, 3),
+]
+
+TESTIMONIAL_DATA = [
+    ("Priya Sharma", "Absolutely loved the toran! Exactly what I wanted for Diwali, great quality.", 5),
+    ("Ankit Verma", "Fast delivery and beautiful handmade work. Will order again.", 5),
+    ("Neha Joshi", "The wall hanging looks even better in person. Highly recommend!", 4),
 ]
 
 
@@ -113,7 +119,7 @@ def run():
             slug_to_category[slug] = category
 
         if Product.query.filter_by(vendor_id=vendor.id).count() == 0:
-            for name, cat_slug, price, description, size, colours in PRODUCT_DATA:
+            for name, cat_slug, price, description, size, colours, featured, stock in PRODUCT_DATA:
                 db.session.add(
                     Product(
                         vendor_id=vendor.id,
@@ -123,9 +129,32 @@ def run():
                         description=description,
                         size=size,
                         colours=colours,
+                        is_featured=featured,
+                        stock_quantity=stock,
                     )
                 )
             print(f"Added {len(PRODUCT_DATA)} sample products to the demo vendor.")
+
+        if not vendor.announcement_text:
+            vendor.announcement_text = "🎉 Festive Season Sale — Order now for on-time Diwali delivery!"
+
+        if Testimonial.query.filter_by(vendor_id=vendor.id).count() == 0:
+            for customer_name, message, rating in TESTIMONIAL_DATA:
+                db.session.add(
+                    Testimonial(
+                        vendor_id=vendor.id,
+                        customer_name=customer_name,
+                        message=message,
+                        rating=rating,
+                    )
+                )
+            print(f"Added {len(TESTIMONIAL_DATA)} sample testimonials to the demo vendor.")
+
+        if not Coupon.query.filter_by(vendor_id=vendor.id, code="WELCOME10").first():
+            db.session.add(
+                Coupon(vendor_id=vendor.id, code="WELCOME10", discount_percent=10, usage_limit=0)
+            )
+            print("Added sample coupon -> WELCOME10 (10% off)")
 
         db.session.commit()
         print("Database seeded successfully.")

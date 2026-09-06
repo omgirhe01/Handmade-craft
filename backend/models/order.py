@@ -20,6 +20,8 @@ class Order(db.Model):
     phone = db.Column(db.String(20), nullable=False)
     address = db.Column(db.Text, default="")
     quantity = db.Column(db.Integer, default=1)
+    coupon_code = db.Column(db.String(30), default="")
+    discount_amount = db.Column(db.Numeric(10, 2), default=0)
     total_price = db.Column(db.Numeric(10, 2), nullable=False)
     status = db.Column(db.String(30), default="Pending")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ SITE_NAME }} — Temporarily Unavailable</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="login-shell">
+  <div class="form-card text-center" style="width:440px;">
+    {% if VENDOR.logo_filename %}
+    <div class="logo-icon logo-icon-img" style="margin:0 auto 14px; width:56px; height:56px;"><img src="{{ url_for('static', filename='uploads/' + VENDOR.logo_filename) }}" alt="{{ SITE_NAME }}"></div>
+    {% else %}
+    <div class="logo-icon" style="margin:0 auto 14px; width:56px; height:56px;">{{ SITE_NAME[0]|upper }}</div>
+    {% endif %}
+    <h2 class="mt-0">{{ SITE_NAME }}</h2>
+    <p style="color:var(--ink-600); margin-top:10px;">
+      This store is temporarily paused for updates. Please check back soon!
+    </p>
+    {% if PHONE_NUMBER %}
+    <p style="color:var(--ink-600); font-size:.85rem; margin-top:16px;">
+      Need something urgently? Call {{ PHONE_NUMBER }}
+    </p>
+    {% endif %}
+  </div>
+</div>
+</body>
+</html>

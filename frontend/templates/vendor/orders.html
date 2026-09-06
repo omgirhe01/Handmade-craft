@@ -5,7 +5,7 @@
 
 <div class="table-card">
   <table>
-    <thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Qty</th><th>Amount</th><th>Phone</th><th>Status</th></tr></thead>
+    <thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Qty</th><th>Amount</th><th>Phone</th><th>Status</th><th>Invoice</th></tr></thead>
     <tbody>
       {% for o in orders %}
       <tr>
@@ -13,7 +13,7 @@
         <td>{{ o.customer_name }}</td>
         <td>{{ o.product.name }}</td>
         <td>{{ o.quantity }}</td>
-        <td>₹{{ '%.0f'|format(o.total_price) }}</td>
+        <td>₹{{ '%.0f'|format(o.total_price) }}{% if o.discount_amount %}<br><span style="font-size:.72rem; color:var(--ink-600);">({{ o.coupon_code }} applied)</span>{% endif %}</td>
         <td>{{ o.phone }}</td>
         <td>
           <form method="post" action="{{ url_for('vendor.update_order_status', order_id=o.id) }}">
@@ -24,9 +24,10 @@
             </select>
           </form>
         </td>
+        <td><a href="{{ url_for('vendor.download_order_invoice', order_id=o.id) }}" class="btn btn-outline btn-sm">PDF</a></td>
       </tr>
       {% else %}
-      <tr><td colspan="7" style="text-align:center; color:var(--ink-600);">No orders yet.</td></tr>
+      <tr><td colspan="8" style="text-align:center; color:var(--ink-600);">No orders yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>

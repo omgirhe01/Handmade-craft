@@ -52,6 +52,7 @@
             <div class="cat">{{ p.category.name }}</div>
             <h4>{{ p.name }}</h4>
             <div class="price">₹{{ '%.0f'|format(p.price) }}</div>
+            {% if p.is_featured %}<span class="badge-featured">Bestseller</span>{% endif %}
             {% if not p.in_stock %}<span class="stock-out">Out of Stock</span>{% endif %}
           </div>
         </a>

@@ -439,3 +439,71 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .img-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .img-preview.empty { display: flex; align-items: center; justify-content: center; color: var(--ink-600); font-size: .8rem; }
 
+.announcement-bar {
+  background: var(--maroon-900);
+  color: #fff;
+  text-align: center;
+  font-size: .82rem;
+  font-weight: 600;
+  padding: 9px 16px;
+  letter-spacing: .01em;
+}
+
+.badge-featured {
+  display: inline-block;
+  background: var(--gold-500, #C9973A);
+  color: #3a2400;
+  font-size: .68rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.badge-low-stock {
+  display: inline-block;
+  background: #FBE6E9;
+  color: #B23A48;
+  font-size: .68rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+.order-timeline { display: flex; align-items: center; margin: 10px 0 4px; }
+.order-timeline .step {
+  flex: 1; text-align: center; position: relative; font-size: .7rem; color: var(--ink-600);
+}
+.order-timeline .step .dot {
+  width: 16px; height: 16px; border-radius: 50%; background: var(--cream-200);
+  border: 2px solid var(--line); margin: 0 auto 6px; position: relative; z-index: 2;
+}
+.order-timeline .step::before {
+  content: ""; position: absolute; top: 7px; left: -50%; width: 100%; height: 2px;
+  background: var(--line); z-index: 1;
+}
+.order-timeline .step:first-child::before { display: none; }
+.order-timeline .step.done .dot { background: var(--maroon-900); border-color: var(--maroon-900); }
+.order-timeline .step.done::before { background: var(--maroon-900); }
+.order-timeline .step.done { color: var(--maroon-900); font-weight: 600; }
+
+.testimonial-card {
+  background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 22px; height: 100%;
+}
+.testimonial-card .stars { color: #C9973A; font-size: .85rem; margin-bottom: 8px; }
+.testimonial-card .msg { font-size: .92rem; color: var(--ink-900); font-style: italic; }
+.testimonial-card .name { margin-top: 12px; font-weight: 700; color: var(--maroon-900); font-size: .85rem; }
+
+.testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 960px) { .testimonial-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .testimonial-grid { grid-template-columns: 1fr; } }
+
+
+
+
+.star-rating {
+  color: #C9973A;
+  font-size: .95rem;
+  letter-spacing: 1px;
+}

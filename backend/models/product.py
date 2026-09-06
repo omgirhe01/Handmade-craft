@@ -18,9 +18,17 @@ class Product(db.Model):
     colours = db.Column(db.String(150), default="")
     care = db.Column(db.String(150), default="Dry Clean Only")
     in_stock = db.Column(db.Boolean, default=True)
+    is_featured = db.Column(db.Boolean, default=False)
+    stock_quantity = db.Column(db.Integer, default=10)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    LOW_STOCK_THRESHOLD = 3
+
     orders = db.relationship("Order", backref="product", lazy=True)
+
+    @property
+    def is_low_stock(self):
+        return self.in_stock and self.stock_quantity is not None and self.stock_quantity <= self.LOW_STOCK_THRESHOLD
 
     def __repr__(self):
         return f"<Product {self.name}>"

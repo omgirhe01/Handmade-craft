@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Write a Review — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section container" style="padding-top:8px;">
+  <div class="form-card">
+    <h2 class="text-center">Write a Review</h2>
+    <p class="text-center" style="color:var(--ink-600); margin-top:-8px;">{{ order.product.name }} — Order #{{ order.order_code }}</p>
+
+    <form method="post" style="margin-top:24px;">
+      <div class="form-group">
+        <label>Your Rating</label>
+        <select name="rating">
+          {% for n in [5,4,3,2,1] %}
+          <option value="{{ n }}" {{ 'selected' if n==5 }}>{{ "★" * n }}{{ "☆" * (5-n) }} ({{ n }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Your Review</label>
+        <textarea name="comment" placeholder="How was the product? Would you recommend it?"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Submit Review</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

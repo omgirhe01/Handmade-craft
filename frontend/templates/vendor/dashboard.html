@@ -4,6 +4,13 @@
 {% block page_title %}Dashboard{% endblock %}
 {% block vendor_content %}
 
+{% if current_user.is_maintenance %}
+<div class="panel" style="margin-bottom:20px; background:#FBE6E9; border-color:#E8B4B8;">
+  <strong style="color:#B23A48;">⏸ Your store is currently paused.</strong>
+  <span style="color:var(--ink-600); font-size:.85rem;"> Customers visiting your link see a "Temporarily Unavailable" message. Go to Store Settings to turn it back on.</span>
+</div>
+{% endif %}
+
 <div class="panel" style="margin-bottom:20px;">
   <h4>Your Store Link</h4>
   <p style="color:var(--ink-600); font-size:.85rem; margin-bottom:10px;">
@@ -22,6 +29,18 @@
   <div class="stat-card"><div class="icon">{{ icon('hourglass', 22) }}</div><div><div class="num">{{ pending_orders }}</div><div class="label">Pending Orders</div></div></div>
   <div class="stat-card"><div class="icon">{{ icon('check-circle', 22) }}</div><div><div class="num">{{ completed_orders }}</div><div class="label">Completed Orders</div></div></div>
 </div>
+
+{% if low_stock_products %}
+<div class="panel" style="margin-top:20px; border-color:#E8B4B8;">
+  <h4 style="color:#B23A48;">⚠ Low Stock Alert</h4>
+  <p style="font-size:.85rem; color:var(--ink-600); margin-bottom:12px;">These products are running low — restock soon or customers may keep ordering an item you don't have.</p>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    {% for p in low_stock_products %}
+    <a href="{{ url_for('vendor.edit_product', product_id=p.id) }}" class="badge badge-low-stock" style="text-decoration:none;">{{ p.name }} — {{ p.stock_quantity }} left</a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
 
 <div class="panel" style="margin-top:20px;">
   <h4>Recent Orders</h4>

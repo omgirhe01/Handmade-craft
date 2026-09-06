@@ -55,4 +55,19 @@
   </form>
 </div>
 
+{% if vendor %}
+<div class="panel" style="max-width:560px; margin-top:20px;">
+  <h4>Send Notification</h4>
+  <p style="font-size:.82rem; color:var(--ink-600); margin-bottom:12px;">
+    This message shows as a banner on {{ vendor.owner_name }}'s dashboard until they dismiss it.
+  </p>
+  <form method="post" action="{{ url_for('admin.notify_vendor', vendor_id=vendor.id) }}">
+    <div class="form-group">
+      <textarea name="message" required placeholder="e.g. Please update your store contact number, WhatsApp orders are bouncing."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">Send Notification</button>
+  </form>
+</div>
+{% endif %}
+
 {% endblock %}

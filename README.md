@@ -190,3 +190,33 @@ Each vendor sets their own WhatsApp number in **Store Settings** — the
 - Admin and Vendor share one Flask-Login session but are kept completely
   separate via a prefixed user id (`admin:<id>` / `vendor:<id>`) and two
   independent `@admin_required` / `@vendor_required` decorators.
+
+## 8. Full Feature List
+
+**Every vendor's storefront (`/store/<slug>`)**
+- Multi-photo product gallery (main photo + extra photos, click to switch)
+- Featured/Bestseller product badges
+- Customer reviews & star ratings (only after a Completed order — verified purchase)
+- Coupon codes at checkout (% discount)
+- Order tracking timeline (Pending → Confirmed → Preparing → Completed)
+- PDF invoice/receipt download for every order
+- Auto-remembered phone number on "My Orders" (no re-typing to check status)
+- Store theme colour, announcement bar, testimonials section
+- SEO meta description + Open Graph tags per store
+- "Temporarily paused" maintenance page when a vendor turns their store off
+
+**Vendor Dashboard (`/vendor`)**
+- Products, Categories, Orders, Custom Orders, Messages, Testimonials, Reviews, Coupons
+- Bulk product upload via CSV (with a downloadable sample template)
+- Low-stock alerts on the dashboard (stock auto-decrements as orders come in)
+- Analytics page: revenue (7-day chart), top products, revenue by category, order status breakdown
+- Store Settings: identity, logo/cover (auto-compressed on upload), story/about, contact & socials, theme colour, announcement bar, SEO description, maintenance toggle, password change
+- Notification banners sent by the platform admin
+
+**Admin Panel (`/admin`)**
+- Create/edit/activate/deactivate/delete vendors
+- Platform-wide dashboard + Analytics (total revenue, top vendors, vendor signup trend)
+- Send a notification message to any vendor
+
+**Platform-wide**
+- Uploaded images are auto-resized (max 1600px) and compressed with Pillow to keep every store fast.

@@ -1,0 +1,38 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Testimonials — {{ current_user.business_name }}{% endblock %}
+{% block page_title %}Testimonials{% endblock %}
+{% block vendor_content %}
+
+<p style="color:var(--ink-600); font-size:.85rem; margin-top:-10px; margin-bottom:16px; max-width:60ch;">
+  Add a testimonial whenever a happy customer messages you on WhatsApp/Instagram —
+  it will show up on your store's home page to build trust with new customers.
+</p>
+
+<div style="margin-bottom:18px;">
+  <a href="{{ url_for('vendor.add_testimonial') }}" class="btn btn-primary">+ Add Testimonial</a>
+</div>
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>Customer</th><th>Message</th><th>Rating</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for t in testimonials %}
+      <tr>
+        <td>{{ t.customer_name }}</td>
+        <td style="max-width:340px;">{{ t.message }}</td>
+        <td class="star-rating">{{ "★" * t.rating }}{{ "☆" * (5 - t.rating) }}</td>
+        <td style="display:flex; gap:8px;">
+          <a href="{{ url_for('vendor.edit_testimonial', testimonial_id=t.id) }}" class="btn btn-outline btn-sm">Edit</a>
+          <form method="post" action="{{ url_for('vendor.delete_testimonial', testimonial_id=t.id) }}" onsubmit="return confirm('Delete this testimonial?');">
+            <button type="submit" class="btn btn-sm" style="background:#FBE6E9; color:#B23A48;">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" style="text-align:center; color:var(--ink-600);">No testimonials yet. Add your first one!</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

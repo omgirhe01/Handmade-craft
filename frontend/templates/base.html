@@ -4,10 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+<meta name="description" content="{{ (VENDOR.meta_description or VENDOR.about_text or VENDOR.tagline or (SITE_NAME ~ ' - Handmade decor, made with love.'))[:300] }}">
+<meta property="og:title" content="{{ SITE_NAME }}">
+<meta property="og:description" content="{{ (VENDOR.meta_description or VENDOR.about_text or VENDOR.tagline or '')[:300] }}">
+{% if VENDOR.logo_filename or VENDOR.cover_filename %}
+<meta property="og:image" content="{{ url_for('static', filename='uploads/' + (VENDOR.cover_filename or VENDOR.logo_filename), _external=True) }}">
+{% endif %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% if VENDOR.theme_color %}
+<style>
+  :root {
+    --maroon-700: {{ VENDOR.theme_color }};
+    --maroon-900: {{ VENDOR.theme_color }};
+  }
+</style>
+{% endif %}
 </head>
 {% from "_icons.html" import social_icon %}
 <body>
+
+{% if VENDOR.announcement_text %}
+<div class="announcement-bar">{{ VENDOR.announcement_text }}</div>
+{% endif %}
 
 <header class="navbar">
   <div class="inner">

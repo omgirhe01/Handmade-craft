@@ -15,6 +15,7 @@
     </div>
     <nav>
       <a href="{{ url_for('admin.dashboard') }}" class="{{ 'active' if request.endpoint=='admin.dashboard' }}">{{ icon('chart', 18) }} Dashboard</a>
+      <a href="{{ url_for('admin.analytics') }}" class="{{ 'active' if request.endpoint=='admin.analytics' }}">{{ icon('chart', 18) }} Analytics</a>
       <a href="{{ url_for('admin.vendors') }}" class="{{ 'active' if request.endpoint in ['admin.vendors','admin.add_vendor','admin.edit_vendor'] }}">{{ icon('grid', 18) }} Vendors (Users)</a>
       <a href="{{ url_for('admin.logout') }}">{{ icon('logout', 18) }} Logout</a>
     </nav>

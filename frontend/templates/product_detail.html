@@ -10,12 +10,31 @@
   <div class="pd-layout">
     <div>
       <div class="hero-image" style="aspect-ratio:1/1;">
-        <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=700&auto=format&fit=crop'" alt="{{ product.name }}">
+        <img id="pdMainImage" src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=700&auto=format&fit=crop'" alt="{{ product.name }}">
       </div>
+      {% if product.gallery_images %}
+      <div class="pd-thumbs">
+        <div onclick="document.getElementById('pdMainImage').src=this.querySelector('img').src" style="cursor:pointer;">
+          <img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=200&auto=format&fit=crop'">
+        </div>
+        {% for g in product.gallery_images %}
+        <div onclick="document.getElementById('pdMainImage').src=this.querySelector('img').src" style="cursor:pointer;">
+          <img src="{{ url_for('static', filename='uploads/' + g.image_filename) }}">
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
 
     <div>
-      <h1 style="font-size:1.8rem;">{{ product.name }}</h1>
+      <h1 style="font-size:1.8rem;">{{ product.name }} {% if product.is_featured %}<span class="badge-featured">Bestseller</span>{% endif %}</h1>
+      {% if product.reviews %}
+      {% set avg_rating = (product.reviews|sum(attribute='rating') / product.reviews|length) %}
+      <div style="display:flex; align-items:center; gap:8px; margin-top:4px;">
+        <span class="star-rating">{{ "★" * avg_rating|round|int }}{{ "☆" * (5 - avg_rating|round|int) }}</span>
+        <span style="font-size:.85rem; color:var(--ink-600);">{{ "%.1f"|format(avg_rating) }} ({{ product.reviews|length }} review{{ 's' if product.reviews|length != 1 }})</span>
+      </div>
+      {% endif %}
       <div class="price" style="font-size:1.5rem; margin:6px 0 16px;">₹{{ '%.0f'|format(product.price) }}</div>
       <p style="color:var(--ink-600);">{{ product.description }}</p>
 
@@ -43,6 +62,21 @@
       </div>
     </div>
   </div>
+
+  {% if product.reviews %}
+  <div class="section-head" style="margin-top:50px;">
+    <div><h2>Customer Reviews</h2></div>
+  </div>
+  <div class="testimonial-grid">
+    {% for r in product.reviews|sort(attribute='created_at', reverse=True) %}
+    <div class="testimonial-card">
+      <div class="stars">{{ "★" * r.rating }}{{ "☆" * (5 - r.rating) }}</div>
+      {% if r.comment %}<p class="msg">"{{ r.comment }}"</p>{% endif %}
+      <div class="name">— {{ r.customer_name }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
 
   {% if related %}
   <div class="section-head" style="margin-top:50px;">

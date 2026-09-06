@@ -25,11 +25,6 @@ class Config:
             f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:"
             f"{MYSQL_PORT}/{MYSQL_DB}"
         )
-        # Some cloud MySQL providers (e.g. Aiven) require SSL. Set MYSQL_SSL=1
-        # in your environment variables to enable it -- leave unset for a
-        # normal local MySQL/XAMPP setup.
-        if os.environ.get("MYSQL_SSL", "0") == "1":
-            SQLALCHEMY_DATABASE_URI += "?ssl=true"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

@@ -48,6 +48,7 @@
         <div class="cat">{{ p.category.name }}</div>
         <h4>{{ p.name }}</h4>
         <div class="price">₹{{ '%.0f'|format(p.price) }}</div>
+        {% if p.is_featured %}<span class="badge-featured">Bestseller</span>{% endif %}
         {% if not p.in_stock %}<span class="stock-out">Out of Stock</span>{% endif %}
       </div>
     </a>
@@ -73,6 +74,26 @@
     </div>
   </div>
 </section>
+
+{% if testimonials %}
+<section class="section container" style="padding-top:0;">
+  <div class="section-head">
+    <div>
+      <h2>What Our Customers Say</h2>
+      <p>Real feedback from real customers.</p>
+    </div>
+  </div>
+  <div class="testimonial-grid">
+    {% for t in testimonials %}
+    <div class="testimonial-card">
+      <div class="stars">{{ '★' * t.rating }}{{ '☆' * (5 - t.rating) }}</div>
+      <p class="msg">"{{ t.message }}"</p>
+      <div class="name">— {{ t.customer_name }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
 
 <section class="section container" style="padding-top:0;">
   <div class="filter-card" style="text-align:center; padding:40px;">

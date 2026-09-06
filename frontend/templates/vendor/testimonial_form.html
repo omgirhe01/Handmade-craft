@@ -1,0 +1,31 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}{{ 'Edit' if testimonial else 'Add' }} Testimonial{% endblock %}
+{% block page_title %}{{ 'Edit Testimonial' if testimonial else 'Add Testimonial' }}{% endblock %}
+{% block vendor_content %}
+
+<div class="panel" style="max-width:520px;">
+  <form method="post">
+    <div class="form-group">
+      <label>Customer Name <span class="req">*</span></label>
+      <input type="text" name="customer_name" required value="{{ testimonial.customer_name if testimonial else '' }}">
+    </div>
+    <div class="form-group">
+      <label>What did they say? <span class="req">*</span></label>
+      <textarea name="message" required placeholder="e.g. Loved the toran, exactly what I wanted for Diwali!">{{ testimonial.message if testimonial else '' }}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Rating</label>
+      <select name="rating">
+        {% for n in [5,4,3,2,1] %}
+        <option value="{{ n }}" {{ 'selected' if testimonial and testimonial.rating==n or (not testimonial and n==5) }}>{{ "★" * n }}{{ "☆" * (5-n) }} ({{ n }})</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:10px;">
+      <button type="submit" class="btn btn-primary">{{ 'Save Changes' if testimonial else 'Add Testimonial' }}</button>
+      <a href="{{ url_for('vendor.testimonials') }}" class="btn btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

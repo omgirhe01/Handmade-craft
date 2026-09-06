@@ -1,10 +1,27 @@
-from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
+import csv
+import io
+from datetime import datetime
+
+from flask import Blueprint, current_app, flash, redirect, render_template, request, send_file, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from backend.extensions import db
-from backend.models import Category, ContactMessage, CustomOrder, Order, Product, Vendor
+from backend.models import (
+    Category,
+    ContactMessage,
+    Coupon,
+    CustomOrder,
+    Order,
+    Product,
+    ProductImage,
+    Review,
+    Testimonial,
+    Vendor,
+    VendorNotification,
+)
 from backend.utils.decorators import vendor_required
 from backend.utils.helpers import allowed_file, save_vendor_upload, unique_slug
+from backend.utils.invoice import generate_custom_order_invoice_pdf, generate_order_invoice_pdf
 
 vendor_bp = Blueprint("vendor", __name__)
 
@@ -67,6 +84,10 @@ def dashboard():
         .limit(5)
         .all()
     )
+    low_stock_products = [
+        p for p in Product.query.filter_by(vendor_id=current_user.id, in_stock=True).all()
+        if p.is_low_stock
+    ]
     store_url = url_for("public.home", slug=current_user.slug, _external=True)
 
     return render_template(
@@ -76,6 +97,7 @@ def dashboard():
         pending_orders=pending_orders,
         completed_orders=completed_orders,
         recent_orders=recent_orders,
+        low_stock_products=low_stock_products,
         store_url=store_url,
     )
 
@@ -183,10 +205,20 @@ def add_product():
             colours=request.form.get("colours", "").strip(),
             care=request.form.get("care", "").strip(),
             in_stock=request.form.get("in_stock") == "on",
+            is_featured=request.form.get("is_featured") == "on",
+            stock_quantity=int(request.form.get("stock_quantity") or 10),
             image_filename=image_filename,
         )
         db.session.add(product)
         db.session.commit()
+
+        gallery_files = request.files.getlist("gallery_images")
+        for pos, gfile in enumerate(gallery_files):
+            if gfile and gfile.filename and allowed_file(gfile.filename):
+                gname = save_vendor_upload(gfile, current_user.slug)
+                db.session.add(ProductImage(product_id=product.id, image_filename=gname, position=pos))
+        db.session.commit()
+
         flash("Product added successfully.", "success")
         return redirect(url_for("vendor.products"))
 
@@ -217,8 +249,23 @@ def edit_product(product_id):
         product.colours = request.form.get("colours", "").strip()
         product.care = request.form.get("care", "").strip()
         product.in_stock = request.form.get("in_stock") == "on"
+        product.is_featured = request.form.get("is_featured") == "on"
+        product.stock_quantity = int(request.form.get("stock_quantity") or 0)
 
         db.session.commit()
+
+        gallery_files = request.files.getlist("gallery_images")
+        existing_count = len(product.gallery_images)
+        for pos, gfile in enumerate(gallery_files):
+            if gfile and gfile.filename and allowed_file(gfile.filename):
+                gname = save_vendor_upload(gfile, current_user.slug)
+                db.session.add(
+                    ProductImage(
+                        product_id=product.id, image_filename=gname, position=existing_count + pos
+                    )
+                )
+        db.session.commit()
+
         flash("Product updated successfully.", "success")
         return redirect(url_for("vendor.products"))
 
@@ -233,6 +280,94 @@ def delete_product(product_id):
     db.session.commit()
     flash("Product deleted.", "info")
     return redirect(url_for("vendor.products"))
+
+
+@vendor_bp.route("/products/<int:product_id>/gallery/delete/<int:image_id>", methods=["POST"])
+@vendor_required
+def delete_gallery_image(product_id, image_id):
+    product = Product.query.filter_by(id=product_id, vendor_id=current_user.id).first_or_404()
+    image = ProductImage.query.filter_by(id=image_id, product_id=product.id).first_or_404()
+    db.session.delete(image)
+    db.session.commit()
+    flash("Photo removed.", "info")
+    return redirect(url_for("vendor.edit_product", product_id=product.id))
+
+
+@vendor_bp.route("/products/bulk-upload", methods=["GET", "POST"])
+@vendor_required
+def bulk_upload_products():
+    categories = _my_categories()
+
+    if request.method == "POST":
+        file = request.files.get("csv_file")
+        if not file or not file.filename:
+            flash("Please choose a CSV file to upload.", "danger")
+            return render_template("vendor/bulk_upload.html", categories=categories)
+
+        if not file.filename.lower().endswith(".csv"):
+            flash("Please upload a .csv file.", "danger")
+            return render_template("vendor/bulk_upload.html", categories=categories)
+
+        try:
+            stream = io.StringIO(file.stream.read().decode("utf-8-sig"))
+            reader = csv.DictReader(stream)
+        except Exception:
+            flash("Could not read that CSV file. Please check the format.", "danger")
+            return render_template("vendor/bulk_upload.html", categories=categories)
+
+        category_by_name = {c.name.strip().lower(): c for c in categories}
+        added, skipped = 0, 0
+
+        for row in reader:
+            name = (row.get("name") or "").strip()
+            category_name = (row.get("category") or "").strip()
+            price_raw = (row.get("price") or "").strip()
+
+            if not name or not category_name or not price_raw:
+                skipped += 1
+                continue
+
+            category = category_by_name.get(category_name.lower())
+            if not category:
+                # Auto-create the category if it doesn't exist yet.
+                slug = unique_slug(
+                    category_name,
+                    lambda s: Category.query.filter_by(vendor_id=current_user.id, slug=s).first()
+                    is not None,
+                )
+                category = Category(vendor_id=current_user.id, name=category_name, slug=slug)
+                db.session.add(category)
+                db.session.flush()
+                category_by_name[category_name.lower()] = category
+
+            try:
+                price = float(price_raw)
+            except ValueError:
+                skipped += 1
+                continue
+
+            db.session.add(
+                Product(
+                    vendor_id=current_user.id,
+                    name=name,
+                    category_id=category.id,
+                    price=price,
+                    description=(row.get("description") or "").strip(),
+                    material=(row.get("material") or "").strip() or "Premium Quality Wool",
+                    size=(row.get("size") or "").strip(),
+                    colours=(row.get("colours") or "").strip(),
+                    care=(row.get("care") or "").strip() or "Dry Clean Only",
+                    in_stock=(row.get("in_stock") or "yes").strip().lower() not in ("no", "0", "false"),
+                    stock_quantity=int(row.get("stock_quantity") or 10),
+                )
+            )
+            added += 1
+
+        db.session.commit()
+        flash(f"Bulk upload complete: {added} product(s) added, {skipped} row(s) skipped.", "success")
+        return redirect(url_for("vendor.products"))
+
+    return render_template("vendor/bulk_upload.html", categories=categories)
 
 
 # -------------------------------------------------------------- orders ----
@@ -304,6 +439,10 @@ def settings():
         current_user.address = request.form.get("address", "").strip()
         current_user.instagram_url = request.form.get("instagram_url", "").strip()
         current_user.facebook_url = request.form.get("facebook_url", "").strip()
+        current_user.theme_color = request.form.get("theme_color", "").strip() or current_user.theme_color
+        current_user.announcement_text = request.form.get("announcement_text", "").strip()
+        current_user.meta_description = request.form.get("meta_description", "").strip()
+        current_user.is_maintenance = request.form.get("is_maintenance") == "on"
 
         logo = request.files.get("logo")
         if logo and logo.filename and allowed_file(logo.filename):
@@ -323,3 +462,248 @@ def settings():
 
     store_url = url_for("public.home", slug=current_user.slug, _external=True)
     return render_template("vendor/site_settings.html", store_url=store_url)
+
+
+# ----------------------------------------------------------- testimonials ----
+
+@vendor_bp.route("/testimonials")
+@vendor_required
+def testimonials():
+    all_testimonials = (
+        Testimonial.query.filter_by(vendor_id=current_user.id)
+        .order_by(Testimonial.created_at.desc())
+        .all()
+    )
+    return render_template("vendor/testimonials.html", testimonials=all_testimonials)
+
+
+@vendor_bp.route("/testimonials/add", methods=["GET", "POST"])
+@vendor_required
+def add_testimonial():
+    if request.method == "POST":
+        customer_name = request.form.get("customer_name", "").strip()
+        message = request.form.get("message", "").strip()
+        if not customer_name or not message:
+            flash("Please fill in the customer name and message.", "danger")
+            return render_template("vendor/testimonial_form.html", testimonial=None)
+
+        rating = max(1, min(5, int(request.form.get("rating") or 5)))
+        db.session.add(
+            Testimonial(
+                vendor_id=current_user.id,
+                customer_name=customer_name,
+                message=message,
+                rating=rating,
+            )
+        )
+        db.session.commit()
+        flash("Testimonial added.", "success")
+        return redirect(url_for("vendor.testimonials"))
+
+    return render_template("vendor/testimonial_form.html", testimonial=None)
+
+
+@vendor_bp.route("/testimonials/edit/<int:testimonial_id>", methods=["GET", "POST"])
+@vendor_required
+def edit_testimonial(testimonial_id):
+    testimonial = Testimonial.query.filter_by(
+        id=testimonial_id, vendor_id=current_user.id
+    ).first_or_404()
+
+    if request.method == "POST":
+        testimonial.customer_name = request.form.get("customer_name", "").strip()
+        testimonial.message = request.form.get("message", "").strip()
+        testimonial.rating = max(1, min(5, int(request.form.get("rating") or 5)))
+        db.session.commit()
+        flash("Testimonial updated.", "success")
+        return redirect(url_for("vendor.testimonials"))
+
+    return render_template("vendor/testimonial_form.html", testimonial=testimonial)
+
+
+@vendor_bp.route("/testimonials/delete/<int:testimonial_id>", methods=["POST"])
+@vendor_required
+def delete_testimonial(testimonial_id):
+    testimonial = Testimonial.query.filter_by(
+        id=testimonial_id, vendor_id=current_user.id
+    ).first_or_404()
+    db.session.delete(testimonial)
+    db.session.commit()
+    flash("Testimonial deleted.", "info")
+    return redirect(url_for("vendor.testimonials"))
+
+
+@vendor_bp.route("/analytics")
+@vendor_required
+def analytics():
+    from collections import defaultdict
+    from datetime import timedelta
+    from sqlalchemy import func
+
+    all_orders = Order.query.filter_by(vendor_id=current_user.id).all()
+
+    total_revenue = sum(float(o.total_price) for o in all_orders)
+    completed_revenue = sum(float(o.total_price) for o in all_orders if o.status == "Completed")
+
+    # Revenue for each of the last 7 days
+    today = datetime.utcnow().date()
+    last_7_days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+    revenue_by_day = defaultdict(float)
+    for o in all_orders:
+        revenue_by_day[o.created_at.date()] += float(o.total_price)
+    daily_revenue = [(d.strftime("%d %b"), revenue_by_day.get(d, 0)) for d in last_7_days]
+    max_daily = max([r for _, r in daily_revenue] + [1])
+
+    # Top-selling products by units ordered
+    units_by_product = defaultdict(int)
+    revenue_by_product = defaultdict(float)
+    for o in all_orders:
+        units_by_product[o.product_id] += o.quantity
+        revenue_by_product[o.product_id] += float(o.total_price)
+    top_product_ids = sorted(units_by_product, key=lambda pid: units_by_product[pid], reverse=True)[:5]
+    top_products = [
+        {
+            "product": db.session.get(Product, pid),
+            "units": units_by_product[pid],
+            "revenue": revenue_by_product[pid],
+        }
+        for pid in top_product_ids
+    ]
+
+    # Best-performing category by revenue
+    revenue_by_category = defaultdict(float)
+    for o in all_orders:
+        cat_name = o.product.category.name if o.product and o.product.category else "Uncategorised"
+        revenue_by_category[cat_name] += float(o.total_price)
+    top_categories = sorted(revenue_by_category.items(), key=lambda kv: kv[1], reverse=True)[:5]
+    max_cat_revenue = max([v for _, v in top_categories] + [1])
+
+    status_counts = defaultdict(int)
+    for o in all_orders:
+        status_counts[o.status] += 1
+
+    return render_template(
+        "vendor/analytics.html",
+        total_revenue=total_revenue,
+        completed_revenue=completed_revenue,
+        total_orders=len(all_orders),
+        daily_revenue=daily_revenue,
+        max_daily=max_daily,
+        top_products=top_products,
+        top_categories=top_categories,
+        max_cat_revenue=max_cat_revenue,
+        status_counts=status_counts,
+    )
+
+
+# --------------------------------------------------------------- coupons ----
+
+@vendor_bp.route("/coupons")
+@vendor_required
+def coupons():
+    all_coupons = (
+        Coupon.query.filter_by(vendor_id=current_user.id)
+        .order_by(Coupon.created_at.desc())
+        .all()
+    )
+    return render_template("vendor/coupons.html", coupons=all_coupons)
+
+
+@vendor_bp.route("/coupons/add", methods=["GET", "POST"])
+@vendor_required
+def add_coupon():
+    if request.method == "POST":
+        code = request.form.get("code", "").strip().upper()
+        discount_percent = request.form.get("discount_percent", "").strip()
+        usage_limit = request.form.get("usage_limit", "0").strip()
+        expires_on = request.form.get("expires_on", "").strip()
+
+        if not code or not discount_percent:
+            flash("Please enter a coupon code and discount percentage.", "danger")
+            return render_template("vendor/coupon_form.html", coupon=None)
+
+        if Coupon.query.filter_by(vendor_id=current_user.id, code=code).first():
+            flash("You already have a coupon with this code.", "danger")
+            return render_template("vendor/coupon_form.html", coupon=None)
+
+        coupon = Coupon(
+            vendor_id=current_user.id,
+            code=code,
+            discount_percent=max(1, min(90, int(discount_percent))),
+            usage_limit=int(usage_limit or 0),
+            expires_on=datetime.strptime(expires_on, "%Y-%m-%d").date() if expires_on else None,
+        )
+        db.session.add(coupon)
+        db.session.commit()
+        flash(f"Coupon '{code}' created.", "success")
+        return redirect(url_for("vendor.coupons"))
+
+    return render_template("vendor/coupon_form.html", coupon=None)
+
+
+@vendor_bp.route("/coupons/toggle/<int:coupon_id>", methods=["POST"])
+@vendor_required
+def toggle_coupon(coupon_id):
+    coupon = Coupon.query.filter_by(id=coupon_id, vendor_id=current_user.id).first_or_404()
+    coupon.is_active = not coupon.is_active
+    db.session.commit()
+    flash(f"Coupon '{coupon.code}' {'activated' if coupon.is_active else 'deactivated'}.", "info")
+    return redirect(url_for("vendor.coupons"))
+
+
+@vendor_bp.route("/coupons/delete/<int:coupon_id>", methods=["POST"])
+@vendor_required
+def delete_coupon(coupon_id):
+    coupon = Coupon.query.filter_by(id=coupon_id, vendor_id=current_user.id).first_or_404()
+    db.session.delete(coupon)
+    db.session.commit()
+    flash("Coupon deleted.", "info")
+    return redirect(url_for("vendor.coupons"))
+
+
+# -------------------------------------------------------- reviews & invoices ----
+
+@vendor_bp.route("/reviews")
+@vendor_required
+def reviews():
+    all_reviews = (
+        Review.query.filter_by(vendor_id=current_user.id)
+        .order_by(Review.created_at.desc())
+        .all()
+    )
+    return render_template("vendor/reviews.html", reviews=all_reviews)
+
+
+@vendor_bp.route("/orders/<int:order_id>/invoice")
+@vendor_required
+def download_order_invoice(order_id):
+    order = Order.query.filter_by(id=order_id, vendor_id=current_user.id).first_or_404()
+    pdf = generate_order_invoice_pdf(order, current_user)
+    return send_file(
+        pdf, mimetype="application/pdf", as_attachment=True,
+        download_name=f"invoice_{order.order_code}.pdf",
+    )
+
+
+@vendor_bp.route("/custom-orders/<int:order_id>/invoice")
+@vendor_required
+def download_custom_order_invoice(order_id):
+    custom = CustomOrder.query.filter_by(id=order_id, vendor_id=current_user.id).first_or_404()
+    pdf = generate_custom_order_invoice_pdf(custom, current_user)
+    return send_file(
+        pdf, mimetype="application/pdf", as_attachment=True,
+        download_name=f"receipt_{custom.order_code}.pdf",
+    )
+
+
+# ---------------------------------------------------------- notifications ----
+
+@vendor_bp.route("/notifications/<int:notification_id>/read", methods=["POST"])
+@vendor_required
+def mark_notification_read(notification_id):
+    notif = VendorNotification.query.filter_by(
+        id=notification_id, vendor_id=current_user.id
+    ).first_or_404()
+    notif.is_read = True
+    db.session.commit()
+    return redirect(request.referrer or url_for("vendor.dashboard"))

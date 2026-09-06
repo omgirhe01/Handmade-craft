@@ -1,0 +1,81 @@
+{% extends "vendor/base_vendor.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Analytics — {{ current_user.business_name }}{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+{% block vendor_content %}
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="icon">{{ icon('chart', 22) }}</div><div><div class="num">₹{{ '%.0f'|format(total_revenue) }}</div><div class="label">Total Revenue (all orders)</div></div></div>
+  <div class="stat-card"><div class="icon">{{ icon('check-circle', 22) }}</div><div><div class="num">₹{{ '%.0f'|format(completed_revenue) }}</div><div class="label">Completed Revenue</div></div></div>
+  <div class="stat-card"><div class="icon">{{ icon('package', 22) }}</div><div><div class="num">{{ total_orders }}</div><div class="label">Total Orders</div></div></div>
+</div>
+
+<div class="panel" style="margin-top:20px;">
+  <h4>Revenue — Last 7 Days</h4>
+  {% if total_orders %}
+  <div style="display:flex; align-items:flex-end; gap:14px; height:160px; margin-top:20px; padding:0 6px;">
+    {% for label, revenue in daily_revenue %}
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;">
+      <span style="font-size:.72rem; color:var(--ink-600);">{{ '%.0f'|format(revenue) if revenue else '' }}</span>
+      <div style="width:100%; max-width:38px; background:var(--maroon-700, #5E1836); border-radius:6px 6px 0 0; height:{{ (revenue / max_daily * 100)|round|int if max_daily else 0 }}%; min-height:3px;"></div>
+      <span style="font-size:.7rem; color:var(--ink-600);">{{ label }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color:var(--ink-600); font-size:.85rem;">No orders yet — your revenue chart will show up here once you get your first order.</p>
+  {% endif %}
+</div>
+
+<div class="settings-grid" style="margin-top:20px;">
+  <div class="panel">
+    <h4>Top-Selling Products</h4>
+    {% if top_products %}
+    <table>
+      <thead><tr><th>Product</th><th>Units Sold</th><th>Revenue</th></tr></thead>
+      <tbody>
+        {% for row in top_products %}
+        <tr>
+          <td>{{ row.product.name if row.product else 'Deleted product' }}</td>
+          <td>{{ row.units }}</td>
+          <td>₹{{ '%.0f'|format(row.revenue) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:var(--ink-600); font-size:.85rem;">No orders yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <h4>Revenue by Category</h4>
+    {% if top_categories %}
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:6px;">
+      {% for name, revenue in top_categories %}
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:.82rem; margin-bottom:4px;">
+          <span>{{ name }}</span><span>₹{{ '%.0f'|format(revenue) }}</span>
+        </div>
+        <div style="background:var(--cream-200); border-radius:6px; height:10px; overflow:hidden;">
+          <div style="background:var(--maroon-700, #5E1836); height:100%; width:{{ (revenue / max_cat_revenue * 100)|round|int if max_cat_revenue else 0 }}%;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--ink-600); font-size:.85rem;">No orders yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="panel" style="margin-top:20px;">
+  <h4>Orders by Status</h4>
+  <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:10px;">
+    {% for status in ['Pending','Confirmed','Preparing','Completed'] %}
+    <span class="badge badge-{{ status|lower }}" style="font-size:.85rem; padding:8px 16px;">{{ status }}: {{ status_counts.get(status, 0) }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

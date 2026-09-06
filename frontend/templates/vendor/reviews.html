@@ -1,0 +1,25 @@
+{% extends "vendor/base_vendor.html" %}
+{% block title %}Reviews — {{ current_user.business_name }}{% endblock %}
+{% block page_title %}Customer Reviews{% endblock %}
+{% block vendor_content %}
+
+<div class="table-card">
+  <table>
+    <thead><tr><th>Product</th><th>Customer</th><th>Rating</th><th>Comment</th><th>Date</th></tr></thead>
+    <tbody>
+      {% for r in reviews %}
+      <tr>
+        <td>{{ r.product.name }}</td>
+        <td>{{ r.customer_name }}</td>
+        <td class="star-rating">{{ "★" * r.rating }}{{ "☆" * (5 - r.rating) }}</td>
+        <td style="max-width:320px;">{{ r.comment or '—' }}</td>
+        <td>{{ r.created_at.strftime('%d %b %Y') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" style="text-align:center; color:var(--ink-600);">No reviews yet. Reviews appear here once customers complete an order and leave feedback.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

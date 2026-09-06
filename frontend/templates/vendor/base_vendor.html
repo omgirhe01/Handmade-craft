@@ -15,11 +15,16 @@
     </div>
     <nav>
       <a href="{{ url_for('vendor.dashboard') }}" class="{{ 'active' if request.endpoint=='vendor.dashboard' }}">{{ icon('chart', 18) }} Dashboard</a>
+      <a href="{{ url_for('vendor.analytics') }}" class="{{ 'active' if request.endpoint=='vendor.analytics' }}">{{ icon('chart', 18) }} Analytics</a>
       <a href="{{ url_for('vendor.products') }}" class="{{ 'active' if request.endpoint in ['vendor.products','vendor.add_product','vendor.edit_product'] }}">{{ icon('grid', 18) }} Products</a>
+      <a href="{{ url_for('vendor.bulk_upload_products') }}" class="{{ 'active' if request.endpoint=='vendor.bulk_upload_products' }}">{{ icon('package', 18) }} Bulk Upload</a>
       <a href="{{ url_for('vendor.categories') }}" class="{{ 'active' if request.endpoint in ['vendor.categories','vendor.add_category','vendor.edit_category'] }}">{{ icon('sparkle', 18) }} Categories</a>
       <a href="{{ url_for('vendor.orders') }}" class="{{ 'active' if request.endpoint=='vendor.orders' }}">{{ icon('package', 18) }} Orders</a>
       <a href="{{ url_for('vendor.custom_orders') }}" class="{{ 'active' if request.endpoint=='vendor.custom_orders' }}">{{ icon('edit', 18) }} Custom Orders</a>
       <a href="{{ url_for('vendor.messages') }}" class="{{ 'active' if request.endpoint=='vendor.messages' }}">{{ icon('mail', 18) }} Messages</a>
+      <a href="{{ url_for('vendor.testimonials') }}" class="{{ 'active' if request.endpoint in ['vendor.testimonials','vendor.add_testimonial','vendor.edit_testimonial'] }}">{{ icon('sparkle', 18) }} Testimonials</a>
+      <a href="{{ url_for('vendor.reviews') }}" class="{{ 'active' if request.endpoint=='vendor.reviews' }}">{{ icon('heart', 18) }} Reviews</a>
+      <a href="{{ url_for('vendor.coupons') }}" class="{{ 'active' if request.endpoint in ['vendor.coupons','vendor.add_coupon'] }}">{{ icon('truck', 18) }} Coupons</a>
       <a href="{{ url_for('vendor.settings') }}" class="{{ 'active' if request.endpoint=='vendor.settings' }}">{{ icon('edit', 18) }} Store Settings</a>
       <a href="{{ url_for('public.home', slug=current_user.slug) }}" target="_blank">{{ icon('globe', 18) }} View My Store</a>
       <a href="{{ url_for('vendor.logout') }}">{{ icon('logout', 18) }} Logout</a>
@@ -43,6 +48,15 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+
+    {% for n in current_user.notifications if not n.is_read %}
+    <div class="alert alert-info" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+      <span>📢 <strong>Message from admin:</strong> {{ n.message }}</span>
+      <form method="post" action="{{ url_for('vendor.mark_notification_read', notification_id=n.id) }}" style="flex-shrink:0;">
+        <button type="submit" class="btn btn-outline btn-sm">Dismiss</button>
+      </form>
+    </div>
+    {% endfor %}
 
     {% block vendor_content %}{% endblock %}
   </div>

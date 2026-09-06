@@ -1,0 +1,68 @@
+{% extends "admin/base_admin.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Analytics — Admin{% endblock %}
+{% block page_title %}Platform Analytics{% endblock %}
+{% block admin_content %}
+
+<div class="stat-grid">
+  <div class="stat-card"><div class="icon">{{ icon('chart', 22) }}</div><div><div class="num">₹{{ '%.0f'|format(total_revenue) }}</div><div class="label">Total Platform Revenue</div></div></div>
+  <div class="stat-card"><div class="icon">{{ icon('package', 22) }}</div><div><div class="num">{{ total_orders }}</div><div class="label">Total Orders (All Stores)</div></div></div>
+  <div class="stat-card"><div class="icon">{{ icon('grid', 22) }}</div><div><div class="num">{{ total_vendors }}</div><div class="label">Total Vendors</div></div></div>
+</div>
+
+<div class="panel" style="margin-top:20px;">
+  <h4>Platform Revenue — Last 7 Days</h4>
+  {% if total_orders %}
+  <div style="display:flex; align-items:flex-end; gap:14px; height:160px; margin-top:20px; padding:0 6px;">
+    {% for label, revenue in daily_revenue %}
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; height:100%; justify-content:flex-end;">
+      <span style="font-size:.72rem; color:var(--ink-600);">{{ '%.0f'|format(revenue) if revenue else '' }}</span>
+      <div style="width:100%; max-width:38px; background:var(--maroon-700, #5E1836); border-radius:6px 6px 0 0; height:{{ (revenue / max_daily * 100)|round|int if max_daily else 0 }}%; min-height:3px;"></div>
+      <span style="font-size:.7rem; color:var(--ink-600);">{{ label }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="color:var(--ink-600); font-size:.85rem;">No orders yet on the platform.</p>
+  {% endif %}
+</div>
+
+<div class="settings-grid" style="margin-top:20px;">
+  <div class="panel">
+    <h4>Top Vendors by Revenue</h4>
+    {% if top_vendors %}
+    <table>
+      <thead><tr><th>Vendor</th><th>Orders</th><th>Revenue</th></tr></thead>
+      <tbody>
+        {% for row in top_vendors %}
+        <tr>
+          <td>{{ row.vendor.business_name if row.vendor else 'Deleted vendor' }}</td>
+          <td>{{ row.orders }}</td>
+          <td>₹{{ '%.0f'|format(row.revenue) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:var(--ink-600); font-size:.85rem;">No orders yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="panel">
+    <h4>New Vendor Signups — Last 7 Days</h4>
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:6px;">
+      {% for label, count in daily_signups %}
+      <div>
+        <div style="display:flex; justify-content:space-between; font-size:.82rem; margin-bottom:4px;">
+          <span>{{ label }}</span><span>{{ count }}</span>
+        </div>
+        <div style="background:var(--cream-200); border-radius:6px; height:10px; overflow:hidden;">
+          <div style="background:var(--maroon-700, #5E1836); height:100%; width:{{ (count / max_signups * 100)|round|int if max_signups else 0 }}%;"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock %}

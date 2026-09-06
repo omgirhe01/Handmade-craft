@@ -51,6 +51,27 @@
         </div>
       </div>
       <p style="font-size:.78rem; color:var(--ink-600);">The cover image is shown as the banner on your store's home page.</p>
+
+      <div class="form-row" style="margin-top:14px;">
+        <div class="form-group">
+          <label>Store Theme Colour</label>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="color" name="theme_color" value="{{ current_user.theme_color or '#5E1836' }}" style="width:52px; height:40px; padding:2px; cursor:pointer;">
+            <span style="font-size:.8rem; color:var(--ink-600);">Used for buttons, links &amp; headings on your store.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Announcement Bar (optional)</label>
+        <input type="text" name="announcement_text" value="{{ current_user.announcement_text or '' }}" placeholder="e.g. 🎉 Diwali Sale — Flat 20% off this week!">
+        <span style="font-size:.78rem; color:var(--ink-600);">Shows as a slim bar at the very top of your store. Leave blank to hide it.</span>
+      </div>
+
+      <div class="form-group" style="flex-direction:row; align-items:center; gap:10px; margin-top:10px; padding:12px; background:#FBE6E9; border-radius:8px;">
+        <input type="checkbox" name="is_maintenance" id="is_maintenance" style="width:auto;" {{ 'checked' if current_user.is_maintenance }}>
+        <label for="is_maintenance" style="margin:0; color:#B23A48;">Pause my store (show "Temporarily Unavailable" to customers)</label>
+      </div>
     </div>
 
     <div class="panel">
@@ -62,6 +83,11 @@
       <div class="form-group">
         <label>About Us (short intro)</label>
         <textarea name="about_text" style="min-height:130px;" placeholder="A short paragraph introducing your business">{{ current_user.about_text or '' }}</textarea>
+      </div>
+      <div class="form-group">
+        <label>SEO Description (for Google search results)</label>
+        <textarea name="meta_description" maxlength="300" style="min-height:70px;" placeholder="A one-line summary of your store shown on Google search results (max ~160 characters recommended)">{{ current_user.meta_description or '' }}</textarea>
+        <span style="font-size:.78rem; color:var(--ink-600);">Leave blank to automatically use your About Us text instead.</span>
       </div>
     </div>
 
