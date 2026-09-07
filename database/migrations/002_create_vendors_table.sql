@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS vendors (
     facebook_url VARCHAR(255),
     logo_filename VARCHAR(255),
     cover_filename VARCHAR(255),
+    story_image_filename VARCHAR(255),
     theme_color VARCHAR(10) DEFAULT '#5E1836',
     announcement_text VARCHAR(200),
     meta_description VARCHAR(300),

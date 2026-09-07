@@ -452,6 +452,10 @@ def settings():
         if cover and cover.filename and allowed_file(cover.filename):
             current_user.cover_filename = save_vendor_upload(cover, current_user.slug)
 
+        story_image = request.files.get("story_image")
+        if story_image and story_image.filename and allowed_file(story_image.filename):
+            current_user.story_image_filename = save_vendor_upload(story_image, current_user.slug)
+
         new_password = request.form.get("new_password", "")
         if new_password:
             current_user.set_password(new_password)

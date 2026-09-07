@@ -52,4 +52,11 @@ def create_app():
         # Used only by the Admin / Vendor panel templates.
         return {"PLATFORM_NAME": app.config["PLATFORM_NAME"]}
 
+    @app.errorhandler(413)
+    def file_too_large(e):
+        from flask import flash, redirect, request
+
+        flash("Those files are too large to upload together. Please try fewer or smaller photos.", "danger")
+        return redirect(request.referrer or "/"), 302
+
     return app

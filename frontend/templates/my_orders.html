@@ -43,7 +43,7 @@
             <td>
               <div class="order-timeline" style="min-width:160px;">
                 {% for s in steps %}
-                <div class="step {{ 'done' if steps.index(s) <= steps.index(o.status) else '' }}">
+                <div class="step step-{{ s|lower }} {{ 'done' if steps.index(s) <= steps.index(o.status) else '' }}">
                   <div class="dot"></div>{{ s }}
                 </div>
                 {% endfor %}
@@ -72,7 +72,7 @@
             <td>
               <div class="order-timeline" style="min-width:160px;">
                 {% for s in steps %}
-                <div class="step {{ 'done' if steps.index(s) <= steps.index(c.status) else '' }}">
+                <div class="step step-{{ s|lower }} {{ 'done' if steps.index(s) <= steps.index(c.status) else '' }}">
                   <div class="dot"></div>{{ s }}
                 </div>
                 {% endfor %}

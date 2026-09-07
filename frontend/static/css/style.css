@@ -4,6 +4,9 @@
   --maroon-900: #5E1836;
   --maroon-700: #7C2049;
   --maroon-500: #9A2E5C;
+  /* Vendor theme colour only ever touches this variable (see base.html) --
+     used solely for header accents and the hero area beside the banner. */
+  --brand-accent: var(--maroon-700);
   --cream-100: #FBF3E7;
   --cream-200: #F4E7D3;
   --card-bg: #FFFCF6;
@@ -75,14 +78,14 @@ img { max-width: 100%; display: block; }
   flex-shrink: 0;
 }
 .brand-text .name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem; color: var(--maroon-900); line-height: 1.2; }
-.brand-text .name em { font-family: 'Dancing Script', cursive; font-style: normal; color: var(--maroon-700); }
+.brand-text .name em { font-family: 'Dancing Script', cursive; font-style: normal; color: var(--brand-accent); }
 .brand-text .tagline { font-size: .72rem; color: var(--ink-600); }
 
 /* Panel holds the page links + Admin button; on desktop it sits inline in the header */
 .nav-panel { display: flex; align-items: center; gap: 26px; }
 .nav-links { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
 .nav-links a { font-size: .92rem; font-weight: 500; color: var(--ink-900); padding: 6px 2px; border-bottom: 2px solid transparent; }
-.nav-links a:hover, .nav-links a.active { color: var(--maroon-700); border-color: var(--gold-500); }
+.nav-links a:hover, .nav-links a.active { color: var(--brand-accent); border-color: var(--gold-500); }
 
 /* Hamburger button - hidden on desktop, shown top-right on mobile */
 .nav-toggle {
@@ -122,6 +125,8 @@ img { max-width: 100%; display: block; }
 .btn-primary:hover { background: var(--maroon-700); box-shadow: var(--shadow); }
 .btn-outline { background: transparent; border-color: var(--maroon-900); color: var(--maroon-900); }
 .btn-outline:hover { background: var(--maroon-900); color: #fff; }
+.hero-cta { background: var(--brand-accent); color: #fff; }
+.hero-cta:hover { filter: brightness(0.92); box-shadow: var(--shadow); }
 .btn-whatsapp { background: #25D366; color: #fff; }
 .btn-whatsapp:hover { filter: brightness(0.95); }
 .btn-sm { padding: 6px 14px; font-size: .8rem; border-radius: 6px; }
@@ -135,7 +140,7 @@ img { max-width: 100%; display: block; }
 }
 .hero .inner { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 48px; align-items: center; }
 .hero h1 { font-size: 2.6rem; margin-bottom: .1em; }
-.hero .script-line { font-family: 'Dancing Script', cursive; font-size: 3.1rem; color: var(--maroon-700); line-height: 1; }
+.hero .script-line { font-family: 'Dancing Script', cursive; font-size: 3.1rem; color: var(--brand-accent); line-height: 1; }
 .hero p.lede { color: var(--ink-600); max-width: 46ch; margin: 18px 0 26px; }
 .hero-image {
   border-radius: 20px; overflow: hidden; box-shadow: var(--shadow);
@@ -175,7 +180,7 @@ img { max-width: 100%; display: block; }
 .product-card .body { padding: 14px 16px 18px; }
 .product-card .cat { font-size: .72rem; color: var(--gold-500); font-weight: 600; }
 .product-card h4 { font-size: 1rem; margin: 4px 0 6px; }
-.product-card .price { color: var(--maroon-900); font-weight: 700; font-family: 'Playfair Display', serif; }
+.product-card .price { color: #1A1A1A; font-weight: 700; font-family: 'Poppins', sans-serif; }
 .product-card .stock-out { display:inline-block; font-size:.7rem; color:#B23A48; font-weight:600; margin-top:4px; }
 
 /* ---------- Story band (homepage craft image + text) ---------- */
@@ -486,6 +491,23 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .order-timeline .step.done .dot { background: var(--maroon-900); border-color: var(--maroon-900); }
 .order-timeline .step.done::before { background: var(--maroon-900); }
 .order-timeline .step.done { color: var(--maroon-900); font-weight: 600; }
+
+/* Each status gets its own colour so the timeline reads at a glance. */
+.order-timeline .step.done.step-pending .dot,
+.order-timeline .step.done.step-pending::before { background: var(--warn-fg); border-color: var(--warn-fg); }
+.order-timeline .step.done.step-pending { color: var(--warn-fg); }
+
+.order-timeline .step.done.step-confirmed .dot,
+.order-timeline .step.done.step-confirmed::before { background: var(--info-fg); border-color: var(--info-fg); }
+.order-timeline .step.done.step-confirmed { color: var(--info-fg); }
+
+.order-timeline .step.done.step-preparing .dot,
+.order-timeline .step.done.step-preparing::before { background: #7C4DBB; border-color: #7C4DBB; }
+.order-timeline .step.done.step-preparing { color: #7C4DBB; }
+
+.order-timeline .step.done.step-completed .dot,
+.order-timeline .step.done.step-completed::before { background: var(--ok-fg); border-color: var(--ok-fg); }
+.order-timeline .step.done.step-completed { color: var(--ok-fg); }
 
 .testimonial-card {
   background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius);

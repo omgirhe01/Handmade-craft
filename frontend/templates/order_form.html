@@ -27,10 +27,68 @@
       </div>
       <div class="form-group">
         <label>Coupon Code (optional)</label>
-        <input type="text" name="coupon_code" placeholder="Enter coupon code if you have one" style="text-transform:uppercase;">
+        <div style="display:flex; gap:10px;">
+          <input type="text" name="coupon_code" id="couponInput" placeholder="Enter coupon code if you have one" style="text-transform:uppercase; flex:1;">
+          <button type="button" id="applyCouponBtn" class="btn btn-outline" style="flex-shrink:0;">Apply</button>
+        </div>
+        <div id="couponMessage" style="font-size:.85rem; margin-top:8px;"></div>
+      </div>
+      <div id="orderSummary" class="filter-card" style="display:none; margin-bottom:18px; background:var(--cream-200);">
+        <div style="display:flex; justify-content:space-between; font-size:.85rem;"><span>Subtotal</span><span id="sumSubtotal"></span></div>
+        <div style="display:flex; justify-content:space-between; font-size:.85rem; color:#2C7A3D;"><span id="sumDiscountLabel">Discount</span><span id="sumDiscount"></span></div>
+        <div style="display:flex; justify-content:space-between; font-weight:700; margin-top:6px; border-top:1px solid var(--line); padding-top:6px;"><span>Total</span><span id="sumTotal"></span></div>
       </div>
       <button type="submit" class="btn btn-primary btn-block">Confirm Order</button>
     </form>
   </div>
 </section>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('applyCouponBtn').addEventListener('click', function () {
+  var code = document.getElementById('couponInput').value.trim();
+  var quantity = document.querySelector('input[name="quantity"]').value || 1;
+  var msgEl = document.getElementById('couponMessage');
+  var summaryEl = document.getElementById('orderSummary');
+
+  if (!code) {
+    msgEl.textContent = 'Enter a coupon code first.';
+    msgEl.style.color = '#B23A48';
+    summaryEl.style.display = 'none';
+    return;
+  }
+
+  msgEl.textContent = 'Checking...';
+  msgEl.style.color = 'var(--ink-600)';
+
+  var formData = new FormData();
+  formData.append('coupon_code', code);
+  formData.append('quantity', quantity);
+
+  fetch("{{ url_for('public.check_coupon', product_id=product.id) }}", {
+    method: 'POST',
+    body: formData
+  })
+  .then(function (res) { return res.json(); })
+  .then(function (data) {
+    if (data.valid) {
+      msgEl.textContent = '✓ ' + data.message;
+      msgEl.style.color = '#2C7A3D';
+      document.getElementById('sumSubtotal').textContent = '₹' + data.subtotal.toFixed(0);
+      document.getElementById('sumDiscountLabel').textContent = 'Discount (' + data.discount_percent + '%)';
+      document.getElementById('sumDiscount').textContent = '-₹' + data.discount_amount.toFixed(0);
+      document.getElementById('sumTotal').textContent = '₹' + data.final_total.toFixed(0);
+      summaryEl.style.display = 'block';
+    } else {
+      msgEl.textContent = '✗ ' + (data.message || 'Invalid coupon code.');
+      msgEl.style.color = '#B23A48';
+      summaryEl.style.display = 'none';
+    }
+  })
+  .catch(function () {
+    msgEl.textContent = 'Could not check this coupon right now.';
+    msgEl.style.color = '#B23A48';
+  });
+});
+</script>
 {% endblock %}

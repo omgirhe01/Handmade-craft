@@ -33,7 +33,10 @@ class Config:
     STATIC_FOLDER = os.path.join(BASE_DIR, "frontend", "static")
 
     UPLOAD_FOLDER = os.path.join(STATIC_FOLDER, "uploads")
-    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 MB
+    # Raw photos (before our automatic compression) can be several MB each,
+    # especially phone camera photos, and a product can have several gallery
+    # photos uploaded in the same request -- so this needs real headroom.
+    MAX_CONTENT_LENGTH = 30 * 1024 * 1024  # 30 MB per request
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 
     # ---- Platform branding (shown only on the Admin / Vendor panels, never

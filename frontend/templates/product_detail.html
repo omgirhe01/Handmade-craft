@@ -35,7 +35,7 @@
         <span style="font-size:.85rem; color:var(--ink-600);">{{ "%.1f"|format(avg_rating) }} ({{ product.reviews|length }} review{{ 's' if product.reviews|length != 1 }})</span>
       </div>
       {% endif %}
-      <div class="price" style="font-size:1.5rem; margin:6px 0 16px;">₹{{ '%.0f'|format(product.price) }}</div>
+      <div class="price" style="font-size:1.5rem; margin:6px 0 16px; color:#1A1A1A; font-family:'Poppins', sans-serif;">₹{{ '%.0f'|format(product.price) }}</div>
       <p style="color:var(--ink-600);">{{ product.description }}</p>
 
       <ul class="spec-list">

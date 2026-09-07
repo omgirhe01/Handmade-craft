@@ -41,6 +41,7 @@ class Vendor(UserMixin, db.Model):
     # Branding images (stored as "<slug>/<filename>" under the uploads folder)
     logo_filename = db.Column(db.String(255), default="")
     cover_filename = db.Column(db.String(255), default="")
+    story_image_filename = db.Column(db.String(255), default="")
 
     # Store personalisation
     theme_color = db.Column(db.String(10), default="#5E1836")

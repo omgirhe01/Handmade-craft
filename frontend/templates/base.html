@@ -13,9 +13,12 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 {% if VENDOR.theme_color %}
 <style>
+  /* Only the header brand accent and the hero section beside the banner
+     follow the vendor's chosen theme colour -- headings, prices, the
+     footer, perk icons, and every other page keep the site's fixed
+     default colours regardless of theme. */
   :root {
-    --maroon-700: {{ VENDOR.theme_color }};
-    --maroon-900: {{ VENDOR.theme_color }};
+    --brand-accent: {{ VENDOR.theme_color }};
   }
 </style>
 {% endif %}

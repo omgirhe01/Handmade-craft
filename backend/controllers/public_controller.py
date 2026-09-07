@@ -3,6 +3,7 @@ from flask import (
     abort,
     flash,
     g,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -142,6 +143,39 @@ def product_detail(product_id):
         .all()
     )
     return render_template("product_detail.html", product=product, related=related)
+
+
+@public_bp.route("/coupon/check/<int:product_id>", methods=["POST"])
+def check_coupon(product_id):
+    """AJAX endpoint used by the order form's 'Apply' button -- validates a
+    coupon code live and returns the discount, without placing an order."""
+    product = Product.query.filter_by(id=product_id, vendor_id=g.vendor.id).first_or_404()
+    code = (request.form.get("coupon_code") or "").strip().upper()
+    try:
+        quantity = max(1, int(request.form.get("quantity", 1)))
+    except ValueError:
+        quantity = 1
+
+    subtotal = float(product.price) * quantity
+
+    if not code:
+        return jsonify({"valid": False, "message": "Enter a coupon code first."})
+
+    coupon = Coupon.query.filter_by(vendor_id=g.vendor.id, code=code).first()
+    if not coupon or not coupon.is_valid():
+        return jsonify({"valid": False, "message": "This coupon code is not valid."})
+
+    discount_amount = round(subtotal * coupon.discount_percent / 100, 2)
+    final_total = round(subtotal - discount_amount, 2)
+
+    return jsonify({
+        "valid": True,
+        "discount_percent": coupon.discount_percent,
+        "subtotal": subtotal,
+        "discount_amount": discount_amount,
+        "final_total": final_total,
+        "message": f"Coupon applied! {coupon.discount_percent}% off.",
+    })
 
 
 @public_bp.route("/order/<int:product_id>", methods=["GET", "POST"])

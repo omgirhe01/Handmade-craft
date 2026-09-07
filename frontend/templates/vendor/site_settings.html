@@ -52,6 +52,17 @@
       </div>
       <p style="font-size:.78rem; color:var(--ink-600);">The cover image is shown as the banner on your store's home page.</p>
 
+      <div class="form-group" style="margin-top:14px;">
+        <label>"Our Story" Side Image</label>
+        {% if current_user.story_image_filename %}
+        <div class="img-preview" style="max-width:260px;"><img src="{{ url_for('static', filename='uploads/' + current_user.story_image_filename) }}" alt="Story"></div>
+        {% else %}
+        <div class="img-preview empty" style="max-width:260px;">Using default image</div>
+        {% endif %}
+        <input type="file" name="story_image" accept="image/*">
+        <span style="font-size:.78rem; color:var(--ink-600);">Shown beside the "Every Piece, Made By Hand" section on your home page and on your About Us page.</span>
+      </div>
+
       <div class="form-row" style="margin-top:14px;">
         <div class="form-group">
           <label>Store Theme Colour</label>

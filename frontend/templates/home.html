@@ -10,13 +10,13 @@
       <div class="script-line">{{ SITE_TAGLINE or "Handmade with Love" }}</div>
       <p class="lede">Made with Love, Crafted by Hand<br>
         Beautiful handmade decoration items for your home, festivals &amp; every special occasion.</p>
-      <a href="{{ url_for('public.products') }}" class="btn btn-primary">Explore Products →</a>
+      <a href="{{ url_for('public.products') }}" class="btn hero-cta">Explore Products →</a>
     </div>
     <div class="hero-image">
       {% if VENDOR.cover_filename %}
       <img src="{{ url_for('static', filename='uploads/' + VENDOR.cover_filename) }}" alt="{{ SITE_NAME }}">
       {% else %}
-      <img src="https://images.unsplash.com/photo-1613400549188-b40dbbd0b3f0?q=80&w=800&auto=format&fit=crop" alt="Handmade decorative wall hanging">
+      <img src="{{ url_for('static', filename='img/default_banner.jpg') }}" alt="Handmade decorative craft being made by hand">
       {% endif %}
     </div>
   </div>
@@ -61,7 +61,12 @@
 <section class="section container" style="padding-top:0;">
   <div class="story-band">
     <div class="story-image">
-      <img src="https://images.unsplash.com/photo-1700170447159-9d2d0da133a5?q=80&w=900&auto=format&fit=crop" alt="Handmade crochet flowers being crafted by hand">
+      {% set story_img = VENDOR.story_image_filename %}
+      {% if story_img %}
+      <img src="{{ url_for('static', filename='uploads/' + story_img) }}" alt="{{ SITE_NAME }} — handmade craft being made by hand">
+      {% else %}
+      <img src="{{ url_for('static', filename='img/default_banner.jpg') }}" alt="Handmade craft being made by hand">
+      {% endif %}
     </div>
     <div class="story-text">
       <h2>Every Piece, Made By Hand</h2>
