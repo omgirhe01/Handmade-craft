@@ -1,3 +1,4 @@
+import io
 import os
 import re
 import uuid
@@ -37,42 +38,102 @@ def unique_slug(base_text, exists_fn):
     return slug
 
 
-def _compress_image(src_path):
-    """Resize large photos down to a sane max dimension and re-save with
-    compression, so a vendor uploading a 6000x4000 phone photo doesn't slow
-    down every visitor's page load. Runs in place; falls back silently to
-    the original file if it isn't a Pillow-readable image (e.g. corrupt
-    upload) so a bad photo never breaks the save.
+def _compress_to_bytes(file_storage):
+    """Read an uploaded FileStorage, resize it down to a sane max dimension,
+    and return compressed JPEG bytes. Falls back to the raw original bytes
+    if it isn't a Pillow-readable image, so a bad photo never breaks the
+    upload -- it just skips compression.
     """
+    raw = file_storage.read()
     try:
-        with Image.open(src_path) as img:
+        with Image.open(io.BytesIO(raw)) as img:
             img = ImageOps.exif_transpose(img)  # respect phone camera orientation
             img.thumbnail((MAX_DIMENSION, MAX_DIMENSION), Image.LANCZOS)
 
             if img.mode in ("RGBA", "P"):
                 img = img.convert("RGB")
 
-            img.save(src_path, format="JPEG", quality=JPEG_QUALITY, optimize=True)
+            out = io.BytesIO()
+            img.save(out, format="JPEG", quality=JPEG_QUALITY, optimize=True)
+            return out.getvalue()
     except Exception:
-        # Not a valid/openable image (or Pillow doesn't support it) -- leave
-        # the originally-saved file untouched rather than failing the upload.
-        pass
+        return raw
+
+
+def _cloudinary_configured():
+    cfg = current_app.config
+    return bool(cfg.get("CLOUDINARY_CLOUD_NAME") and cfg.get("CLOUDINARY_API_KEY") and cfg.get("CLOUDINARY_API_SECRET"))
+
+
+def _upload_to_cloudinary(image_bytes, vendor_slug):
+    """Uploads to Cloudinary and returns the permanent https URL, or None if
+    the upload fails for any reason (caller falls back to local disk)."""
+    try:
+        import cloudinary
+        import cloudinary.uploader
+
+        cfg = current_app.config
+        cloudinary.config(
+            cloud_name=cfg["CLOUDINARY_CLOUD_NAME"],
+            api_key=cfg["CLOUDINARY_API_KEY"],
+            api_secret=cfg["CLOUDINARY_API_SECRET"],
+            secure=True,
+        )
+        result = cloudinary.uploader.upload(
+            io.BytesIO(image_bytes),
+            folder=f"handmade-craft-decor/{vendor_slug}",
+            public_id=uuid.uuid4().hex,
+            resource_type="image",
+        )
+        return result.get("secure_url")
+    except Exception:
+        return None
 
 
 def save_vendor_upload(file, vendor_slug):
-    """Save an uploaded image inside a per-vendor sub-folder of the uploads
-    directory so files from different vendors never collide or mix. The
-    image is automatically resized/compressed to keep the store fast.
-    Returns the stored value to keep on the model, e.g. '<slug>/<filename>'.
-    """
-    # Photos are always re-saved as JPEG during compression, so the stored
-    # filename uses a .jpg extension regardless of the original upload type.
-    unique_name = f"{uuid.uuid4().hex}.jpg"
+    """Save an uploaded image for a vendor. The image is always
+    resized/compressed first to keep the store fast.
 
+    - If Cloudinary credentials are configured, the image is uploaded there
+      and a permanent https:// URL is returned -- this is what makes photos
+      survive restarts/redeploys on Render (its local disk is ephemeral).
+    - Otherwise, it's saved to the local uploads/ folder as before (fine for
+      local development) and '<slug>/<filename>' is returned.
+
+    Use image_url() (registered as a Jinja global) in templates so both
+    storage forms render correctly without templates needing to care which
+    one is active.
+    """
+    compressed = _compress_to_bytes(file)
+
+    if _cloudinary_configured():
+        url = _upload_to_cloudinary(compressed, vendor_slug)
+        if url:
+            return url
+        # Cloudinary upload failed (bad credentials, network issue, etc.) --
+        # fall through to local disk so the upload doesn't just fail outright.
+
+    unique_name = f"{uuid.uuid4().hex}.jpg"
     vendor_folder = os.path.join(current_app.config["UPLOAD_FOLDER"], vendor_slug)
     os.makedirs(vendor_folder, exist_ok=True)
-    dest_path = os.path.join(vendor_folder, unique_name)
-    file.save(dest_path)
-    _compress_image(dest_path)
+    with open(os.path.join(vendor_folder, unique_name), "wb") as f:
+        f.write(compressed)
 
     return f"{vendor_slug}/{unique_name}"
+
+
+def image_url(stored_value, external=False):
+    """Build the correct <img src> for a value saved by save_vendor_upload,
+    regardless of whether it's a full Cloudinary URL or a local relative
+    path. Use this in templates instead of manually building
+    url_for('static', filename='uploads/' + value).
+    Pass external=True for places needing an absolute URL (e.g. og:image) --
+    Cloudinary URLs are always absolute already, so this only affects the
+    local-disk fallback."""
+    from flask import url_for
+
+    if not stored_value:
+        return ""
+    if stored_value.startswith("http://") or stored_value.startswith("https://"):
+        return stored_value
+    return url_for("static", filename="uploads/" + stored_value, _external=external)

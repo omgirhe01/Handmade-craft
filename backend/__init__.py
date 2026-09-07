@@ -52,6 +52,9 @@ def create_app():
         # Used only by the Admin / Vendor panel templates.
         return {"PLATFORM_NAME": app.config["PLATFORM_NAME"]}
 
+    from backend.utils.helpers import image_url
+    app.jinja_env.globals["image_url"] = image_url
+
     @app.errorhandler(413)
     def file_too_large(e):
         from flask import flash, redirect, request

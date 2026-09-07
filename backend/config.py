@@ -39,6 +39,17 @@ class Config:
     MAX_CONTENT_LENGTH = 30 * 1024 * 1024  # 30 MB per request
     ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 
+    # ---- Persistent image storage (Cloudinary) ----
+    # Render's (and most PaaS) local disk is EPHEMERAL: anything saved to
+    # UPLOAD_FOLDER disappears on the next restart/redeploy, which is why
+    # uploaded photos were vanishing. When these three variables are set,
+    # save_vendor_upload() uploads to Cloudinary instead and photos persist
+    # forever, independent of the app's disk. If they're not set (e.g. in
+    # local development), uploads fall back to the local disk as before.
+    CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME", "")
+    CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY", "")
+    CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET", "")
+
     # ---- Platform branding (shown only on the Admin / Vendor panels, never
     # on an individual vendor's public storefront) ----
     PLATFORM_NAME = os.environ.get("PLATFORM_NAME", "Handmade Craft Decor")

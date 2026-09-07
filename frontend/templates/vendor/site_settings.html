@@ -34,7 +34,7 @@
         <div class="form-group">
           <label>Logo Image</label>
           {% if current_user.logo_filename %}
-          <div class="img-preview"><img src="{{ url_for('static', filename='uploads/' + current_user.logo_filename) }}" alt="Logo"></div>
+          <div class="img-preview"><img src="{{ image_url(current_user.logo_filename) }}" alt="Logo"></div>
           {% else %}
           <div class="img-preview empty">No logo yet</div>
           {% endif %}
@@ -43,7 +43,7 @@
         <div class="form-group">
           <label>Cover / Banner Image</label>
           {% if current_user.cover_filename %}
-          <div class="img-preview"><img src="{{ url_for('static', filename='uploads/' + current_user.cover_filename) }}" alt="Cover"></div>
+          <div class="img-preview"><img src="{{ image_url(current_user.cover_filename) }}" alt="Cover"></div>
           {% else %}
           <div class="img-preview empty">No cover yet</div>
           {% endif %}
@@ -55,7 +55,7 @@
       <div class="form-group" style="margin-top:14px;">
         <label>"Our Story" Side Image</label>
         {% if current_user.story_image_filename %}
-        <div class="img-preview" style="max-width:260px;"><img src="{{ url_for('static', filename='uploads/' + current_user.story_image_filename) }}" alt="Story"></div>
+        <div class="img-preview" style="max-width:260px;"><img src="{{ image_url(current_user.story_image_filename) }}" alt="Story"></div>
         {% else %}
         <div class="img-preview empty" style="max-width:260px;">Using default image</div>
         {% endif %}

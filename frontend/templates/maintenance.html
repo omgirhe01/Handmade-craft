@@ -10,7 +10,7 @@
 <div class="login-shell">
   <div class="form-card text-center" style="width:440px;">
     {% if VENDOR.logo_filename %}
-    <div class="logo-icon logo-icon-img" style="margin:0 auto 14px; width:56px; height:56px;"><img src="{{ url_for('static', filename='uploads/' + VENDOR.logo_filename) }}" alt="{{ SITE_NAME }}"></div>
+    <div class="logo-icon logo-icon-img" style="margin:0 auto 14px; width:56px; height:56px;"><img src="{{ image_url(VENDOR.logo_filename) }}" alt="{{ SITE_NAME }}"></div>
     {% else %}
     <div class="logo-icon" style="margin:0 auto 14px; width:56px; height:56px;">{{ SITE_NAME[0]|upper }}</div>
     {% endif %}

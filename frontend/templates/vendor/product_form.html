@@ -56,7 +56,7 @@
       <label>Product Image (main photo)</label>
       <input type="file" name="image" accept="image/*">
       {% if product and product.image_filename != 'placeholder.png' %}
-      <div class="img-preview" style="margin-top:8px; height:90px; max-width:140px;"><img src="{{ url_for('static', filename='uploads/' + product.image_filename) }}"></div>
+      <div class="img-preview" style="margin-top:8px; height:90px; max-width:140px;"><img src="{{ image_url(product.image_filename) }}"></div>
       {% endif %}
     </div>
 
@@ -67,7 +67,7 @@
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
         {% for g in product.gallery_images %}
         <div style="position:relative;">
-          <div class="img-preview" style="width:80px; height:80px; margin-bottom:0;"><img src="{{ url_for('static', filename='uploads/' + g.image_filename) }}"></div>
+          <div class="img-preview" style="width:80px; height:80px; margin-bottom:0;"><img src="{{ image_url(g.image_filename) }}"></div>
           <form method="post" action="{{ url_for('vendor.delete_gallery_image', product_id=product.id, image_id=g.id) }}" style="position:absolute; top:-8px; right:-8px;">
             <button type="submit" title="Remove photo" style="background:#B23A48; color:#fff; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:.7rem;">✕</button>
           </form>

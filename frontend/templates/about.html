@@ -9,7 +9,7 @@
     <div class="hero-image" style="aspect-ratio:4/3;">
       {% set story_img = VENDOR.story_image_filename or VENDOR.cover_filename %}
       {% if story_img %}
-      <img src="{{ url_for('static', filename='uploads/' + story_img) }}" alt="{{ SITE_NAME }} — Our Story">
+      <img src="{{ image_url(story_img) }}" alt="{{ SITE_NAME }} — Our Story">
       {% else %}
       <img src="{{ url_for('static', filename='img/default_banner.jpg') }}" alt="{{ SITE_NAME }} — Our Story">
       {% endif %}
