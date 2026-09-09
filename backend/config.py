@@ -1,4 +1,6 @@
 import os
+import ssl as ssl_lib
+
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -9,22 +11,43 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "change-this-secret-key")
 
     # ---- MySQL connection (read from .env) ----
-    MYSQL_USER = os.environ.get("MYSQL_USER", "root")
-    MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "root")
+    # Defaults here match a fresh Aiven "defaultdb" MySQL service (Aiven
+    # doesn't use the standard port 3306 -- always double-check the actual
+    # port/host/db shown on your Aiven service's "Connection information"
+    # panel and put those exact values in .env / your host's env vars).
+    MYSQL_USER = os.environ.get("MYSQL_USER", "avnadmin")
+    MYSQL_PASSWORD = os.environ.get("MYSQL_PASSWORD", "")
     MYSQL_HOST = os.environ.get("MYSQL_HOST", "localhost")
     MYSQL_PORT = os.environ.get("MYSQL_PORT", "3306")
-    MYSQL_DB = os.environ.get("MYSQL_DB", "handmade_creations")
+    MYSQL_DB = os.environ.get("MYSQL_DB", "defaultdb")
+    # Aiven (and most managed MySQL hosts) require an SSL connection. Set
+    # MYSQL_SSL=0 in .env only for a plain local MySQL install that has no
+    # SSL configured (e.g. XAMPP/MySQL on your own PC).
+    MYSQL_SSL = os.environ.get("MYSQL_SSL", "1") == "1"
 
     # Set USE_SQLITE=1 in .env to run/demo instantly without installing MySQL.
+    # NOTE: never use USE_SQLITE=1 on Render (or any host with an ephemeral
+    # disk) -- the SQLite file gets wiped on every restart/redeploy, so all
+    # vendors/products/orders would vanish. Use real MySQL there instead.
     USE_SQLITE = os.environ.get("USE_SQLITE", "0") == "1"
 
     if USE_SQLITE:
         SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(BASE_DIR, "database", "dev.db")
+        SQLALCHEMY_ENGINE_OPTIONS = {}
     else:
         SQLALCHEMY_DATABASE_URI = (
             f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:"
             f"{MYSQL_PORT}/{MYSQL_DB}"
         )
+        if MYSQL_SSL:
+            # Enables TLS (required by Aiven) without needing to download
+            # and wire up their CA certificate file.
+            _ssl_context = ssl_lib.create_default_context()
+            _ssl_context.check_hostname = False
+            _ssl_context.verify_mode = ssl_lib.CERT_NONE
+            SQLALCHEMY_ENGINE_OPTIONS = {"connect_args": {"ssl": {"context": _ssl_context}}}
+        else:
+            SQLALCHEMY_ENGINE_OPTIONS = {}
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

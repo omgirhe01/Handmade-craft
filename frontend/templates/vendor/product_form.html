@@ -3,6 +3,71 @@
 {% block page_title %}{{ 'Edit Product' if product else 'Add Product' }}{% endblock %}
 {% block vendor_content %}
 
+{% if product and product.gallery_images %}
+<div class="panel" style="max-width:640px; margin-bottom:20px;">
+  <h4>Extra Gallery Photos</h4>
+  <p style="font-size:.78rem; color:var(--ink-600); margin-bottom:10px;">Click ✕ to remove a photo. This happens right away and doesn't need "Save Changes".</p>
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    {% for g in product.gallery_images %}
+    <div style="position:relative;">
+      <div class="img-preview" style="width:80px; height:80px; margin-bottom:0;"><img src="{{ image_url(g.image_filename) }}"></div>
+      <form method="post" action="{{ url_for('vendor.delete_gallery_image', product_id=product.id, image_id=g.id) }}" style="position:absolute; top:-8px; right:-8px; margin:0;" onsubmit="return confirm('Remove this photo?');">
+        <button type="submit" title="Remove photo" style="background:#B23A48; color:#fff; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:.7rem; line-height:1;">✕</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if product %}
+<div class="panel" style="max-width:640px; margin-bottom:20px;">
+  <h4>Size / Colour Options</h4>
+  <p style="font-size:.78rem; color:var(--ink-600); margin-bottom:12px;">
+    Add options like "Small - Red" at their own price. If you add at least one option, customers must pick one when ordering (the base price above is then only used as a fallback).
+  </p>
+
+  {% if product.variants %}
+  <div class="table-card" style="margin-bottom:14px;">
+    <table>
+      <thead><tr><th>Option</th><th>Price</th><th>Stock</th><th></th></tr></thead>
+      <tbody>
+        {% for v in product.variants %}
+        <tr>
+          <td>{{ v.label }}</td>
+          <td>₹{{ '%.0f'|format(v.price) }}</td>
+          <td>{{ v.stock_quantity }}</td>
+          <td>
+            <form method="post" action="{{ url_for('vendor.delete_variant', product_id=product.id, variant_id=v.id) }}" onsubmit="return confirm('Remove this option?');">
+              <button type="submit" class="btn btn-sm" style="background:#FBE6E9; color:#B23A48;">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('vendor.add_variant', product_id=product.id) }}" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+    <div class="form-group" style="flex:1; min-width:140px; margin:0;">
+      <label>Label</label>
+      <input type="text" name="variant_label" placeholder="e.g. Small - Red" required>
+    </div>
+    <div class="form-group" style="width:110px; margin:0;">
+      <label>Price (₹)</label>
+      <input type="number" step="0.01" name="variant_price" required>
+    </div>
+    <div class="form-group" style="width:90px; margin:0;">
+      <label>Stock</label>
+      <input type="number" name="variant_stock" value="10">
+    </div>
+    <button type="submit" class="btn btn-outline">+ Add Option</button>
+  </form>
+</div>
+{% endif %}
+
+
 <div class="panel" style="max-width:640px;">
   <form method="post" enctype="multipart/form-data">
     <div class="form-group">
@@ -60,31 +125,11 @@
       {% endif %}
     </div>
 
-    {% if product %}
     <div class="form-group">
-      <label>Extra Gallery Photos</label>
-      {% if product.gallery_images %}
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-        {% for g in product.gallery_images %}
-        <div style="position:relative;">
-          <div class="img-preview" style="width:80px; height:80px; margin-bottom:0;"><img src="{{ image_url(g.image_filename) }}"></div>
-          <form method="post" action="{{ url_for('vendor.delete_gallery_image', product_id=product.id, image_id=g.id) }}" style="position:absolute; top:-8px; right:-8px;">
-            <button type="submit" title="Remove photo" style="background:#B23A48; color:#fff; border:none; border-radius:50%; width:22px; height:22px; cursor:pointer; font-size:.7rem;">✕</button>
-          </form>
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
+      <label>{{ 'Add More Gallery Photos' if product else 'Extra Gallery Photos (optional)' }}</label>
       <input type="file" name="gallery_images" accept="image/*" multiple>
-      <span style="font-size:.78rem; color:var(--ink-600);">Add more photos to this product's gallery (you can select multiple files).</span>
+      <span style="font-size:.78rem; color:var(--ink-600);">You can select multiple photos at once (hold Ctrl/Cmd while picking files).</span>
     </div>
-    {% else %}
-    <div class="form-group">
-      <label>Extra Gallery Photos (optional)</label>
-      <input type="file" name="gallery_images" accept="image/*" multiple>
-      <span style="font-size:.78rem; color:var(--ink-600);">Select multiple files to add extra photos alongside the main image.</span>
-    </div>
-    {% endif %}
 
     <div class="form-row">
       <div class="form-group" style="flex-direction:row; align-items:center; gap:10px;">
@@ -100,7 +145,7 @@
     <div class="form-group">
       <label>Stock Quantity</label>
       <input type="number" name="stock_quantity" min="0" value="{{ product.stock_quantity if product and product.stock_quantity is not none else 10 }}">
-      <span style="font-size:.78rem; color:var(--ink-600);">You'll get a low-stock alert on your dashboard when this drops to {{ 3 }} or below.</span>
+      <span style="font-size:.78rem; color:var(--ink-600);">You'll get a low-stock alert on your dashboard when this drops to 3 or below.</span>
     </div>
 
     <div style="display:flex; gap:12px; margin-top:10px;">

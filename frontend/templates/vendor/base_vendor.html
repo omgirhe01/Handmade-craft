@@ -51,7 +51,7 @@
 
     {% for n in current_user.notifications if not n.is_read %}
     <div class="alert alert-info" style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
-      <span>{{ icon('mail', 16) }} <strong>Message from admin:</strong> {{ n.message }}</span>
+      <span>📢 <strong>Message from admin:</strong> {{ n.message }}</span>
       <form method="post" action="{{ url_for('vendor.mark_notification_read', notification_id=n.id) }}" style="flex-shrink:0;">
         <button type="submit" class="btn btn-outline btn-sm">Dismiss</button>
       </form>

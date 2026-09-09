@@ -14,6 +14,7 @@ from backend.models import (
     Order,
     Product,
     ProductImage,
+    ProductVariant,
     Review,
     Testimonial,
     Vendor,
@@ -34,30 +35,15 @@ def _my_categories():
 
 @vendor_bp.route("/login", methods=["GET", "POST"])
 def login():
-    if current_user.is_authenticated and isinstance(current_user, Vendor):
-        return redirect(url_for("vendor.dashboard"))
-
-    if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
-        acc = Vendor.query.filter_by(email=email).first()
-
-        if acc and acc.check_password(password):
-            if not acc.is_active:
-                flash("Your account has been deactivated. Please contact the admin.", "danger")
-                return render_template("vendor/login.html")
-            login_user(acc)
-            return redirect(url_for("vendor.dashboard"))
-        flash("Invalid email or password.", "danger")
-
-    return render_template("vendor/login.html")
+    # Admin and Vendor now share one login page.
+    return redirect(url_for("landing.login"))
 
 
 @vendor_bp.route("/logout")
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for("vendor.login"))
+    return redirect(url_for("landing.login"))
 
 
 # ----------------------------------------------------------- dashboard ----
@@ -90,6 +76,17 @@ def dashboard():
     ]
     store_url = url_for("public.home", slug=current_user.slug, _external=True)
 
+    total_categories = Category.query.filter_by(vendor_id=current_user.id).count()
+    onboarding_steps = [
+        {"label": "Add at least one category", "done": total_categories > 0, "link": url_for("vendor.categories")},
+        {"label": "Add your first product", "done": total_products > 0, "link": url_for("vendor.products")},
+        {"label": "Add your logo and cover photo", "done": bool(current_user.logo_filename or current_user.cover_filename), "link": url_for("vendor.settings")},
+        {"label": "Write your story / about text", "done": bool(current_user.story or current_user.about_text), "link": url_for("vendor.settings")},
+        {"label": "Add your contact number", "done": bool(current_user.phone_number or current_user.whatsapp_number), "link": url_for("vendor.settings")},
+        {"label": "Share your store link", "done": total_orders > 0, "link": None},
+    ]
+    onboarding_complete = all(s["done"] for s in onboarding_steps)
+
     return render_template(
         "vendor/dashboard.html",
         total_products=total_products,
@@ -99,6 +96,8 @@ def dashboard():
         recent_orders=recent_orders,
         low_stock_products=low_stock_products,
         store_url=store_url,
+        onboarding_steps=onboarding_steps,
+        onboarding_complete=onboarding_complete,
     )
 
 
@@ -293,6 +292,45 @@ def delete_gallery_image(product_id, image_id):
     return redirect(url_for("vendor.edit_product", product_id=product.id))
 
 
+@vendor_bp.route("/products/<int:product_id>/variants/add", methods=["POST"])
+@vendor_required
+def add_variant(product_id):
+    product = Product.query.filter_by(id=product_id, vendor_id=current_user.id).first_or_404()
+    label = request.form.get("variant_label", "").strip()
+    price = request.form.get("variant_price", "").strip()
+    stock = request.form.get("variant_stock", "10").strip()
+
+    if not label or not price:
+        flash("Please enter both a label and price for the option.", "danger")
+        return redirect(url_for("vendor.edit_product", product_id=product.id))
+
+    try:
+        price_val = float(price)
+        stock_val = int(stock or 10)
+    except ValueError:
+        flash("Price and stock must be numbers.", "danger")
+        return redirect(url_for("vendor.edit_product", product_id=product.id))
+
+    position = len(product.variants)
+    db.session.add(
+        ProductVariant(product_id=product.id, label=label, price=price_val, stock_quantity=stock_val, position=position)
+    )
+    db.session.commit()
+    flash("Option added.", "success")
+    return redirect(url_for("vendor.edit_product", product_id=product.id))
+
+
+@vendor_bp.route("/products/<int:product_id>/variants/delete/<int:variant_id>", methods=["POST"])
+@vendor_required
+def delete_variant(product_id, variant_id):
+    product = Product.query.filter_by(id=product_id, vendor_id=current_user.id).first_or_404()
+    variant = ProductVariant.query.filter_by(id=variant_id, product_id=product.id).first_or_404()
+    db.session.delete(variant)
+    db.session.commit()
+    flash("Option removed.", "info")
+    return redirect(url_for("vendor.edit_product", product_id=product.id))
+
+
 @vendor_bp.route("/products/bulk-upload", methods=["GET", "POST"])
 @vendor_required
 def bulk_upload_products():
@@ -444,6 +482,22 @@ def settings():
         current_user.meta_description = request.form.get("meta_description", "").strip()
         current_user.is_maintenance = request.form.get("is_maintenance") == "on"
 
+        try:
+            current_user.delivery_charge = float(request.form.get("delivery_charge") or 0)
+        except ValueError:
+            current_user.delivery_charge = 0
+
+        custom_domain = request.form.get("custom_domain", "").strip().lower()
+        custom_domain = custom_domain.replace("https://", "").replace("http://", "").rstrip("/")
+        if custom_domain:
+            existing = Vendor.query.filter_by(custom_domain=custom_domain).first()
+            if existing and existing.id != current_user.id:
+                flash("That custom domain is already connected to another store.", "danger")
+                return redirect(url_for("vendor.settings"))
+            current_user.custom_domain = custom_domain
+        else:
+            current_user.custom_domain = None
+
         logo = request.files.get("logo")
         if logo and logo.filename and allowed_file(logo.filename):
             current_user.logo_filename = save_vendor_upload(logo, current_user.slug)
@@ -456,6 +510,10 @@ def settings():
         if story_image and story_image.filename and allowed_file(story_image.filename):
             current_user.story_image_filename = save_vendor_upload(story_image, current_user.slug)
 
+        upi_qr = request.files.get("upi_qr")
+        if upi_qr and upi_qr.filename and allowed_file(upi_qr.filename):
+            current_user.upi_qr_filename = save_vendor_upload(upi_qr, current_user.slug)
+
         new_password = request.form.get("new_password", "")
         if new_password:
             current_user.set_password(new_password)
@@ -466,6 +524,24 @@ def settings():
 
     store_url = url_for("public.home", slug=current_user.slug, _external=True)
     return render_template("vendor/site_settings.html", store_url=store_url)
+
+
+@vendor_bp.route("/store-qr.png")
+@vendor_required
+def store_qr_code():
+    import io
+
+    import qrcode
+
+    store_url = url_for("public.home", slug=current_user.slug, _external=True)
+    img = qrcode.make(store_url, box_size=10, border=2)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return send_file(
+        buf, mimetype="image/png", as_attachment=True,
+        download_name=f"{current_user.slug}-store-qr.png",
+    )
 
 
 # ----------------------------------------------------------- testimonials ----
@@ -711,3 +787,62 @@ def mark_notification_read(notification_id):
     notif.is_read = True
     db.session.commit()
     return redirect(request.referrer or url_for("vendor.dashboard"))
+
+
+# ------------------------------------------------------------- CSV export ----
+
+@vendor_bp.route("/export/products.csv")
+@vendor_required
+def export_products_csv():
+    import csv as csv_module
+    from flask import Response
+
+    products = Product.query.filter_by(vendor_id=current_user.id).order_by(Product.name).all()
+
+    output = io.StringIO()
+    writer = csv_module.writer(output)
+    writer.writerow(["Name", "Category", "Price", "Stock", "In Stock", "Featured", "Description"])
+    for p in products:
+        writer.writerow([
+            p.name, p.category.name, p.price,
+            p.stock_quantity if p.stock_quantity is not None else "",
+            "Yes" if p.in_stock else "No",
+            "Yes" if p.is_featured else "No",
+            p.description,
+        ])
+
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={current_user.slug}-products.csv"},
+    )
+
+
+@vendor_bp.route("/export/orders.csv")
+@vendor_required
+def export_orders_csv():
+    import csv as csv_module
+    from flask import Response
+
+    orders = (
+        Order.query.filter_by(vendor_id=current_user.id).order_by(Order.created_at.desc()).all()
+    )
+
+    output = io.StringIO()
+    writer = csv_module.writer(output)
+    writer.writerow([
+        "Order ID", "Date", "Customer", "Phone", "Product", "Variant", "Qty",
+        "Coupon", "Discount", "Delivery Charge", "Total", "Status", "Address",
+    ])
+    for o in orders:
+        writer.writerow([
+            o.order_code, o.created_at.strftime("%Y-%m-%d %H:%M"), o.customer_name, o.phone,
+            o.product.name, o.variant_label, o.quantity, o.coupon_code,
+            o.discount_amount, o.delivery_charge, o.total_price, o.status, o.address,
+        ])
+
+    return Response(
+        output.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={current_user.slug}-orders.csv"},
+    )

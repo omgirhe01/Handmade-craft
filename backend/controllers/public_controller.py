@@ -20,10 +20,12 @@ from backend.models import (
     CustomOrder,
     Order,
     Product,
+    ProductVariant,
     Review,
     Testimonial,
     Vendor,
 )
+from backend.utils.helpers import image_url
 from backend.utils.invoice import generate_custom_order_invoice_pdf, generate_order_invoice_pdf
 
 # url_prefix="/store/<string:slug>" is set when this blueprint is registered
@@ -133,16 +135,49 @@ def products():
 @public_bp.route("/products/<int:product_id>")
 def product_detail(product_id):
     product = Product.query.filter_by(id=product_id, vendor_id=g.vendor.id).first_or_404()
-    related = (
-        Product.query.filter(
-            Product.category_id == product.category_id,
-            Product.id != product.id,
-            Product.vendor_id == g.vendor.id,
+
+    # "Frequently bought together": look at other customers who ordered this
+    # product and see what else they ordered. Falls back to same-category
+    # products when there isn't enough order history yet (e.g. a new store).
+    co_purchased_ids = (
+        db.session.query(Order.product_id)
+        .filter(
+            Order.vendor_id == g.vendor.id,
+            Order.product_id != product.id,
+            Order.phone.in_(
+                db.session.query(Order.phone).filter(
+                    Order.vendor_id == g.vendor.id, Order.product_id == product.id
+                )
+            ),
         )
+        .distinct()
         .limit(4)
         .all()
     )
-    return render_template("product_detail.html", product=product, related=related)
+    co_purchased_ids = [row[0] for row in co_purchased_ids]
+
+    related = []
+    if co_purchased_ids:
+        related = Product.query.filter(
+            Product.id.in_(co_purchased_ids), Product.vendor_id == g.vendor.id
+        ).all()
+
+    if len(related) < 4:
+        exclude_ids = [product.id] + [p.id for p in related]
+        fallback = (
+            Product.query.filter(
+                Product.category_id == product.category_id,
+                Product.id.notin_(exclude_ids),
+                Product.vendor_id == g.vendor.id,
+            )
+            .limit(4 - len(related))
+            .all()
+        )
+        related = related + fallback
+
+    return render_template(
+        "product_detail.html", product=product, related=related, has_copurchase=bool(co_purchased_ids)
+    )
 
 
 @public_bp.route("/coupon/check/<int:product_id>", methods=["POST"])
@@ -151,12 +186,20 @@ def check_coupon(product_id):
     coupon code live and returns the discount, without placing an order."""
     product = Product.query.filter_by(id=product_id, vendor_id=g.vendor.id).first_or_404()
     code = (request.form.get("coupon_code") or "").strip().upper()
+    variant_id = request.form.get("variant_id", "").strip()
     try:
         quantity = max(1, int(request.form.get("quantity", 1)))
     except ValueError:
         quantity = 1
 
-    subtotal = float(product.price) * quantity
+    unit_price = float(product.price)
+    if variant_id:
+        variant = ProductVariant.query.filter_by(id=int(variant_id), product_id=product.id).first()
+        if variant:
+            unit_price = float(variant.price)
+
+    subtotal = unit_price * quantity
+    delivery_charge = float(g.vendor.delivery_charge or 0)
 
     if not code:
         return jsonify({"valid": False, "message": "Enter a coupon code first."})
@@ -166,13 +209,14 @@ def check_coupon(product_id):
         return jsonify({"valid": False, "message": "This coupon code is not valid."})
 
     discount_amount = round(subtotal * coupon.discount_percent / 100, 2)
-    final_total = round(subtotal - discount_amount, 2)
+    final_total = round(subtotal - discount_amount + delivery_charge, 2)
 
     return jsonify({
         "valid": True,
         "discount_percent": coupon.discount_percent,
         "subtotal": subtotal,
         "discount_amount": discount_amount,
+        "delivery_charge": delivery_charge,
         "final_total": final_total,
         "message": f"Coupon applied! {coupon.discount_percent}% off.",
     })
@@ -187,6 +231,7 @@ def place_order(product_id):
         phone = request.form.get("phone", "").strip()
         address = request.form.get("address", "").strip()
         coupon_input = request.form.get("coupon_code", "").strip()
+        variant_id = request.form.get("variant_id", "").strip()
         try:
             quantity = max(1, int(request.form.get("quantity", 1)))
         except ValueError:
@@ -196,8 +241,18 @@ def place_order(product_id):
             flash("Please enter your name and mobile number.", "danger")
             return render_template("order_form.html", product=product)
 
-        subtotal = product.price * quantity
-        discount_amount = 0
+        variant = None
+        unit_price = float(product.price)
+        if variant_id:
+            variant = ProductVariant.query.filter_by(id=int(variant_id), product_id=product.id).first()
+            if variant:
+                unit_price = float(variant.price)
+        elif product.variants:
+            flash("Please choose an option before ordering.", "danger")
+            return render_template("order_form.html", product=product)
+
+        subtotal = unit_price * quantity
+        discount_amount = 0.0
         applied_coupon = ""
 
         if coupon_input:
@@ -210,20 +265,27 @@ def place_order(product_id):
                 flash("That coupon code is invalid or has expired.", "danger")
                 return render_template("order_form.html", product=product)
 
+        delivery_charge = float(g.vendor.delivery_charge or 0)
+
         order = Order(
             vendor_id=g.vendor.id,
             product_id=product.id,
+            variant_id=variant.id if variant else None,
+            variant_label=variant.label if variant else "",
             customer_name=customer_name,
             phone=phone,
             address=address,
             quantity=quantity,
             coupon_code=applied_coupon,
             discount_amount=discount_amount,
-            total_price=subtotal - discount_amount,
+            delivery_charge=delivery_charge,
+            total_price=subtotal - discount_amount + delivery_charge,
         )
         db.session.add(order)
 
-        if product.stock_quantity is not None:
+        if variant:
+            variant.stock_quantity = max(0, (variant.stock_quantity or 0) - quantity)
+        elif product.stock_quantity is not None:
             product.stock_quantity = max(0, product.stock_quantity - quantity)
             if product.stock_quantity == 0:
                 product.in_stock = False
@@ -300,6 +362,47 @@ def my_orders():
         searched=searched,
         remembered_phone=phone,
     )
+
+
+@public_bp.route("/order/<int:order_id>/cancel", methods=["POST"])
+def cancel_order(order_id):
+    order = Order.query.filter_by(id=order_id, vendor_id=g.vendor.id).first_or_404()
+    session_phone = session.get(f"phone_{g.vendor.id}", "")
+
+    # Only the customer who placed it (matched via their remembered phone
+    # number) can cancel it, and only while it's still Pending.
+    if order.phone != session_phone:
+        flash("We couldn't verify this order belongs to you.", "danger")
+    elif order.status != "Pending":
+        flash("This order can no longer be cancelled -- it's already being processed.", "danger")
+    else:
+        order.status = "Cancelled"
+        if order.variant:
+            order.variant.stock_quantity = (order.variant.stock_quantity or 0) + order.quantity
+        elif order.product.stock_quantity is not None:
+            order.product.stock_quantity += order.quantity
+            order.product.in_stock = True
+        db.session.commit()
+        flash(f"Order #{order.order_code} has been cancelled.", "info")
+
+    return redirect(url_for("public.my_orders"))
+
+
+@public_bp.route("/custom-order/<int:order_id>/cancel", methods=["POST"])
+def cancel_custom_order(order_id):
+    custom = CustomOrder.query.filter_by(id=order_id, vendor_id=g.vendor.id).first_or_404()
+    session_phone = session.get(f"phone_{g.vendor.id}", "")
+
+    if custom.mobile != session_phone:
+        flash("We couldn't verify this order belongs to you.", "danger")
+    elif custom.status != "Pending":
+        flash("This order can no longer be cancelled -- it's already being processed.", "danger")
+    else:
+        custom.status = "Cancelled"
+        db.session.commit()
+        flash(f"Custom order #{custom.order_code} has been cancelled.", "info")
+
+    return redirect(url_for("public.my_orders"))
 
 
 @public_bp.route("/order/<int:order_id>/invoice")
@@ -382,6 +485,48 @@ def contact():
     return render_template("contact.html")
 
 
+@public_bp.route("/set-language/<lang>")
+def set_language(lang):
+    if lang in ("en", "hi"):
+        session["lang"] = lang
+    return redirect(request.referrer or url_for("public.home"))
+
+
 @public_bp.route("/about")
 def about():
     return render_template("about.html")
+
+
+@public_bp.route("/wishlist")
+def wishlist():
+    return render_template("wishlist.html")
+
+
+@public_bp.route("/api/products-by-ids")
+def products_by_ids():
+    ids_param = request.args.get("ids", "")
+    try:
+        ids = [int(x) for x in ids_param.split(",") if x.strip().isdigit()]
+    except ValueError:
+        ids = []
+
+    if not ids:
+        return jsonify({"products": []})
+
+    products = Product.query.filter(
+        Product.id.in_(ids), Product.vendor_id == g.vendor.id
+    ).all()
+
+    return jsonify({
+        "products": [
+            {
+                "id": p.id,
+                "name": p.name,
+                "price": float(p.price),
+                "image_url": image_url(p.image_filename),
+                "in_stock": p.in_stock,
+                "url": url_for("public.product_detail", product_id=p.id),
+            }
+            for p in products
+        ]
+    })

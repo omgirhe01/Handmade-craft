@@ -42,6 +42,10 @@ class Vendor(UserMixin, db.Model):
     logo_filename = db.Column(db.String(255), default="")
     cover_filename = db.Column(db.String(255), default="")
     story_image_filename = db.Column(db.String(255), default="")
+    upi_qr_filename = db.Column(db.String(255), default="")
+
+    delivery_charge = db.Column(db.Numeric(10, 2), default=0)
+    custom_domain = db.Column(db.String(255), unique=True, nullable=True)
 
     # Store personalisation
     theme_color = db.Column(db.String(10), default="#5E1836")

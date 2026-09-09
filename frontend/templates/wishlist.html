@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}My Wishlist — {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<section class="section container" style="padding-top:8px;">
+  <h2>My Wishlist</h2>
+  <p style="color:var(--ink-600); margin-top:-10px; margin-bottom:26px;">Home / Wishlist</p>
+
+  <div id="wishlistEmpty" class="empty-state" style="display:none;">
+    <div class="icon">{{ icon('heart', 26) }}</div>
+    <p>Your wishlist is empty. Tap the heart on any product to save it here.</p>
+    <a href="{{ url_for('public.products') }}" class="btn btn-primary" style="margin-top:14px;">Browse Products</a>
+  </div>
+
+  <div id="wishlistGrid" class="grid-products"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  function removeWishlistCard(btn) {
+    toggleWishlist(btn);
+    var card = btn.closest('.product-card');
+    if (card) { card.remove(); }
+    var remaining = document.querySelectorAll('#wishlistGrid .product-card').length;
+    if (remaining === 0) { document.getElementById('wishlistEmpty').style.display = 'block'; }
+  }
+  window.removeWishlistCard = removeWishlistCard;
+
+  var list = getWishlist();
+  var gridEl = document.getElementById('wishlistGrid');
+  var emptyEl = document.getElementById('wishlistEmpty');
+
+  if (list.length === 0) {
+    emptyEl.style.display = 'block';
+    return;
+  }
+
+  fetch("{{ url_for('public.products_by_ids') }}?ids=" + list.join(','))
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      var products = data.products || [];
+      if (products.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+      }
+      products.forEach(function (p) {
+        var card = document.createElement('div');
+        card.className = 'product-card';
+        card.style.cursor = 'pointer';
+        card.onclick = function () { location.href = p.url; };
+
+        var thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        thumb.style.position = 'relative';
+
+        var img = document.createElement('img');
+        img.src = p.image_url;
+        img.alt = p.name;
+        thumb.appendChild(img);
+
+        var heartBtn = document.createElement('button');
+        heartBtn.type = 'button';
+        heartBtn.className = 'wishlist-btn active';
+        heartBtn.setAttribute('data-product-id', p.id);
+        heartBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>';
+        heartBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          removeWishlistCard(heartBtn);
+        });
+        thumb.appendChild(heartBtn);
+
+        var body = document.createElement('div');
+        body.className = 'body';
+        var h4 = document.createElement('h4');
+        h4.textContent = p.name;
+        var priceDiv = document.createElement('div');
+        priceDiv.className = 'price';
+        priceDiv.textContent = '₹' + p.price.toFixed(0);
+        body.appendChild(h4);
+        body.appendChild(priceDiv);
+        if (!p.in_stock) {
+          var stockSpan = document.createElement('span');
+          stockSpan.className = 'stock-out';
+          stockSpan.textContent = 'Out of Stock';
+          body.appendChild(stockSpan);
+        }
+
+        card.appendChild(thumb);
+        card.appendChild(body);
+        gridEl.appendChild(card);
+      });
+    });
+})();
+</script>
+{% endblock %}

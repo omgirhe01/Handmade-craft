@@ -16,11 +16,11 @@
         <td>{{ c.size }}</td>
         <td>{{ c.quantity }}</td>
         <td>{{ c.required_date }}</td>
-        <td>{{ c.mobile }}</td>
+        <td class="phone-text">{{ c.mobile }}</td>
         <td>
           <form method="post" action="{{ url_for('vendor.update_custom_order_status', order_id=c.id) }}">
             <select name="status" onchange="this.form.submit()" class="form-control" style="padding:6px 10px; font-size:.8rem;">
-              {% for s in ['Pending','Confirmed','Preparing','Completed'] %}
+              {% for s in ['Pending','Confirmed','Preparing','Completed','Cancelled'] %}
               <option value="{{ s }}" {{ 'selected' if c.status==s }}>{{ s }}</option>
               {% endfor %}
             </select>

@@ -11,7 +11,7 @@
       <tr>
         <td>{{ m.name }}</td>
         <td>{{ m.email or '—' }}</td>
-        <td>{{ m.phone or '—' }}</td>
+        <td class="phone-text">{{ m.phone or '—' }}</td>
         <td style="max-width:340px;">{{ m.message }}</td>
         <td>{{ m.created_at.strftime('%d %b %Y') }}</td>
       </tr>

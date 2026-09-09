@@ -13,7 +13,7 @@ def admin_required(f):
     def wrapped(*args, **kwargs):
         if not current_user.is_authenticated or not isinstance(current_user, Admin):
             flash("Please log in to access the admin dashboard.", "warning")
-            return redirect(url_for("admin.login"))
+            return redirect(url_for("landing.login"))
         return f(*args, **kwargs)
 
     return wrapped
@@ -26,7 +26,7 @@ def vendor_required(f):
     def wrapped(*args, **kwargs):
         if not current_user.is_authenticated or not isinstance(current_user, Vendor):
             flash("Please log in to access your dashboard.", "warning")
-            return redirect(url_for("vendor.login"))
+            return redirect(url_for("landing.login"))
         return f(*args, **kwargs)
 
     return wrapped

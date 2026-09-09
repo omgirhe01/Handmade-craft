@@ -1,0 +1,298 @@
+{
+  "admins": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password_hash": "scrypt:32768:8:1$c30VbigwaBEpH4fR$ea4f0d21cec4e7136f1b4d42b40a61504bf403a23087b17afe18d1f4fa8c0c849e74b4e639d4afbba0557624d20729d56e45eaffaabdff2582042b04a8c0a16e"
+    }
+  ],
+  "vendors": [
+    {
+      "id": 1,
+      "email": "kaku@example.com",
+      "password_hash": "scrypt:32768:8:1$NzeVRcnEU25EO8u3$2bccabbf1cd65bacf9fbe22a3d3b7e558f79cdd25b926edd7d8ed010cf87fe3f9571d84a995c716008b01d73abe9a1fa61de58dde5f8aafa0c4ba6113be0860a",
+      "owner_name": "Kaku",
+      "business_name": "Kaku's Woolen Decor",
+      "slug": "kakus-woolen-decor",
+      "tagline": "Handmade with Love",
+      "story": "It all started as a hobby making woolen toran for our own home during festivals -- friends and family loved them so much that it slowly turned into a small handmade business.",
+      "about_text": "Kaku's Woolen Decor is a small home-based handmade business. We create beautiful decoration items with creativity, patience and love.",
+      "phone_number": "+91 98765 43210",
+      "whatsapp_number": "919876543210",
+      "contact_email": "kakuswoolendecor@gmail.com",
+      "address": "Akola, Maharashtra, India",
+      "instagram_url": "",
+      "facebook_url": "",
+      "logo_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788785850/handmade-craft-decor/kakus-woolen-decor/4dbe153fc05e41878434fc489ffd94b1.jpg",
+      "cover_filename": "",
+      "story_image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788785851/handmade-craft-decor/kakus-woolen-decor/c189e6a833d74cf3bbc841498dda6e4a.jpg",
+      "theme_color": "#ee4444",
+      "announcement_text": "\ud83c\udf89 Festive Season Sale \u2014 Order now for on-time Diwali delivery!",
+      "meta_description": "",
+      "is_active": true,
+      "is_maintenance": false,
+      "created_at": "2026-09-07T05:12:00"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "vendor_id": 1,
+      "name": "Toran",
+      "slug": "toran"
+    },
+    {
+      "id": 2,
+      "vendor_id": 1,
+      "name": "Flower Decor",
+      "slug": "flower-decor"
+    },
+    {
+      "id": 3,
+      "vendor_id": 1,
+      "name": "Wall Decoration",
+      "slug": "wall-decoration"
+    },
+    {
+      "id": 4,
+      "vendor_id": 1,
+      "name": "Festival Decoration",
+      "slug": "festival-decoration"
+    },
+    {
+      "id": 5,
+      "vendor_id": 1,
+      "name": "Custom Decoration",
+      "slug": "custom-decoration"
+    }
+  ],
+  "contact_messages": [],
+  "coupons": [
+    {
+      "id": 1,
+      "vendor_id": 1,
+      "code": "WELCOME10",
+      "discount_percent": 10,
+      "is_active": true,
+      "usage_limit": 0,
+      "times_used": 1,
+      "expires_on": null,
+      "created_at": "2026-09-07T05:12:01"
+    }
+  ],
+  "custom_orders": [],
+  "testimonials": [
+    {
+      "id": 1,
+      "vendor_id": 1,
+      "customer_name": "Priya Sharma",
+      "message": "Absolutely loved the toran! Exactly what I wanted for Diwali, great quality.",
+      "rating": 5,
+      "created_at": "2026-09-07T05:12:01"
+    },
+    {
+      "id": 2,
+      "vendor_id": 1,
+      "customer_name": "Ankit Verma",
+      "message": "Fast delivery and beautiful handmade work. Will order again.",
+      "rating": 5,
+      "created_at": "2026-09-07T05:12:01"
+    },
+    {
+      "id": 3,
+      "vendor_id": 1,
+      "customer_name": "Neha Joshi",
+      "message": "The wall hanging looks even better in person. Highly recommend!",
+      "rating": 4,
+      "created_at": "2026-09-07T05:12:01"
+    }
+  ],
+  "vendor_notifications": [],
+  "products": [
+    {
+      "id": 1,
+      "vendor_id": 1,
+      "name": "Toran (Traditional)",
+      "category_id": 1,
+      "price": 450.0,
+      "description": "Beautiful handmade toran for doors and walls. Perfect for festivals, home decoration and gifting.",
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788786069/handmade-craft-decor/kakus-woolen-decor/dcf52b19081d4865a6f597adae5551ef.jpg",
+      "material": "Premium Quality Wool",
+      "size": "Approx 36 inch",
+      "colours": "Red, Green, White, Maroon",
+      "care": "Dry Clean Only",
+      "in_stock": true,
+      "is_featured": true,
+      "stock_quantity": 12,
+      "created_at": "2026-09-07T05:12:00"
+    },
+    {
+      "id": 2,
+      "vendor_id": 1,
+      "name": "Flower Bouquet",
+      "category_id": 2,
+      "price": 350.0,
+      "description": "A charming bouquet of handmade flowers, perfect as a gift or a centrepiece for your living room.",
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788786099/handmade-craft-decor/kakus-woolen-decor/951e7cba818240f3bd05a0c24ecd2fe3.jpg",
+      "material": "Premium Quality Wool",
+      "size": "Approx 12 inch",
+      "colours": "Red, Pink, White",
+      "care": "Dry Clean Only",
+      "in_stock": true,
+      "is_featured": true,
+      "stock_quantity": 2,
+      "created_at": "2026-09-07T05:12:00"
+    },
+    {
+      "id": 3,
+      "vendor_id": 1,
+      "name": "Wall Hanging",
+      "category_id": 3,
+      "price": 400.0,
+      "description": "A decorative wall hanging that adds warmth and colour to any wall.",
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788786122/handmade-craft-decor/kakus-woolen-decor/20e78491162d4ee795983ef8378ff333.jpg",
+      "material": "Premium Quality Wool",
+      "size": "Approx 18 inch",
+      "colours": "Multicolour",
+      "care": "Dry Clean Only",
+      "in_stock": true,
+      "is_featured": false,
+      "stock_quantity": 8,
+      "created_at": "2026-09-07T05:12:00"
+    },
+    {
+      "id": 4,
+      "vendor_id": 1,
+      "name": "Flower Pot",
+      "category_id": 2,
+      "price": 300.0,
+      "description": "A cheerful flower arrangement in a decorative pot, made entirely by hand.",
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788785921/handmade-craft-decor/kakus-woolen-decor/9583fdf60699418dbf04b04dfedf7c49.jpg",
+      "material": "Premium Quality Wool",
+      "size": "Approx 10 inch",
+      "colours": "Red, Green, Yellow",
+      "care": "Dry Clean Only",
+      "in_stock": false,
+      "is_featured": false,
+      "stock_quantity": 0,
+      "created_at": "2026-09-07T05:12:01"
+    },
+    {
+      "id": 5,
+      "vendor_id": 1,
+      "name": "Diwali Door Hanging",
+      "category_id": 4,
+      "price": 500.0,
+      "description": "Festive door hanging designed especially for Diwali celebrations.",
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788785945/handmade-craft-decor/kakus-woolen-decor/1d21c9a90a9e4619887c28172015fad8.jpg",
+      "material": "Premium Quality Wool",
+      "size": "Approx 24 inch",
+      "colours": "Red, Gold, Green",
+      "care": "Dry Clean Only",
+      "in_stock": true,
+      "is_featured": true,
+      "stock_quantity": 6,
+      "created_at": "2026-09-07T05:12:01"
+    },
+    {
+      "id": 6,
+      "vendor_id": 1,
+      "name": "Lotus Wall Decor",
+      "category_id": 3,
+      "price": 450.0,
+      "description": "An elegant lotus-inspired wall piece, handcrafted with fine detailing.",
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788786005/handmade-craft-decor/kakus-woolen-decor/f7e22dbd98cc45a19202307b265af402.jpg",
+      "material": "Premium Quality Wool",
+      "size": "Approx 14 inch",
+      "colours": "Pink, White, Green",
+      "care": "Dry Clean Only",
+      "in_stock": true,
+      "is_featured": false,
+      "stock_quantity": 9,
+      "created_at": "2026-09-07T05:12:01"
+    },
+    {
+      "id": 7,
+      "vendor_id": 1,
+      "name": "Pom Pom Hanging Decor",
+      "category_id": 4,
+      "price": 350.0,
+      "description": "Colourful pom-pom hanging decor, perfect for festive and everyday decoration.",
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788786044/handmade-craft-decor/kakus-woolen-decor/f3ddf8a790c44020b1243f5860eac39e.jpg",
+      "material": "Premium Quality Wool",
+      "size": "Approx 20 inch",
+      "colours": "Multicolour",
+      "care": "Dry Clean Only",
+      "in_stock": false,
+      "is_featured": false,
+      "stock_quantity": 0,
+      "created_at": "2026-09-07T05:12:01"
+    }
+  ],
+  "product_images": [
+    {
+      "id": 1,
+      "product_id": 4,
+      "image_filename": "kakus-woolen-decor/c9e06f07e4034bb0b52e058b002e28ff.jpg",
+      "position": 0
+    },
+    {
+      "id": 4,
+      "product_id": 7,
+      "image_filename": "kakus-woolen-decor/7db4a7d1d8e74044823c982fae81b3bc.jpg",
+      "position": 0
+    },
+    {
+      "id": 5,
+      "product_id": 4,
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788785924/handmade-craft-decor/kakus-woolen-decor/1466d1e72f734e10b5b18dacae768ea0.jpg",
+      "position": 1
+    },
+    {
+      "id": 6,
+      "product_id": 4,
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788785924/handmade-craft-decor/kakus-woolen-decor/9eed0b41a0d24f7cb708f7e98efe95a0.jpg",
+      "position": 2
+    },
+    {
+      "id": 7,
+      "product_id": 7,
+      "image_filename": "https://res.cloudinary.com/dxobbsydc/image/upload/v1788786048/handmade-craft-decor/kakus-woolen-decor/4b4c211e4204499fa5fb485b197b3e04.jpg",
+      "position": 1
+    }
+  ],
+  "product_variants": [],
+  "orders": [
+    {
+      "id": 1,
+      "vendor_id": 1,
+      "order_code": "ORD5193",
+      "product_id": 4,
+      "customer_name": "om",
+      "phone": "9999999999",
+      "address": "akola",
+      "quantity": 1,
+      "coupon_code": "WELCOME10",
+      "discount_amount": 30.0,
+      "total_price": 270.0,
+      "status": "Confirmed",
+      "created_at": "2026-09-07T05:16:05"
+    },
+    {
+      "id": 2,
+      "vendor_id": 1,
+      "order_code": "ORD1115",
+      "product_id": 6,
+      "customer_name": "abc",
+      "phone": "9999999998",
+      "address": "akola",
+      "quantity": 1,
+      "coupon_code": "",
+      "discount_amount": 0.0,
+      "total_price": 450.0,
+      "status": "Pending",
+      "created_at": "2026-09-07T05:19:09"
+    }
+  ],
+  "reviews": []
+}

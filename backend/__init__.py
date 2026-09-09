@@ -55,6 +55,14 @@ def create_app():
     from backend.utils.helpers import image_url
     app.jinja_env.globals["image_url"] = image_url
 
+    from backend.utils.translations import translate
+    from flask import session as flask_session
+
+    def t(text):
+        return translate(text, flask_session.get("lang", "en"))
+
+    app.jinja_env.globals["t"] = t
+
     @app.errorhandler(413)
     def file_too_large(e):
         from flask import flash, redirect, request
@@ -62,4 +70,35 @@ def create_app():
         flash("Those files are too large to upload together. Please try fewer or smaller photos.", "danger")
         return redirect(request.referrer or "/"), 302
 
+    app.wsgi_app = CustomDomainMiddleware(app.wsgi_app, app)
+
     return app
+
+
+class CustomDomainMiddleware:
+    """If a request's Host header matches a vendor's custom_domain, silently
+    rewrite the path to /store/<slug>/... before Flask's router ever sees
+    it -- so visitors on their own domain see their store at "/" instead of
+    needing the /store/<slug> path. Runs at the WSGI layer (before routing),
+    since Flask has already matched the URL rule by the time any
+    before_request hook would run.
+    """
+
+    def __init__(self, wsgi_app, app):
+        self.wsgi_app = wsgi_app
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        host = environ.get("HTTP_HOST", "").split(":")[0].lower()
+        # Skip the lookup entirely for the platform's own domain / localhost
+        # so every normal request isn't slowed down by a DB query.
+        if host and host not in ("localhost", "127.0.0.1"):
+            with self.app.app_context():
+                from backend.models import Vendor
+
+                vendor = Vendor.query.filter_by(custom_domain=host, is_active=True).first()
+                if vendor:
+                    path = environ.get("PATH_INFO", "/")
+                    environ["PATH_INFO"] = f"/store/{vendor.slug}{path}"
+
+        return self.wsgi_app(environ, start_response)

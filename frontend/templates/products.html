@@ -3,15 +3,15 @@
 {% block title %}Our Products — {{ SITE_NAME }}{% endblock %}
 {% block content %}
 <section class="section container" style="padding-top:8px;">
-  <h2>Our Products</h2>
+  <h2>{{ t('Our Products') }}</h2>
   <p style="color:var(--ink-600); margin-top:-10px; margin-bottom:26px;">Home / Products</p>
 
   <div class="shop-layout">
     <aside>
       <div class="filter-card">
-        <h4>Categories</h4>
+        <h4>{{ t('Categories') }}</h4>
         <ul class="filter-list">
-          <li><a href="{{ url_for('public.products') }}" class="{{ 'active' if active_category=='all' }}">All Products</a></li>
+          <li><a href="{{ url_for('public.products') }}" class="{{ 'active' if active_category=='all' }}">{{ t('All Products') }}</a></li>
           {% for c in categories %}
           <li><a href="{{ url_for('public.products', category=c.slug) }}" class="{{ 'active' if active_category==c.slug }}">{{ c.name }}</a></li>
           {% endfor %}
@@ -30,14 +30,14 @@
       <div class="toolbar">
         <form class="search-box" method="get">
           {% if active_category and active_category != 'all' %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
-          <input type="text" name="q" value="{{ search }}" placeholder="Search products...">
+          <input type="text" name="q" value="{{ search }}" placeholder="{{ t('Search products...') }}">
           <button class="btn btn-primary btn-sm" type="submit">Search</button>
         </form>
         <form method="get">
           {% if active_category and active_category != 'all' %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
           {% if search %}<input type="hidden" name="q" value="{{ search }}">{% endif %}
           <select name="sort" onchange="this.form.submit()">
-            <option value="">Sort By</option>
+            <option value="">{{ t('Sort By') }}</option>
             <option value="price_low" {{ 'selected' if sort=='price_low' }}>Price: Low to High</option>
             <option value="price_high" {{ 'selected' if sort=='price_high' }}>Price: High to Low</option>
           </select>
@@ -46,8 +46,13 @@
 
       <div class="grid-products">
         {% for p in products %}
-        <a href="{{ url_for('public.product_detail', product_id=p.id) }}" class="product-card">
-          <div class="thumb"><img src="{{ image_url(p.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=400&auto=format&fit=crop'" alt="{{ p.name }}"></div>
+        <div class="product-card" onclick="location.href='{{ url_for('public.product_detail', product_id=p.id) }}'" style="cursor:pointer;">
+          <div class="thumb" style="position:relative;">
+            <img src="{{ image_url(p.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=400&auto=format&fit=crop'" alt="{{ p.name }}">
+            <button type="button" class="wishlist-btn" data-product-id="{{ p.id }}" onclick="event.stopPropagation(); toggleWishlist(this);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+            </button>
+          </div>
           <div class="body">
             <div class="cat">{{ p.category.name }}</div>
             <h4>{{ p.name }}</h4>
@@ -55,7 +60,7 @@
             {% if p.is_featured %}<span class="badge-featured">Bestseller</span>{% endif %}
             {% if not p.in_stock %}<span class="stock-out">Out of Stock</span>{% endif %}
           </div>
-        </a>
+        </div>
         {% else %}
         <div class="empty-state" style="grid-column:1/-1;">
           <div class="icon">{{ icon('search', 26) }}</div>

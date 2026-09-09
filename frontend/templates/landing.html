@@ -20,8 +20,7 @@
     </a>
     <div class="nav-panel">
       <nav class="nav-links"></nav>
-      <a href="{{ url_for('vendor.login') }}" class="btn btn-outline btn-sm">Vendor Login</a>
-      <a href="{{ url_for('admin.login') }}" class="btn btn-primary btn-sm">Admin Login</a>
+      <a href="{{ url_for('landing.login') }}" class="btn btn-primary btn-sm">Log In</a>
     </div>
   </div>
 </header>
@@ -37,10 +36,10 @@
           products, categories, photos, story and a unique link you can share on
           Instagram, Facebook &amp; WhatsApp.
         </p>
-        <a href="{{ url_for('vendor.login') }}" class="btn btn-primary">Vendor Login →</a>
+        <a href="{{ url_for('landing.login') }}" class="btn btn-primary">Log In →</a>
       </div>
       <div class="hero-image">
-        <img src="https://images.unsplash.com/photo-1613400549188-b40dbbd0b3f0?q=80&w=800&auto=format&fit=crop" alt="Handmade decorative wall hanging">
+        <img src="{{ url_for('static', filename='img/default_banner.jpg') }}" alt="Handmade craft being made by hand">
       </div>
     </div>
 
@@ -87,8 +86,7 @@
     </div>
     <div>
       <h5>Access</h5>
-      <p><a href="{{ url_for('vendor.login') }}">Vendor Login</a></p>
-      <p><a href="{{ url_for('admin.login') }}">Admin Login</a></p>
+      <p><a href="{{ url_for('landing.login') }}">Log In</a></p>
     </div>
   </div>
   <div class="foot-bottom">&copy; {{ PLATFORM_NAME }}. All rights reserved.</div>

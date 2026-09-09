@@ -10,7 +10,7 @@
       <div class="script-line">{{ SITE_TAGLINE or "Handmade with Love" }}</div>
       <p class="lede">Made with Love, Crafted by Hand<br>
         Beautiful handmade decoration items for your home, festivals &amp; every special occasion.</p>
-      <a href="{{ url_for('public.products') }}" class="btn hero-cta">Explore Products →</a>
+      <a href="{{ url_for('public.products') }}" class="btn hero-cta">{{ t('Explore Products') }} →</a>
     </div>
     <div class="hero-image">
       {% if VENDOR.cover_filename %}

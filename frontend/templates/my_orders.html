@@ -10,7 +10,7 @@
   <div class="filter-card" style="max-width:480px; margin-bottom:30px;">
     <form method="post" style="display:flex; gap:10px; flex-wrap:wrap;">
       <input type="tel" name="phone" placeholder="Enter your mobile number" required style="flex:1; min-width:180px;" class="form-control" value="{{ remembered_phone }}">
-      <button type="submit" class="btn btn-primary">Find Orders</button>
+      <button type="submit" class="btn btn-primary">{{ t('Find Orders') }}</button>
     </form>
   </div>
   {% else %}
@@ -36,11 +36,14 @@
           <tr>
             <td>#{{ o.order_code }}</td>
             <td>{{ o.created_at.strftime('%d %b %Y') }}</td>
-            <td>{{ o.product.name }}</td>
+            <td>{{ o.product.name }}{% if o.variant_label %}<br><span style="font-size:.78rem; color:var(--ink-600);">{{ o.variant_label }}</span>{% endif %}</td>
             <td>{{ o.quantity }}</td>
             <td>₹{{ '%.0f'|format(o.total_price) }}</td>
             <td><span class="badge badge-{{ o.status|lower }}">{{ o.status }}</span></td>
             <td>
+              {% if o.status == 'Cancelled' %}
+              <span style="font-size:.82rem; color:#B23A48;">✕ Order cancelled</span>
+              {% else %}
               <div class="order-timeline" style="min-width:160px;">
                 {% for s in steps %}
                 <div class="step step-{{ s|lower }} {{ 'done' if steps.index(s) <= steps.index(o.status) else '' }}">
@@ -48,9 +51,15 @@
                 </div>
                 {% endfor %}
               </div>
+              {% endif %}
             </td>
             <td style="display:flex; flex-direction:column; gap:6px;">
               <a href="{{ url_for('public.download_invoice', order_id=o.id) }}" class="btn btn-outline btn-sm">Invoice</a>
+              {% if o.status == 'Pending' %}
+              <form method="post" action="{{ url_for('public.cancel_order', order_id=o.id) }}" onsubmit="return confirm('Cancel this order?');">
+                <button type="submit" class="btn btn-sm" style="background:#FBE6E9; color:#B23A48; width:100%;">Cancel Order</button>
+              </form>
+              {% endif %}
               {% if o.status == 'Completed' %}
                 {% if o.review %}
                 <span style="font-size:.75rem; color:var(--ink-600);">Reviewed ✓</span>
@@ -70,6 +79,9 @@
             <td>—</td>
             <td><span class="badge badge-{{ c.status|lower }}">{{ c.status }}</span></td>
             <td>
+              {% if c.status == 'Cancelled' %}
+              <span style="font-size:.82rem; color:#B23A48;">✕ Order cancelled</span>
+              {% else %}
               <div class="order-timeline" style="min-width:160px;">
                 {% for s in steps %}
                 <div class="step step-{{ s|lower }} {{ 'done' if steps.index(s) <= steps.index(c.status) else '' }}">
@@ -77,9 +89,15 @@
                 </div>
                 {% endfor %}
               </div>
+              {% endif %}
             </td>
-            <td>
+            <td style="display:flex; flex-direction:column; gap:6px;">
               <a href="{{ url_for('public.download_custom_order_invoice', order_id=c.id) }}" class="btn btn-outline btn-sm">Invoice</a>
+              {% if c.status == 'Pending' %}
+              <form method="post" action="{{ url_for('public.cancel_custom_order', order_id=c.id) }}" onsubmit="return confirm('Cancel this order?');">
+                <button type="submit" class="btn btn-sm" style="background:#FBE6E9; color:#B23A48; width:100%;">Cancel Order</button>
+              </form>
+              {% endif %}
             </td>
           </tr>
           {% endfor %}
