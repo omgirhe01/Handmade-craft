@@ -23,6 +23,14 @@
 
 * { box-sizing: border-box; }
 
+html, body {
+  /* Safety net: nothing on the site (wide tables, forms, etc.) should ever
+     force the whole page to scroll sideways -- individual components handle
+     their own horizontal scroll (see .table-card) instead. */
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 body {
   margin: 0;
   font-family: 'Poppins', sans-serif;
@@ -210,12 +218,24 @@ img { max-width: 100%; display: block; }
 .filter-list.why-us .icon-svg { color: var(--gold-500); }
 
 .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; }
-.search-box { display: flex; gap: 8px; }
+.search-box { display: flex; gap: 8px; flex-wrap: wrap; }
 .search-box input, select, .form-control {
   padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; font-family: inherit;
   font-size: .9rem; background: #fff; color: var(--ink-900);
+  min-width: 0; max-width: 100%; box-sizing: border-box;
 }
-.search-box input { min-width: 220px; }
+.search-box input { flex: 1 1 140px; min-width: 140px; }
+
+/* Safety net: any input/select/textarea/button sitting inside a flex or grid
+   row (coupon "Apply" button, "search a different number", etc.) must be
+   allowed to shrink below its default browser min-width, otherwise it pushes
+   its sibling (usually a button) off the edge of the screen on narrow
+   phones. This is the #1 cause of buttons "disappearing" off-screen on
+   mobile, so it's set globally rather than patched one row at a time. */
+input, select, textarea, button, .btn {
+  min-width: 0;
+  max-width: 100%;
+}
 
 /* ---------- Forms ---------- */
 .form-card {
@@ -233,7 +253,7 @@ img { max-width: 100%; display: block; }
 .form-group textarea { resize: vertical; min-height: 100px; }
 
 /* ---------- Tables ---------- */
-.table-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.table-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius); overflow-x: auto; overflow-y: hidden; max-width: 100%; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 thead th { text-align: left; background: var(--cream-200); color: var(--maroon-900); padding: 12px 16px; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
 tbody td { padding: 13px 16px; border-top: 1px solid var(--line); }
@@ -284,8 +304,16 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .trust-row .icon-svg { color: var(--maroon-700); }
 
 /* ---------- Admin ---------- */
-.admin-shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
-.admin-sidebar { background: #241119; color: #E9D8DE; padding: 22px 0; }
+/* Sidebar is always position:fixed so it stays put on screen while the
+   main content area scrolls independently -- it never moves/scrolls along
+   with the page. .admin-main is pushed over with margin-left to make room
+   for it (0 on mobile, since the sidebar is off-canvas there). */
+.admin-shell { min-height: 100vh; }
+.admin-sidebar {
+  background: #241119; color: #E9D8DE; padding: 22px 0;
+  position: fixed; top: 0; left: 0; width: 240px; height: 100vh;
+  overflow-y: auto; z-index: 210;
+}
 .admin-sidebar .brand-mini { padding: 0 22px 22px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 12px; }
 .admin-sidebar .brand-mini .name { font-family: 'Playfair Display', serif; color: #fff; font-weight: 700; }
 .admin-sidebar nav a {
@@ -293,7 +321,7 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 }
 .admin-sidebar nav a:hover { background: rgba(255,255,255,.06); color: #fff; }
 .admin-sidebar nav a.active { background: var(--maroon-700); color: #fff; }
-.admin-main { padding: 30px 34px; background: var(--cream-100); }
+.admin-main { margin-left: 240px; padding: 30px 34px; background: var(--cream-100); min-width: 0; }
 .admin-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; }
 
 .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 28px; }
@@ -306,7 +334,7 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .panel { background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
 .panel h4 { font-size: 1rem; margin-bottom: 14px; }
 
-.login-shell { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--cream-200); }
+.login-shell { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--cream-200); padding: 20px; }
 
 /* ---------- Utility ---------- */
 .no-scroll { overflow: hidden; }
@@ -344,14 +372,13 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
   .story-image { aspect-ratio: 16/9; }
 
   /* Admin: sidebar becomes an off-canvas panel with a hamburger toggle */
-  .admin-shell { grid-template-columns: 1fr; }
   .admin-sidebar {
-    position: fixed; top: 0; left: -260px; width: 240px; height: 100vh;
-    z-index: 210; transition: left .25s ease; overflow-y: auto;
+    left: -260px;
+    transition: left .25s ease;
   }
   .admin-sidebar.open { left: 0; }
   .admin-toggle { display: flex; }
-  .admin-main { padding: 22px 18px; }
+  .admin-main { margin-left: 0; padding: 22px 18px; }
 }
 
 @media (max-width: 860px) {

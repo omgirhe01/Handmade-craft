@@ -9,15 +9,15 @@
   {% if not searched %}
   <div class="filter-card" style="max-width:480px; margin-bottom:30px;">
     <form method="post" style="display:flex; gap:10px; flex-wrap:wrap;">
-      <input type="tel" name="phone" placeholder="Enter your mobile number" required style="flex:1; min-width:180px;" class="form-control" value="{{ remembered_phone }}">
+      <input type="tel" name="phone" placeholder="Enter your mobile number" required style="flex:1 1 160px; min-width:160px;" class="form-control" value="{{ remembered_phone }}">
       <button type="submit" class="btn btn-primary">{{ t('Find Orders') }}</button>
     </form>
   </div>
   {% else %}
   <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
     <p style="color:var(--ink-600); margin:0;">Showing orders for <strong>{{ remembered_phone }}</strong></p>
-    <form method="post" style="display:flex; gap:8px;">
-      <input type="tel" name="phone" placeholder="Search a different number" style="width:190px;" class="form-control">
+    <form method="post" style="display:flex; gap:8px; flex-wrap:wrap; flex:1 1 auto; max-width:100%;">
+      <input type="tel" name="phone" placeholder="Search a different number" style="flex:1 1 160px; min-width:160px;" class="form-control">
       <button type="submit" class="btn btn-outline btn-sm">Search</button>
     </form>
   </div>

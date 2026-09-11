@@ -19,15 +19,15 @@ class Order(db.Model):
     variant_id = db.Column(db.Integer, db.ForeignKey("product_variants.id"), nullable=True)
     variant_label = db.Column(db.String(100), default="")
     customer_name = db.Column(db.String(150), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
+    phone = db.Column(db.String(20), nullable=False, index=True)
     address = db.Column(db.Text, default="")
     quantity = db.Column(db.Integer, default=1)
     coupon_code = db.Column(db.String(30), default="")
     discount_amount = db.Column(db.Numeric(10, 2), default=0)
     delivery_charge = db.Column(db.Numeric(10, 2), default=0)
     total_price = db.Column(db.Numeric(10, 2), nullable=False)
-    status = db.Column(db.String(30), default="Pending")
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(30), default="Pending", index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
 
     variant = db.relationship("ProductVariant")
 

@@ -150,14 +150,14 @@
     <div class="panel">
       <h4>Payments &amp; Delivery</h4>
       <div class="form-group">
-        <label>UPI QR Code Image</label>
+        <label>UPI QR Code Image <span style="font-weight:400; color:var(--ink-600);">(Coming soon)</span></label>
         {% if current_user.upi_qr_filename %}
         <div class="img-preview" style="max-width:160px;"><img src="{{ image_url(current_user.upi_qr_filename) }}" alt="UPI QR"></div>
         {% else %}
         <div class="img-preview empty" style="max-width:160px;">No QR uploaded</div>
         {% endif %}
         <input type="file" name="upi_qr" accept="image/*">
-        <span style="font-size:.78rem; color:var(--ink-600);">Upload a screenshot/photo of your UPI QR code (from GPay, PhonePe, Paytm, etc). It will be shown to customers on the order form so they can pay you directly.</span>
+        <span style="font-size:.78rem; color:var(--ink-600);">Upload a screenshot/photo of your UPI QR code (from GPay, PhonePe, Paytm, etc). This is not shown to customers yet -- "pay via QR" is disabled for now because there's no way to confirm a payment actually went through. It'll be turned on once payment verification is added.</span>
       </div>
       <div class="form-group">
         <label>Delivery Charge (₹)</label>

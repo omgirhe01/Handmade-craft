@@ -45,8 +45,8 @@
       </div>
       <div class="form-group">
         <label>Coupon Code (optional)</label>
-        <div style="display:flex; gap:10px;">
-          <input type="text" name="coupon_code" id="couponInput" placeholder="Enter coupon code if you have one" style="text-transform:uppercase; flex:1;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <input type="text" name="coupon_code" id="couponInput" placeholder="Enter coupon code if you have one" style="text-transform:uppercase; flex:1 1 140px; min-width:140px;">
           <button type="button" id="applyCouponBtn" class="btn btn-outline" style="flex-shrink:0;">Apply</button>
         </div>
         <div id="couponMessage" style="font-size:.85rem; margin-top:8px;"></div>
@@ -61,15 +61,12 @@
         <div style="display:flex; justify-content:space-between; font-weight:700; margin-top:6px; border-top:1px solid var(--line); padding-top:6px;"><span>Total</span><span id="sumTotal">₹{{ '%.0f'|format(product.price + (VENDOR.delivery_charge or 0)) }}</span></div>
       </div>
 
-      {% if VENDOR.upi_qr_filename %}
-      <div class="filter-card" style="text-align:center; margin-bottom:18px;">
-        <p style="font-weight:600; margin-bottom:10px;">Pay via UPI (optional)</p>
-        <img src="{{ image_url(VENDOR.upi_qr_filename) }}" alt="UPI QR code" style="max-width:180px; margin:0 auto; border-radius:8px;">
-        <p style="font-size:.8rem; color:var(--ink-600); margin-top:10px;">
-          Scan &amp; pay, then place your order below. The seller will confirm your payment.
-        </p>
-      </div>
-      {% endif %}
+      {# UPI QR "pay now" block is turned off for now (future scope) -- there is
+         currently no way to verify whether the customer actually completed the
+         payment after scanning, so showing it here was misleading. Re-enable
+         this block once payment confirmation (webhook / manual verify flow)
+         is in place. The vendor's uploaded QR image and the form field for it
+         are kept as-is in Store Settings so no data is lost. #}
 
       <button type="submit" class="btn btn-primary btn-block">Confirm Order</button>
     </form>

@@ -23,6 +23,7 @@ from backend.models import (
 from backend.utils.decorators import vendor_required
 from backend.utils.helpers import allowed_file, save_vendor_upload, unique_slug
 from backend.utils.invoice import generate_custom_order_invoice_pdf, generate_order_invoice_pdf
+from sqlalchemy.orm import joinedload
 
 vendor_bp = Blueprint("vendor", __name__)
 
@@ -65,7 +66,8 @@ def dashboard():
         + CustomOrder.query.filter_by(vendor_id=current_user.id, status="Completed").count()
     )
     recent_orders = (
-        Order.query.filter_by(vendor_id=current_user.id)
+        Order.query.options(joinedload(Order.product))
+        .filter_by(vendor_id=current_user.id)
         .order_by(Order.created_at.desc())
         .limit(5)
         .all()
@@ -166,7 +168,8 @@ def delete_category(category_id):
 @vendor_required
 def products():
     all_products = (
-        Product.query.filter_by(vendor_id=current_user.id)
+        Product.query.options(joinedload(Product.category))
+        .filter_by(vendor_id=current_user.id)
         .order_by(Product.created_at.desc())
         .all()
     )
@@ -414,7 +417,10 @@ def bulk_upload_products():
 @vendor_required
 def orders():
     all_orders = (
-        Order.query.filter_by(vendor_id=current_user.id).order_by(Order.created_at.desc()).all()
+        Order.query.options(joinedload(Order.product))
+        .filter_by(vendor_id=current_user.id)
+        .order_by(Order.created_at.desc())
+        .all()
     )
     return render_template("vendor/orders.html", orders=all_orders)
 
@@ -747,7 +753,8 @@ def delete_coupon(coupon_id):
 @vendor_required
 def reviews():
     all_reviews = (
-        Review.query.filter_by(vendor_id=current_user.id)
+        Review.query.options(joinedload(Review.product))
+        .filter_by(vendor_id=current_user.id)
         .order_by(Review.created_at.desc())
         .all()
     )

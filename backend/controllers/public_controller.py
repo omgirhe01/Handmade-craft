@@ -27,6 +27,7 @@ from backend.models import (
 )
 from backend.utils.helpers import image_url
 from backend.utils.invoice import generate_custom_order_invoice_pdf, generate_order_invoice_pdf
+from sqlalchemy.orm import joinedload
 
 # url_prefix="/store/<string:slug>" is set when this blueprint is registered
 # in backend/__init__.py. Every route below is automatically scoped to one
@@ -78,14 +79,16 @@ def inject_vendor_settings():
 @public_bp.route("/")
 def home():
     featured = (
-        Product.query.filter_by(vendor_id=g.vendor.id, in_stock=True, is_featured=True)
+        Product.query.options(joinedload(Product.category))
+        .filter_by(vendor_id=g.vendor.id, in_stock=True, is_featured=True)
         .order_by(Product.created_at.desc())
         .limit(8)
         .all()
     )
     if not featured:
         featured = (
-            Product.query.filter_by(vendor_id=g.vendor.id, in_stock=True)
+            Product.query.options(joinedload(Product.category))
+            .filter_by(vendor_id=g.vendor.id, in_stock=True)
             .order_by(Product.created_at.desc())
             .limit(8)
             .all()
@@ -108,7 +111,7 @@ def products():
     search = request.args.get("q", "").strip()
     sort = request.args.get("sort", "")
 
-    query = Product.query.filter_by(vendor_id=g.vendor.id)
+    query = Product.query.options(joinedload(Product.category)).filter_by(vendor_id=g.vendor.id)
     if category_slug and category_slug != "all":
         query = query.join(Category).filter(Category.slug == category_slug)
     if search:
@@ -158,14 +161,15 @@ def product_detail(product_id):
 
     related = []
     if co_purchased_ids:
-        related = Product.query.filter(
+        related = Product.query.options(joinedload(Product.category)).filter(
             Product.id.in_(co_purchased_ids), Product.vendor_id == g.vendor.id
         ).all()
 
     if len(related) < 4:
         exclude_ids = [product.id] + [p.id for p in related]
         fallback = (
-            Product.query.filter(
+            Product.query.options(joinedload(Product.category))
+            .filter(
                 Product.category_id == product.category_id,
                 Product.id.notin_(exclude_ids),
                 Product.vendor_id == g.vendor.id,
@@ -331,11 +335,20 @@ def custom_order():
 
 @public_bp.route("/my-orders", methods=["GET", "POST"])
 def my_orders():
+    # NOTE: we intentionally do NOT read the remembered phone number from the
+    # session on a plain page load/refresh. This page is often opened on a
+    # shared/public device -- if we auto-filled the last searched number on
+    # every GET, the next visitor hitting refresh (or just opening this page)
+    # would see the previous customer's order status. So every visit starts
+    # blank; results only appear right after an explicit search (POST).
+    # We still WRITE the phone to the session on search so that the
+    # cancel/review/invoice actions on this same page load can verify the
+    # order belongs to the person who just searched for it.
     orders = []
     custom_orders = []
     searched = False
+    phone = ""
     session_key = f"phone_{g.vendor.id}"
-    phone = session.get(session_key, "")
 
     if request.method == "POST":
         phone = request.form.get("phone", "").strip()
@@ -345,7 +358,8 @@ def my_orders():
     if phone:
         searched = True
         orders = (
-            Order.query.filter_by(phone=phone, vendor_id=g.vendor.id)
+            Order.query.options(joinedload(Order.product), joinedload(Order.review))
+            .filter_by(phone=phone, vendor_id=g.vendor.id)
             .order_by(Order.created_at.desc())
             .all()
         )

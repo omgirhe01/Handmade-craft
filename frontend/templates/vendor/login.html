@@ -8,9 +8,14 @@
 </head>
 <body>
 <div class="login-shell">
-  <div class="form-card" style="width:380px;">
+  <div class="form-card" style="width:100%; max-width:380px;">
     <div class="text-center" style="margin-bottom:20px;">
-      <div class="logo-icon" style="margin:0 auto 10px; width:52px; height:52px;">H</div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px;">
+        <div class="logo-icon logo-icon-img" style="width:56px; height:56px; flex-shrink:0;">
+          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="{{ PLATFORM_NAME }}">
+        </div>
+        <span style="font-family:'Playfair Display', serif; font-weight:700; font-size:1.15rem; color:var(--maroon-900); text-align:left; line-height:1.2;">{{ PLATFORM_NAME }}</span>
+      </div>
       <h2 class="mt-0">Vendor Login</h2>
       <p style="color:var(--ink-600); font-size:.88rem;">{{ PLATFORM_NAME }} — Manage your store</p>
     </div>
