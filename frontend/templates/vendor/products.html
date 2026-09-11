@@ -23,9 +23,9 @@
         <td>{{ p.stock_quantity if p.stock_quantity is not none else '—' }}{% if p.is_low_stock %} <span class="badge badge-low-stock">Low</span>{% endif %}</td>
         <td>{% if p.in_stock %}<span class="badge badge-confirmed">Available</span>{% else %}<span class="badge badge-pending" style="background:#FBE6E9; color:#B23A48;">Out of Stock</span>{% endif %}</td>
         <td style="display:flex; gap:8px;">
-          <a href="{{ url_for('vendor.edit_product', product_id=p.id) }}" class="btn btn-outline btn-sm">Edit</a>
+          <a href="{{ url_for('vendor.edit_product', product_id=p.id) }}" class="btn btn-outline btn-xs">Edit</a>
           <form method="post" action="{{ url_for('vendor.delete_product', product_id=p.id) }}" onsubmit="return confirm('Delete this product?');">
-            <button type="submit" class="btn btn-sm" style="background:#FBE6E9; color:#B23A48;">Delete</button>
+            <button type="submit" class="btn btn-xs" style="background:#FBE6E9; color:#B23A48;">Delete</button>
           </form>
         </td>
       </tr>

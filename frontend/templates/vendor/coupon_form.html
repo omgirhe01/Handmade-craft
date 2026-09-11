@@ -1,31 +1,31 @@
 {% extends "vendor/base_vendor.html" %}
-{% block title %}Add Coupon{% endblock %}
-{% block page_title %}Add Coupon{% endblock %}
+{% block title %}{{ 'Edit Coupon' if coupon else 'Add Coupon' }}{% endblock %}
+{% block page_title %}{{ 'Edit Coupon' if coupon else 'Add Coupon' }}{% endblock %}
 {% block vendor_content %}
 
 <div class="panel" style="max-width:480px;">
   <form method="post">
     <div class="form-group">
       <label>Coupon Code <span class="req">*</span></label>
-      <input type="text" name="code" required placeholder="e.g. DIWALI20" style="text-transform:uppercase;">
+      <input type="text" name="code" required placeholder="e.g. DIWALI20" style="text-transform:uppercase;" value="{{ coupon.code if coupon else '' }}">
     </div>
     <div class="form-group">
       <label>Discount Percentage <span class="req">*</span></label>
-      <input type="number" name="discount_percent" min="1" max="90" required placeholder="e.g. 10">
+      <input type="number" name="discount_percent" min="1" max="90" required placeholder="e.g. 10" value="{{ coupon.discount_percent if coupon else '' }}">
     </div>
     <div class="form-row">
       <div class="form-group">
         <label>Usage Limit</label>
-        <input type="number" name="usage_limit" min="0" value="0">
+        <input type="number" name="usage_limit" min="0" value="{{ coupon.usage_limit if coupon else 0 }}">
         <span style="font-size:.78rem; color:var(--ink-600);">0 = unlimited uses</span>
       </div>
       <div class="form-group">
         <label>Expires On</label>
-        <input type="date" name="expires_on">
+        <input type="date" name="expires_on" value="{{ coupon.expires_on.strftime('%Y-%m-%d') if coupon and coupon.expires_on else '' }}">
       </div>
     </div>
     <div style="display:flex; gap:12px; margin-top:10px;">
-      <button type="submit" class="btn btn-primary">Create Coupon</button>
+      <button type="submit" class="btn btn-primary">{{ 'Save Changes' if coupon else 'Create Coupon' }}</button>
       <a href="{{ url_for('vendor.coupons') }}" class="btn btn-outline">Cancel</a>
     </div>
   </form>

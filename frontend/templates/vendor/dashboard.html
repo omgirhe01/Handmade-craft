@@ -62,7 +62,7 @@
 
 <div class="panel" style="margin-top:20px;">
   <h4>Recent Orders</h4>
-  <div class="table-scroll">
+  <div class="table-scroll hide-mobile-table">
     <table>
       <thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
       <tbody>
@@ -78,6 +78,22 @@
         {% endfor %}
       </tbody>
     </table>
+  </div>
+  <div class="mobile-card-list show-mobile-table">
+    {% for o in recent_orders %}
+    <div class="mc-card" style="flex-direction:column; align-items:stretch; gap:4px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-weight:600; font-size:.9rem;">#{{ o.order_code }}</span>
+        <span class="badge badge-{{ o.status|lower }}">{{ o.status }}</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; color:var(--ink-600); font-size:.85rem;">
+        <span>{{ o.customer_name }}</span>
+        <span>₹{{ '%.0f'|format(o.total_price) }}</span>
+      </div>
+    </div>
+    {% else %}
+    <p style="text-align:center; color:var(--ink-600);">No orders yet.</p>
+    {% endfor %}
   </div>
 </div>
 

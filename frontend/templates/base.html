@@ -96,10 +96,12 @@
     </div>
     <div>
       <h5>Quick Links</h5>
-      <p><a href="{{ url_for('public.products') }}">Products</a></p>
-      <p><a href="{{ url_for('public.custom_order') }}">Custom Order</a></p>
-      <p><a href="{{ url_for('public.my_orders') }}">My Orders</a></p>
-      <p><a href="{{ url_for('public.about') }}">About Us</a></p>
+      <div class="quick-links">
+        <p><a href="{{ url_for('public.products') }}">Products</a></p>
+        <p><a href="{{ url_for('public.custom_order') }}">Custom Order</a></p>
+        <p><a href="{{ url_for('public.my_orders') }}">My Orders</a></p>
+        <p><a href="{{ url_for('public.about') }}">About Us</a></p>
+      </div>
     </div>
     <div>
       <h5>Contact</h5>

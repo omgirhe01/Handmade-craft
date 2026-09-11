@@ -71,9 +71,12 @@
 
 <div class="panel" style="margin-top:20px;">
   <h4>Orders by Status</h4>
-  <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:10px;">
+  <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
     {% for status in ['Pending','Confirmed','Preparing','Completed'] %}
-    <span class="badge badge-{{ status|lower }}" style="font-size:.85rem; padding:8px 16px;">{{ status }}: {{ status_counts.get(status, 0) }}</span>
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--cream-200); border-radius:8px;">
+      <span style="font-size:.88rem; color:var(--ink-900);">{{ status }}</span>
+      <span class="badge badge-{{ status|lower }}">{{ status_counts.get(status, 0) }}</span>
+    </div>
     {% endfor %}
   </div>
 </div>

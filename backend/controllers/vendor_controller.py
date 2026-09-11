@@ -733,6 +733,39 @@ def add_coupon():
     return render_template("vendor/coupon_form.html", coupon=None)
 
 
+@vendor_bp.route("/coupons/edit/<int:coupon_id>", methods=["GET", "POST"])
+@vendor_required
+def edit_coupon(coupon_id):
+    coupon = Coupon.query.filter_by(id=coupon_id, vendor_id=current_user.id).first_or_404()
+
+    if request.method == "POST":
+        code = request.form.get("code", "").strip().upper()
+        discount_percent = request.form.get("discount_percent", "").strip()
+        usage_limit = request.form.get("usage_limit", "0").strip()
+        expires_on = request.form.get("expires_on", "").strip()
+
+        if not code or not discount_percent:
+            flash("Please enter a coupon code and discount percentage.", "danger")
+            return render_template("vendor/coupon_form.html", coupon=coupon)
+
+        existing = Coupon.query.filter_by(vendor_id=current_user.id, code=code).first()
+        if existing and existing.id != coupon.id:
+            flash("You already have a coupon with this code.", "danger")
+            return render_template("vendor/coupon_form.html", coupon=coupon)
+
+        coupon.code = code
+        coupon.discount_percent = max(1, min(90, int(discount_percent)))
+        coupon.usage_limit = int(usage_limit or 0)
+        coupon.expires_on = (
+            datetime.strptime(expires_on, "%Y-%m-%d").date() if expires_on else None
+        )
+        db.session.commit()
+        flash(f"Coupon '{code}' updated.", "success")
+        return redirect(url_for("vendor.coupons"))
+
+    return render_template("vendor/coupon_form.html", coupon=coupon)
+
+
 @vendor_bp.route("/coupons/toggle/<int:coupon_id>", methods=["POST"])
 @vendor_required
 def toggle_coupon(coupon_id):

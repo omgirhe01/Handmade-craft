@@ -143,6 +143,7 @@ img { max-width: 100%; display: block; }
 .btn-whatsapp { background: #25D366; color: #fff; }
 .btn-whatsapp:hover { filter: brightness(0.95); }
 .btn-sm { padding: 6px 14px; font-size: .8rem; border-radius: 6px; }
+.btn-xs { padding: 5px 10px; font-size: .72rem; border-radius: 6px; }
 .btn-block { width: 100%; }
 .btn:disabled { opacity: .55; cursor: not-allowed; }
 
@@ -176,6 +177,13 @@ img { max-width: 100%; display: block; }
 
 /* ---------- Sections ---------- */
 .section { padding: 56px 0; }
+/* Consecutive sections stacked directly on top of each other only need ONE
+   gap between them, not each section's own top+bottom padding added
+   together -- that's what was making some gaps on the home page look much
+   bigger than others (it depended on which two sections happened to be
+   next to each other). This makes the gap consistent everywhere
+   automatically, without needing a manual padding-top:0 on every section. */
+.section + .section { padding-top: 0; }
 .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 10px; }
 .section-head p { color: var(--ink-600); margin: 4px 0 0; }
 
@@ -241,6 +249,14 @@ input, select, textarea, button, .btn {
   min-width: 0;
   max-width: 100%;
 }
+/* Same fix as flex items above, but for CSS Grid: a grid cell (a .panel
+   inside .settings-grid/.form-row, a card inside .stat-grid, etc.) also
+   defaults to a content-based min-width and can quietly push the whole
+   page wider than the screen on mobile if what's inside it is a touch too
+   wide. Forcing min-width:0 lets the grid track's own width win instead. */
+.settings-grid > *, .form-row > *, .stat-grid > *, .grid > * {
+  min-width: 0;
+}
 
 /* ---------- Forms ---------- */
 .form-card {
@@ -286,6 +302,7 @@ footer { background: var(--maroon-900); color: #F3E4EA; padding: 40px 0 18px; ma
 footer .foot-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 30px; }
 footer h5 { color: #fff; font-family: 'Playfair Display', serif; margin-bottom: 12px; }
 footer a { color: #E9CBD6; font-size: .88rem; }
+footer p { margin: 0 0 8px; }
 footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; margin-top: 26px; border-top: 1px solid rgba(255,255,255,.12); padding-top: 16px; }
 .socials { display: flex; gap: 10px; margin-top: 10px; }
 .socials a { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; color: inherit; transition: background .2s ease, transform .2s ease; }
@@ -388,6 +405,12 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
   .admin-sidebar.open { left: 0; }
   .admin-toggle { display: flex; }
   .admin-main { margin-left: 0; padding: 22px 18px; }
+  /* Smaller nav rows so the whole menu fits one screen without needing to
+     scroll inside the sidebar itself. */
+  .admin-sidebar { padding: 14px 0; }
+  .admin-sidebar .brand-mini { padding: 0 18px 14px; margin-bottom: 6px; }
+  .admin-sidebar nav a { padding: 8px 18px; font-size: .8rem; gap: 8px; }
+  .admin-sidebar nav a .icon-svg { width: 16px; height: 16px; }
 }
 
 @media (max-width: 860px) {
@@ -432,6 +455,16 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
      .perk-strip rule below by specificity -- target it directly so its 3
      boxes stack one-under-another on phones instead of squeezing sideways. */
   .perk-strip[style*="repeat(3"] { grid-template-columns: 1fr !important; }
+
+  /* Footer: tighter vertical rhythm, and Quick Links go 2-per-row instead
+     of one long vertical list (desktop/laptop keeps the single column as
+     it already looks fine there). */
+  footer { padding: 28px 0 14px; margin-top: 40px; }
+  footer .foot-grid { gap: 22px; }
+  footer h5 { margin-bottom: 8px; }
+  .quick-links { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 14px; }
+  .quick-links p { margin: 0; }
+  footer .foot-bottom { margin-top: 18px; padding-top: 12px; }
 }
 
 @media (max-width: 420px) {
@@ -455,6 +488,10 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
   font-size: .85rem;
   color: var(--ink-900);
   word-break: break-all;
+}
+@media (max-width: 640px) {
+  .link-box { padding: 10px; gap: 8px; }
+  .link-box .btn { padding: 6px 10px; font-size: .72rem; }
 }
 .logo-icon-img {
   padding: 0 !important;
@@ -627,10 +664,16 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .hide-mobile-table { display: block; }
 @media (max-width: 640px) {
   .hide-mobile-table { display: none !important; }
-  .show-mobile-table { display: block; }
+  .show-mobile-table { display: flex !important; }
 }
 
-.mobile-card-list { display: flex; flex-direction: column; gap: 10px; }
+/* NOTE: .mobile-card-list must NOT set display:flex unconditionally here --
+   it would override the ".show-mobile-table { display:none }" rule above
+   on desktop/laptop (same CSS specificity, this rule comes later in the
+   file, so it was winning the cascade and showing BOTH the table and the
+   mobile cards at once on wide screens). Layout properties are fine to keep
+   global since they don't do anything while display:none is in effect. */
+.mobile-card-list { flex-direction: column; gap: 10px; }
 .mc-card {
   background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius);
   padding: 12px 14px; display: flex; align-items: center; gap: 12px;
@@ -662,8 +705,8 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .detail-modal .dm-row:last-of-type { border-bottom: none; }
 .detail-modal .dm-row span:first-child { color: var(--ink-600); flex-shrink: 0; }
 .detail-modal .dm-row span:last-child { text-align: right; }
-.detail-modal .dm-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-.detail-modal .dm-actions > * { flex: 1 1 auto; }
+.detail-modal .dm-actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: nowrap; }
+.detail-modal .dm-actions > * { flex: 1 1 0; min-width: 0; }
 
 /* ---------- Pagination ---------- */
 .pagination { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: 20px; }

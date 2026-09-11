@@ -16,9 +16,9 @@
         <td>{{ c.name }}</td>
         <td>{{ c.products|length }}</td>
         <td style="display:flex; gap:8px;">
-          <a href="{{ url_for('vendor.edit_category', category_id=c.id) }}" class="btn btn-outline btn-sm">Edit</a>
+          <a href="{{ url_for('vendor.edit_category', category_id=c.id) }}" class="btn btn-outline btn-xs">Edit</a>
           <form method="post" action="{{ url_for('vendor.delete_category', category_id=c.id) }}" onsubmit="return confirm('Delete this category?');">
-            <button type="submit" class="btn btn-sm" style="background:#FBE6E9; color:#B23A48;">Delete</button>
+            <button type="submit" class="btn btn-xs" style="background:#FBE6E9; color:#B23A48;">Delete</button>
           </form>
         </td>
       </tr>
