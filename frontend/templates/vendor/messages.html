@@ -3,7 +3,8 @@
 {% block page_title %}Messages{% endblock %}
 {% block vendor_content %}
 
-<div class="table-card">
+<!-- Desktop table -->
+<div class="table-card hide-mobile-table">
   <table>
     <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Message</th><th>Received</th></tr></thead>
     <tbody>
@@ -21,5 +22,43 @@
     </tbody>
   </table>
 </div>
+
+<!-- Mobile card list: name, tap View for the rest -->
+<div class="mobile-card-list show-mobile-table">
+  {% for m in messages %}
+  <div class="mc-card">
+    <div class="mc-main">
+      <div class="mc-title">{{ m.name }}</div>
+      <div class="mc-sub">{{ m.created_at.strftime('%d %b %Y') }}</div>
+    </div>
+    <button type="button" class="btn btn-outline btn-sm mc-action" onclick="openDetailModal('mm-{{ m.id }}')">View</button>
+  </div>
+  <div id="mm-{{ m.id }}" class="detail-modal-overlay">
+    <div class="detail-modal">
+      <div class="dm-head"><h4>{{ m.name }}</h4><button type="button" class="dm-close" onclick="closeDetailModal('mm-{{ m.id }}')">&times;</button></div>
+      <div class="dm-row"><span>Email</span><span>{{ m.email or '—' }}</span></div>
+      <div class="dm-row"><span>Phone</span><span class="phone-text">{{ m.phone or '—' }}</span></div>
+      <div class="dm-row"><span>Received</span><span>{{ m.created_at.strftime('%d %b %Y') }}</span></div>
+      <div class="dm-row" style="display:block;"><span>Message</span><p style="margin:6px 0 0; font-size:.88rem;">{{ m.message }}</p></div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">No messages yet.</div>
+  {% endfor %}
+</div>
+
+{% if pagination and pagination.pages > 1 %}
+<div class="pagination">
+  <a href="?page={{ pagination.prev_num }}" class="{{ 'disabled' if not pagination.has_prev }}">&laquo;</a>
+  {% for num in pagination.iter_pages() %}
+    {% if num %}
+      <a href="?page={{ num }}" class="{{ 'current' if num == pagination.page }}">{{ num }}</a>
+    {% else %}
+      <span>…</span>
+    {% endif %}
+  {% endfor %}
+  <a href="?page={{ pagination.next_num }}" class="{{ 'disabled' if not pagination.has_next }}">&raquo;</a>
+</div>
+{% endif %}
 
 {% endblock %}

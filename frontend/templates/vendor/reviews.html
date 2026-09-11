@@ -3,7 +3,8 @@
 {% block page_title %}Customer Reviews{% endblock %}
 {% block vendor_content %}
 
-<div class="table-card">
+<!-- Desktop table -->
+<div class="table-card hide-mobile-table">
   <table>
     <thead><tr><th>Product</th><th>Customer</th><th>Rating</th><th>Comment</th><th>Date</th></tr></thead>
     <tbody>
@@ -21,5 +22,43 @@
     </tbody>
   </table>
 </div>
+
+<!-- Mobile card list: product + customer, tap View for the rest -->
+<div class="mobile-card-list show-mobile-table">
+  {% for r in reviews %}
+  <div class="mc-card">
+    <div class="mc-main">
+      <div class="mc-title">{{ r.product.name }}</div>
+      <div class="mc-sub">{{ r.customer_name }} · {{ "★" * r.rating }}{{ "☆" * (5 - r.rating) }}</div>
+    </div>
+    <button type="button" class="btn btn-outline btn-sm mc-action" onclick="openDetailModal('rv-{{ r.id }}')">View</button>
+  </div>
+  <div id="rv-{{ r.id }}" class="detail-modal-overlay">
+    <div class="detail-modal">
+      <div class="dm-head"><h4>{{ r.product.name }}</h4><button type="button" class="dm-close" onclick="closeDetailModal('rv-{{ r.id }}')">&times;</button></div>
+      <div class="dm-row"><span>Customer</span><span>{{ r.customer_name }}</span></div>
+      <div class="dm-row"><span>Rating</span><span class="star-rating">{{ "★" * r.rating }}{{ "☆" * (5 - r.rating) }}</span></div>
+      <div class="dm-row"><span>Date</span><span>{{ r.created_at.strftime('%d %b %Y') }}</span></div>
+      <div class="dm-row" style="display:block;"><span>Comment</span><p style="margin:6px 0 0; font-size:.88rem;">{{ r.comment or '—' }}</p></div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">No reviews yet. Reviews appear here once customers complete an order and leave feedback.</div>
+  {% endfor %}
+</div>
+
+{% if pagination and pagination.pages > 1 %}
+<div class="pagination">
+  <a href="?page={{ pagination.prev_num }}" class="{{ 'disabled' if not pagination.has_prev }}">&laquo;</a>
+  {% for num in pagination.iter_pages() %}
+    {% if num %}
+      <a href="?page={{ num }}" class="{{ 'current' if num == pagination.page }}">{{ num }}</a>
+    {% else %}
+      <span>…</span>
+    {% endif %}
+  {% endfor %}
+  <a href="?page={{ pagination.next_num }}" class="{{ 'disabled' if not pagination.has_next }}">&raquo;</a>
+</div>
+{% endif %}
 
 {% endblock %}

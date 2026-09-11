@@ -3,7 +3,8 @@
 {% block page_title %}Custom Orders{% endblock %}
 {% block vendor_content %}
 
-<div class="table-card">
+<!-- Desktop table -->
+<div class="table-card hide-mobile-table">
   <table>
     <thead><tr><th>Order ID</th><th>Name</th><th>Item Type</th><th>Colours</th><th>Size</th><th>Qty</th><th>Required Date</th><th>Phone</th><th>Status</th><th>Invoice</th></tr></thead>
     <tbody>
@@ -34,5 +35,57 @@
     </tbody>
   </table>
 </div>
+
+<!-- Mobile card list: name + item type, tap View for the rest -->
+<div class="mobile-card-list show-mobile-table">
+  {% for c in custom_orders %}
+  <div class="mc-card">
+    <div class="mc-main">
+      <div class="mc-title">{{ c.full_name }}</div>
+      <div class="mc-sub">{{ c.item_type }} · #{{ c.order_code }}</div>
+    </div>
+    <button type="button" class="btn btn-outline btn-sm mc-action" onclick="openDetailModal('cm-{{ c.id }}')">View</button>
+  </div>
+  <div id="cm-{{ c.id }}" class="detail-modal-overlay">
+    <div class="detail-modal">
+      <div class="dm-head"><h4>Custom Order #{{ c.order_code }}</h4><button type="button" class="dm-close" onclick="closeDetailModal('cm-{{ c.id }}')">&times;</button></div>
+      <div class="dm-row"><span>Name</span><span>{{ c.full_name }}</span></div>
+      <div class="dm-row"><span>Item Type</span><span>{{ c.item_type }}</span></div>
+      <div class="dm-row"><span>Colours</span><span>{{ c.preferred_colours }}</span></div>
+      <div class="dm-row"><span>Size</span><span>{{ c.size }}</span></div>
+      <div class="dm-row"><span>Qty</span><span>{{ c.quantity }}</span></div>
+      <div class="dm-row"><span>Required Date</span><span>{{ c.required_date }}</span></div>
+      <div class="dm-row"><span>Phone</span><span class="phone-text">{{ c.mobile }}</span></div>
+      <div class="dm-row"><span>Status</span><span><span class="badge badge-{{ c.status|lower }}">{{ c.status }}</span></span></div>
+      <div class="dm-actions">
+        <form method="post" action="{{ url_for('vendor.update_custom_order_status', order_id=c.id) }}" style="flex:1 1 100%;">
+          <select name="status" onchange="this.form.submit()" class="form-control btn-block">
+            {% for s in ['Pending','Confirmed','Preparing','Completed','Cancelled'] %}
+            <option value="{{ s }}" {{ 'selected' if c.status==s }}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </form>
+        <a href="{{ url_for('vendor.download_custom_order_invoice', order_id=c.id) }}" class="btn btn-outline btn-sm">Download PDF</a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">No custom orders yet.</div>
+  {% endfor %}
+</div>
+
+{% if pagination and pagination.pages > 1 %}
+<div class="pagination">
+  <a href="?page={{ pagination.prev_num }}" class="{{ 'disabled' if not pagination.has_prev }}">&laquo;</a>
+  {% for num in pagination.iter_pages() %}
+    {% if num %}
+      <a href="?page={{ num }}" class="{{ 'current' if num == pagination.page }}">{{ num }}</a>
+    {% else %}
+      <span>…</span>
+    {% endif %}
+  {% endfor %}
+  <a href="?page={{ pagination.next_num }}" class="{{ 'disabled' if not pagination.has_next }}">&raquo;</a>
+</div>
+{% endif %}
 
 {% endblock %}

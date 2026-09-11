@@ -72,6 +72,34 @@
   if (overlay) overlay.addEventListener("click", closeSidebar);
 })();
 
+// ---------- Mobile "View" detail modals (products/orders/etc. card lists) ----------
+function openDetailModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add("open");
+  document.body.classList.add("no-scroll");
+}
+function closeDetailModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("open");
+  document.body.classList.remove("no-scroll");
+}
+document.addEventListener("click", function (e) {
+  if (e.target.classList && e.target.classList.contains("detail-modal-overlay")) {
+    e.target.classList.remove("open");
+    document.body.classList.remove("no-scroll");
+  }
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") {
+    document.querySelectorAll(".detail-modal-overlay.open").forEach(function (el) {
+      el.classList.remove("open");
+    });
+    document.body.classList.remove("no-scroll");
+  }
+});
+
 // ---------- Quantity increment/decrement buttons (product/order pages) ----------
 document.addEventListener("click", function (e) {
   if (e.target.matches("[data-qty-plus]")) {

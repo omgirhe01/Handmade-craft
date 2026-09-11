@@ -167,13 +167,14 @@ def delete_category(category_id):
 @vendor_bp.route("/products")
 @vendor_required
 def products():
-    all_products = (
+    page = request.args.get("page", 1, type=int)
+    pagination = (
         Product.query.options(joinedload(Product.category))
         .filter_by(vendor_id=current_user.id)
         .order_by(Product.created_at.desc())
-        .all()
+        .paginate(page=page, per_page=20, error_out=False)
     )
-    return render_template("vendor/products.html", products=all_products)
+    return render_template("vendor/products.html", products=pagination.items, pagination=pagination)
 
 
 @vendor_bp.route("/products/add", methods=["GET", "POST"])
@@ -416,13 +417,14 @@ def bulk_upload_products():
 @vendor_bp.route("/orders")
 @vendor_required
 def orders():
-    all_orders = (
+    page = request.args.get("page", 1, type=int)
+    pagination = (
         Order.query.options(joinedload(Order.product))
         .filter_by(vendor_id=current_user.id)
         .order_by(Order.created_at.desc())
-        .all()
+        .paginate(page=page, per_page=20, error_out=False)
     )
-    return render_template("vendor/orders.html", orders=all_orders)
+    return render_template("vendor/orders.html", orders=pagination.items, pagination=pagination)
 
 
 @vendor_bp.route("/orders/status/<int:order_id>", methods=["POST"])
@@ -438,12 +440,13 @@ def update_order_status(order_id):
 @vendor_bp.route("/custom-orders")
 @vendor_required
 def custom_orders():
-    all_custom = (
+    page = request.args.get("page", 1, type=int)
+    pagination = (
         CustomOrder.query.filter_by(vendor_id=current_user.id)
         .order_by(CustomOrder.created_at.desc())
-        .all()
+        .paginate(page=page, per_page=20, error_out=False)
     )
-    return render_template("vendor/custom_orders.html", custom_orders=all_custom)
+    return render_template("vendor/custom_orders.html", custom_orders=pagination.items, pagination=pagination)
 
 
 @vendor_bp.route("/custom-orders/status/<int:order_id>", methods=["POST"])
@@ -459,12 +462,13 @@ def update_custom_order_status(order_id):
 @vendor_bp.route("/messages")
 @vendor_required
 def messages():
-    all_messages = (
+    page = request.args.get("page", 1, type=int)
+    pagination = (
         ContactMessage.query.filter_by(vendor_id=current_user.id)
         .order_by(ContactMessage.created_at.desc())
-        .all()
+        .paginate(page=page, per_page=20, error_out=False)
     )
-    return render_template("vendor/messages.html", messages=all_messages)
+    return render_template("vendor/messages.html", messages=pagination.items, pagination=pagination)
 
 
 # --------------------------------------------------------- site settings ----
@@ -555,12 +559,13 @@ def store_qr_code():
 @vendor_bp.route("/testimonials")
 @vendor_required
 def testimonials():
-    all_testimonials = (
+    page = request.args.get("page", 1, type=int)
+    pagination = (
         Testimonial.query.filter_by(vendor_id=current_user.id)
         .order_by(Testimonial.created_at.desc())
-        .all()
+        .paginate(page=page, per_page=20, error_out=False)
     )
-    return render_template("vendor/testimonials.html", testimonials=all_testimonials)
+    return render_template("vendor/testimonials.html", testimonials=pagination.items, pagination=pagination)
 
 
 @vendor_bp.route("/testimonials/add", methods=["GET", "POST"])
@@ -687,12 +692,13 @@ def analytics():
 @vendor_bp.route("/coupons")
 @vendor_required
 def coupons():
-    all_coupons = (
+    page = request.args.get("page", 1, type=int)
+    pagination = (
         Coupon.query.filter_by(vendor_id=current_user.id)
         .order_by(Coupon.created_at.desc())
-        .all()
+        .paginate(page=page, per_page=20, error_out=False)
     )
-    return render_template("vendor/coupons.html", coupons=all_coupons)
+    return render_template("vendor/coupons.html", coupons=pagination.items, pagination=pagination)
 
 
 @vendor_bp.route("/coupons/add", methods=["GET", "POST"])
@@ -752,13 +758,14 @@ def delete_coupon(coupon_id):
 @vendor_bp.route("/reviews")
 @vendor_required
 def reviews():
-    all_reviews = (
+    page = request.args.get("page", 1, type=int)
+    pagination = (
         Review.query.options(joinedload(Review.product))
         .filter_by(vendor_id=current_user.id)
         .order_by(Review.created_at.desc())
-        .all()
+        .paginate(page=page, per_page=20, error_out=False)
     )
-    return render_template("vendor/reviews.html", reviews=all_reviews)
+    return render_template("vendor/reviews.html", reviews=pagination.items, pagination=pagination)
 
 
 @vendor_bp.route("/orders/<int:order_id>/invoice")

@@ -25,7 +25,7 @@
 
   {% if searched %}
     {% if orders or custom_orders %}
-    <div class="table-card">
+    <div class="table-card hide-mobile-table">
       <table>
         <thead>
           <tr><th>Order ID</th><th>Date</th><th>Item</th><th>Qty</th><th>Amount</th><th>Status</th><th>Progress</th><th>Actions</th></tr>
@@ -103,6 +103,88 @@
           {% endfor %}
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile card list: date + item, tap View for full details -->
+    <div class="mobile-card-list show-mobile-table">
+      {% for o in orders %}
+      <div class="mc-card">
+        <div class="mc-main">
+          <div class="mc-title">{{ o.product.name }}</div>
+          <div class="mc-sub">{{ o.created_at.strftime('%d %b %Y') }} · #{{ o.order_code }}</div>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm mc-action" onclick="openDetailModal('mo-{{ o.id }}')">View</button>
+      </div>
+      <div id="mo-{{ o.id }}" class="detail-modal-overlay">
+        <div class="detail-modal">
+          <div class="dm-head"><h4>Order #{{ o.order_code }}</h4><button type="button" class="dm-close" onclick="closeDetailModal('mo-{{ o.id }}')">&times;</button></div>
+          <div class="dm-row"><span>Date</span><span>{{ o.created_at.strftime('%d %b %Y') }}</span></div>
+          <div class="dm-row"><span>Item</span><span>{{ o.product.name }}{% if o.variant_label %} ({{ o.variant_label }}){% endif %}</span></div>
+          <div class="dm-row"><span>Qty</span><span>{{ o.quantity }}</span></div>
+          <div class="dm-row"><span>Amount</span><span>₹{{ '%.0f'|format(o.total_price) }}</span></div>
+          <div class="dm-row"><span>Status</span><span><span class="badge badge-{{ o.status|lower }}">{{ o.status }}</span></span></div>
+          {% if o.status != 'Cancelled' %}
+          <div class="order-timeline" style="margin:14px 0 4px;">
+            {% for s in steps %}
+            <div class="step step-{{ s|lower }} {{ 'done' if steps.index(s) <= steps.index(o.status) else '' }}">
+              <div class="dot"></div>{{ s }}
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div class="dm-actions">
+            <a href="{{ url_for('public.download_invoice', order_id=o.id) }}" class="btn btn-outline btn-sm">Invoice</a>
+            {% if o.status == 'Pending' %}
+            <form method="post" action="{{ url_for('public.cancel_order', order_id=o.id) }}" onsubmit="return confirm('Cancel this order?');" style="flex:1;">
+              <button type="submit" class="btn btn-sm btn-block" style="background:#FBE6E9; color:#B23A48;">Cancel Order</button>
+            </form>
+            {% endif %}
+            {% if o.status == 'Completed' %}
+              {% if o.review %}
+              <span style="font-size:.8rem; color:var(--ink-600);">Reviewed ✓</span>
+              {% else %}
+              <a href="{{ url_for('public.leave_review', order_id=o.id) }}" class="btn btn-primary btn-sm">Write Review</a>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% for c in custom_orders %}
+      <div class="mc-card">
+        <div class="mc-main">
+          <div class="mc-title">Custom Order — {{ c.item_type }}</div>
+          <div class="mc-sub">{{ c.created_at.strftime('%d %b %Y') }} · #{{ c.order_code }}</div>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm mc-action" onclick="openDetailModal('mc-{{ c.id }}')">View</button>
+      </div>
+      <div id="mc-{{ c.id }}" class="detail-modal-overlay">
+        <div class="detail-modal">
+          <div class="dm-head"><h4>Custom Order #{{ c.order_code }}</h4><button type="button" class="dm-close" onclick="closeDetailModal('mc-{{ c.id }}')">&times;</button></div>
+          <div class="dm-row"><span>Date</span><span>{{ c.created_at.strftime('%d %b %Y') }}</span></div>
+          <div class="dm-row"><span>Item</span><span>{{ c.item_type }}</span></div>
+          <div class="dm-row"><span>Qty</span><span>{{ c.quantity }}</span></div>
+          <div class="dm-row"><span>Status</span><span><span class="badge badge-{{ c.status|lower }}">{{ c.status }}</span></span></div>
+          {% if c.status != 'Cancelled' %}
+          <div class="order-timeline" style="margin:14px 0 4px;">
+            {% for s in steps %}
+            <div class="step step-{{ s|lower }} {{ 'done' if steps.index(s) <= steps.index(c.status) else '' }}">
+              <div class="dot"></div>{{ s }}
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+          <div class="dm-actions">
+            <a href="{{ url_for('public.download_custom_order_invoice', order_id=c.id) }}" class="btn btn-outline btn-sm">Invoice</a>
+            {% if c.status == 'Pending' %}
+            <form method="post" action="{{ url_for('public.cancel_custom_order', order_id=c.id) }}" onsubmit="return confirm('Cancel this order?');" style="flex:1;">
+              <button type="submit" class="btn btn-sm btn-block" style="background:#FBE6E9; color:#B23A48;">Cancel Order</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
     {% else %}
     <div class="empty-state">

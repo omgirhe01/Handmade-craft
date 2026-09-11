@@ -12,7 +12,9 @@
 <header class="navbar">
   <div class="inner">
     <a href="{{ url_for('landing.home') }}" class="brand">
-      <div class="logo-icon">H</div>
+      <div class="logo-icon logo-icon-img">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="{{ PLATFORM_NAME }}">
+      </div>
       <div class="brand-text">
         <div class="name">{{ PLATFORM_NAME|upper }}</div>
         <div class="tagline">Your handmade business, online</div>

@@ -9,10 +9,11 @@
 </p>
 
 <div style="margin-bottom:18px;">
-  <a href="{{ url_for('vendor.add_testimonial') }}" class="btn btn-primary">+ Add Testimonial</a>
+  <a href="{{ url_for('vendor.add_testimonial') }}" class="btn btn-primary btn-sm">+ Add Testimonial</a>
 </div>
 
-<div class="table-card">
+<!-- Desktop table -->
+<div class="table-card hide-mobile-table">
   <table>
     <thead><tr><th>Customer</th><th>Message</th><th>Rating</th><th>Actions</th></tr></thead>
     <tbody>
@@ -34,5 +35,47 @@
     </tbody>
   </table>
 </div>
+
+<!-- Mobile card list: customer, tap View for the rest -->
+<div class="mobile-card-list show-mobile-table">
+  {% for t in testimonials %}
+  <div class="mc-card">
+    <div class="mc-main">
+      <div class="mc-title">{{ t.customer_name }}</div>
+      <div class="mc-sub star-rating">{{ "★" * t.rating }}{{ "☆" * (5 - t.rating) }}</div>
+    </div>
+    <button type="button" class="btn btn-outline btn-sm mc-action" onclick="openDetailModal('tm-{{ t.id }}')">View</button>
+  </div>
+  <div id="tm-{{ t.id }}" class="detail-modal-overlay">
+    <div class="detail-modal">
+      <div class="dm-head"><h4>{{ t.customer_name }}</h4><button type="button" class="dm-close" onclick="closeDetailModal('tm-{{ t.id }}')">&times;</button></div>
+      <div class="dm-row"><span>Rating</span><span class="star-rating">{{ "★" * t.rating }}{{ "☆" * (5 - t.rating) }}</span></div>
+      <div class="dm-row" style="display:block;"><span>Message</span><p style="margin:6px 0 0; font-size:.88rem;">{{ t.message }}</p></div>
+      <div class="dm-actions">
+        <a href="{{ url_for('vendor.edit_testimonial', testimonial_id=t.id) }}" class="btn btn-outline btn-sm">Edit</a>
+        <form method="post" action="{{ url_for('vendor.delete_testimonial', testimonial_id=t.id) }}" onsubmit="return confirm('Delete this testimonial?');" style="flex:1;">
+          <button type="submit" class="btn btn-sm btn-block" style="background:#FBE6E9; color:#B23A48;">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">No testimonials yet. Add your first one!</div>
+  {% endfor %}
+</div>
+
+{% if pagination and pagination.pages > 1 %}
+<div class="pagination">
+  <a href="?page={{ pagination.prev_num }}" class="{{ 'disabled' if not pagination.has_prev }}">&laquo;</a>
+  {% for num in pagination.iter_pages() %}
+    {% if num %}
+      <a href="?page={{ num }}" class="{{ 'current' if num == pagination.page }}">{{ num }}</a>
+    {% else %}
+      <span>…</span>
+    {% endif %}
+  {% endfor %}
+  <a href="?page={{ pagination.next_num }}" class="{{ 'disabled' if not pagination.has_next }}">&raquo;</a>
+</div>
+{% endif %}
 
 {% endblock %}

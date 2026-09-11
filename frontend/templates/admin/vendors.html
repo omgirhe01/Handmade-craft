@@ -40,4 +40,18 @@
   </table>
 </div>
 
+{% if pagination and pagination.pages > 1 %}
+<div class="pagination">
+  <a href="?page={{ pagination.prev_num }}" class="{{ 'disabled' if not pagination.has_prev }}">&laquo;</a>
+  {% for num in pagination.iter_pages() %}
+    {% if num %}
+      <a href="?page={{ num }}" class="{{ 'current' if num == pagination.page }}">{{ num }}</a>
+    {% else %}
+      <span>…</span>
+    {% endif %}
+  {% endfor %}
+  <a href="?page={{ pagination.next_num }}" class="{{ 'disabled' if not pagination.has_next }}">&raquo;</a>
+</div>
+{% endif %}
+
 {% endblock %}

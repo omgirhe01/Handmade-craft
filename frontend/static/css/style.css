@@ -78,13 +78,18 @@ img { max-width: 100%; display: block; }
   margin: 0 auto;
 }
 .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-.brand .logo-icon {
+/* Base logo-icon rule works everywhere (navbar, login page, etc.), not just
+   inside .brand -- previously it only applied inside .brand, so any logo
+   circle used outside the navbar (e.g. the login page) rendered as an
+   unstyled square instead of a circle. */
+.logo-icon {
   width: 42px; height: 42px; border-radius: 50%;
   background: var(--maroon-900); color: var(--cream-100);
   display: flex; align-items: center; justify-content: center;
   font-family: 'Playfair Display', serif; font-weight: 700;
   flex-shrink: 0;
 }
+.brand .logo-icon { width: 42px; height: 42px; }
 .brand-text .name { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem; color: var(--maroon-900); line-height: 1.2; }
 .brand-text .name em { font-family: 'Dancing Script', cursive; font-style: normal; color: var(--brand-accent); }
 .brand-text .tagline { font-size: .72rem; color: var(--ink-600); }
@@ -254,6 +259,10 @@ input, select, textarea, button, .btn {
 
 /* ---------- Tables ---------- */
 .table-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius); overflow-x: auto; overflow-y: hidden; max-width: 100%; -webkit-overflow-scrolling: touch; }
+/* Same horizontal-scroll safety net as .table-card, but with no bg/border of
+   its own -- for tables that already live inside a styled .panel (e.g. the
+   dashboard's "Recent Orders"), so we don't nest one card inside another. */
+.table-scroll { overflow-x: auto; overflow-y: hidden; max-width: 100%; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 thead th { text-align: left; background: var(--cream-200); color: var(--maroon-900); padding: 12px 16px; font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
 tbody td { padding: 13px 16px; border-top: 1px solid var(--line); }
@@ -417,6 +426,14 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
   .stat-card { padding: 14px; }
 }
 
+@media (max-width: 640px) {
+  /* "How it works" (landing.html) reuses .perk-strip with an inline
+     grid-template-columns:repeat(3,1fr) override, which beats the
+     .perk-strip rule below by specificity -- target it directly so its 3
+     boxes stack one-under-another on phones instead of squeezing sideways. */
+  .perk-strip[style*="repeat(3"] { grid-template-columns: 1fr !important; }
+}
+
 @media (max-width: 420px) {
   .grid-products { grid-template-columns: 1fr; }
   .perk-strip { grid-template-columns: 1fr; }
@@ -442,11 +459,16 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .logo-icon-img {
   padding: 0 !important;
   overflow: hidden;
+  /* Matches the logo artwork's own background so that fitting the whole
+     image with "contain" (rather than cropping with "cover") leaves no
+     visible seam -- this is what keeps the scalloped golden border from
+     getting clipped by the circular mask. */
+  background: var(--maroon-900);
 }
 .logo-icon-img img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: inherit;
 }
 
@@ -545,7 +567,10 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .testimonial-card .msg { font-size: .92rem; color: var(--ink-900); font-style: italic; }
 .testimonial-card .name { margin-top: 12px; font-weight: 700; color: var(--maroon-900); font-size: .85rem; }
 
-.testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 12px; }
+/* Extra breathing room between the reviews grid / CTA panel and whatever follows */
+.cta-panel-spaced { margin-top: 12px; }
+.cta-panel-spaced .filter-card { padding: 40px 32px; }
 @media (max-width: 960px) { .testimonial-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 640px) { .testimonial-grid { grid-template-columns: 1fr; } }
 
@@ -593,24 +618,60 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 }
 .zoomable { cursor: zoom-in; }
 
-/* ---- Wishlist heart button ---- */
-.wishlist-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.92);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  z-index: 2;
-  color: var(--ink-600);
-  transition: transform .15s ease;
+/* ---------- Responsive mobile card list (replaces wide tables on phones) ----------
+   Pattern: each list page renders BOTH a normal <table> (desktop) and a
+   `.mobile-card-list` (phones). CSS toggles which one is visible; a "View"
+   button on each mobile card opens a `.detail-modal-overlay` with the rest
+   of that row's fields, built server-side per row. */
+.show-mobile-table { display: none; }
+.hide-mobile-table { display: block; }
+@media (max-width: 640px) {
+  .hide-mobile-table { display: none !important; }
+  .show-mobile-table { display: block; }
 }
-.wishlist-btn:hover { transform: scale(1.08); }
-.wishlist-btn.active { color: #B23A48; }
-.wishlist-btn svg { width: 18px; height: 18px; }
+
+.mobile-card-list { display: flex; flex-direction: column; gap: 10px; }
+.mc-card {
+  background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+}
+.mc-card .mc-thumb { width: 46px; height: 46px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: var(--cream-200); }
+.mc-card .mc-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.mc-card .mc-main { flex: 1; min-width: 0; }
+.mc-card .mc-title { font-weight: 600; font-size: .92rem; color: var(--ink-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-card .mc-sub { font-size: .78rem; color: var(--ink-600); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-card .mc-action { flex-shrink: 0; }
+
+/* Bottom-sheet style modal showing the rest of a row's details on mobile */
+.detail-modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(43,27,29,.5);
+  z-index: 9998; align-items: flex-end; justify-content: center;
+}
+.detail-modal-overlay.open { display: flex; }
+.detail-modal {
+  background: var(--card-bg); width: 100%; max-width: 480px;
+  border-radius: 16px 16px 0 0; padding: 22px 20px 26px;
+  max-height: 82vh; overflow-y: auto; box-shadow: 0 -10px 30px rgba(94,24,54,.18);
+  animation: dm-slide-up .2s ease;
+}
+@keyframes dm-slide-up { from { transform: translateY(24px); opacity:.4; } to { transform: translateY(0); opacity:1; } }
+.detail-modal .dm-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.detail-modal .dm-head h4 { margin: 0; }
+.detail-modal .dm-close { background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--ink-600); cursor: pointer; padding: 0 4px; }
+.detail-modal .dm-row { display: flex; justify-content: space-between; gap: 14px; padding: 9px 0; border-bottom: 1px dashed var(--line); font-size: .88rem; }
+.detail-modal .dm-row:last-of-type { border-bottom: none; }
+.detail-modal .dm-row span:first-child { color: var(--ink-600); flex-shrink: 0; }
+.detail-modal .dm-row span:last-child { text-align: right; }
+.detail-modal .dm-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.detail-modal .dm-actions > * { flex: 1 1 auto; }
+
+/* ---------- Pagination ---------- */
+.pagination { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: 20px; }
+.pagination a, .pagination span {
+  min-width: 34px; height: 34px; padding: 0 8px; border-radius: 8px; font-size: .85rem;
+  display: flex; align-items: center; justify-content: center; border: 1px solid var(--line);
+  color: var(--ink-900); background: var(--card-bg);
+}
+.pagination a:hover { background: var(--cream-200); }
+.pagination .current { background: var(--maroon-900); color: #fff; border-color: var(--maroon-900); font-weight: 600; }
+.pagination .disabled { opacity: .4; pointer-events: none; }

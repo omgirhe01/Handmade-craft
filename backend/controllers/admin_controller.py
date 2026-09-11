@@ -48,8 +48,11 @@ def dashboard():
 @admin_bp.route("/vendors")
 @admin_required
 def vendors():
-    all_vendors = Vendor.query.order_by(Vendor.created_at.desc()).all()
-    return render_template("admin/vendors.html", vendors=all_vendors)
+    page = request.args.get("page", 1, type=int)
+    pagination = Vendor.query.order_by(Vendor.created_at.desc()).paginate(
+        page=page, per_page=20, error_out=False
+    )
+    return render_template("admin/vendors.html", vendors=pagination.items, pagination=pagination)
 
 
 @admin_bp.route("/vendors/add", methods=["GET", "POST"])

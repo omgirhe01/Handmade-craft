@@ -47,11 +47,8 @@
       <div class="grid-products">
         {% for p in products %}
         <div class="product-card" onclick="location.href='{{ url_for('public.product_detail', product_id=p.id) }}'" style="cursor:pointer;">
-          <div class="thumb" style="position:relative;">
+          <div class="thumb">
             <img src="{{ image_url(p.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=400&auto=format&fit=crop'" alt="{{ p.name }}">
-            <button type="button" class="wishlist-btn" data-product-id="{{ p.id }}" onclick="event.stopPropagation(); toggleWishlist(this);">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-            </button>
           </div>
           <div class="body">
             <div class="cat">{{ p.category.name }}</div>
@@ -68,6 +65,24 @@
         </div>
         {% endfor %}
       </div>
+
+      {% set qs = '' %}
+      {% if active_category and active_category != 'all' %}{% set qs = qs ~ '&category=' ~ active_category %}{% endif %}
+      {% if search %}{% set qs = qs ~ '&q=' ~ search %}{% endif %}
+      {% if sort %}{% set qs = qs ~ '&sort=' ~ sort %}{% endif %}
+      {% if pagination and pagination.pages > 1 %}
+      <div class="pagination">
+        <a href="?page={{ pagination.prev_num }}{{ qs }}" class="{{ 'disabled' if not pagination.has_prev }}">&laquo;</a>
+        {% for num in pagination.iter_pages() %}
+          {% if num %}
+            <a href="?page={{ num }}{{ qs }}" class="{{ 'current' if num == pagination.page }}">{{ num }}</a>
+          {% else %}
+            <span>…</span>
+          {% endif %}
+        {% endfor %}
+        <a href="?page={{ pagination.next_num }}{{ qs }}" class="{{ 'disabled' if not pagination.has_next }}">&raquo;</a>
+      </div>
+      {% endif %}
     </div>
   </div>
 </section>

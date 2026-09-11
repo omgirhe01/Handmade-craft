@@ -3,13 +3,14 @@
 {% block page_title %}Products{% endblock %}
 {% block vendor_content %}
 
-<div style="margin-bottom:18px; display:flex; gap:12px;">
-  <a href="{{ url_for('vendor.add_product') }}" class="btn btn-primary">+ Add Product</a>
-  <a href="{{ url_for('vendor.bulk_upload_products') }}" class="btn btn-outline">Bulk Upload (CSV)</a>
-  <a href="{{ url_for('vendor.export_products_csv') }}" class="btn btn-outline">Export CSV</a>
+<div style="margin-bottom:18px; display:flex; gap:10px; flex-wrap:wrap;">
+  <a href="{{ url_for('vendor.add_product') }}" class="btn btn-primary btn-sm">+ Add Product</a>
+  <a href="{{ url_for('vendor.bulk_upload_products') }}" class="btn btn-outline btn-sm">Bulk Upload (CSV)</a>
+  <a href="{{ url_for('vendor.export_products_csv') }}" class="btn btn-outline btn-sm">Export CSV</a>
 </div>
 
-<div class="table-card">
+<!-- Desktop table -->
+<div class="table-card hide-mobile-table">
   <table>
     <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr></thead>
     <tbody>
@@ -34,5 +35,51 @@
     </tbody>
   </table>
 </div>
+
+<!-- Mobile card list: image + name, tap View for the rest -->
+<div class="mobile-card-list show-mobile-table">
+  {% for p in products %}
+  <div class="mc-card">
+    <div class="mc-thumb"><img src="{{ image_url(p.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=100&auto=format&fit=crop'" alt="{{ p.name }}"></div>
+    <div class="mc-main">
+      <div class="mc-title">{{ p.name }}</div>
+      <div class="mc-sub">{{ p.category.name }} · ₹{{ '%.0f'|format(p.price) }}</div>
+    </div>
+    <button type="button" class="btn btn-outline btn-sm mc-action" onclick="openDetailModal('pm-{{ p.id }}')">View</button>
+  </div>
+  <div id="pm-{{ p.id }}" class="detail-modal-overlay">
+    <div class="detail-modal">
+      <div class="dm-head"><h4>{{ p.name }}</h4><button type="button" class="dm-close" onclick="closeDetailModal('pm-{{ p.id }}')">&times;</button></div>
+      <div class="dm-row"><span>Category</span><span>{{ p.category.name }}</span></div>
+      <div class="dm-row"><span>Price</span><span>₹{{ '%.0f'|format(p.price) }}</span></div>
+      <div class="dm-row"><span>Stock</span><span>{{ p.stock_quantity if p.stock_quantity is not none else '—' }}{% if p.is_low_stock %} <span class="badge badge-low-stock">Low</span>{% endif %}</span></div>
+      <div class="dm-row"><span>Status</span><span>{% if p.in_stock %}<span class="badge badge-confirmed">Available</span>{% else %}<span class="badge badge-pending" style="background:#FBE6E9; color:#B23A48;">Out of Stock</span>{% endif %}</span></div>
+      {% if p.is_featured %}<div class="dm-row"><span>Featured</span><span><span class="badge badge-featured">★ Featured</span></span></div>{% endif %}
+      <div class="dm-actions">
+        <a href="{{ url_for('vendor.edit_product', product_id=p.id) }}" class="btn btn-outline btn-sm">Edit</a>
+        <form method="post" action="{{ url_for('vendor.delete_product', product_id=p.id) }}" onsubmit="return confirm('Delete this product?');">
+          <button type="submit" class="btn btn-sm btn-block" style="background:#FBE6E9; color:#B23A48;">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state">No products yet. Add your first product!</div>
+  {% endfor %}
+</div>
+
+{% if pagination and pagination.pages > 1 %}
+<div class="pagination">
+  <a href="?page={{ pagination.prev_num }}" class="{{ 'disabled' if not pagination.has_prev }}">&laquo;</a>
+  {% for num in pagination.iter_pages() %}
+    {% if num %}
+      <a href="?page={{ num }}" class="{{ 'current' if num == pagination.page }}">{{ num }}</a>
+    {% else %}
+      <span>…</span>
+    {% endif %}
+  {% endfor %}
+  <a href="?page={{ pagination.next_num }}" class="{{ 'disabled' if not pagination.has_next }}">&raquo;</a>
+</div>
+{% endif %}
 
 {% endblock %}

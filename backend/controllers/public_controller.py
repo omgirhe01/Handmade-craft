@@ -110,6 +110,7 @@ def products():
     category_slug = request.args.get("category")
     search = request.args.get("q", "").strip()
     sort = request.args.get("sort", "")
+    page = request.args.get("page", 1, type=int)
 
     query = Product.query.options(joinedload(Product.category)).filter_by(vendor_id=g.vendor.id)
     if category_slug and category_slug != "all":
@@ -123,11 +124,12 @@ def products():
     else:
         query = query.order_by(Product.created_at.desc())
 
-    all_products = query.all()
+    all_products = query.paginate(page=page, per_page=20, error_out=False)
     categories = Category.query.filter_by(vendor_id=g.vendor.id).all()
     return render_template(
         "products.html",
-        products=all_products,
+        products=all_products.items,
+        pagination=all_products,
         categories=categories,
         active_category=category_slug or "all",
         search=search,
@@ -509,11 +511,6 @@ def set_language(lang):
 @public_bp.route("/about")
 def about():
     return render_template("about.html")
-
-
-@public_bp.route("/wishlist")
-def wishlist():
-    return render_template("wishlist.html")
 
 
 @public_bp.route("/api/products-by-ids")

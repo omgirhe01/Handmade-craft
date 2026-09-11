@@ -11,9 +11,6 @@
     <div>
       <div class="hero-image zoomable" style="aspect-ratio:1/1; position:relative;" onclick="openLightbox(document.getElementById('pdMainImage').src)">
         <img id="pdMainImage" src="{{ image_url(product.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=700&auto=format&fit=crop'" alt="{{ product.name }}">
-        <button type="button" class="wishlist-btn" data-product-id="{{ product.id }}" onclick="event.stopPropagation(); toggleWishlist(this);">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-        </button>
       </div>
       {% if product.gallery_images %}
       <div class="pd-thumbs">

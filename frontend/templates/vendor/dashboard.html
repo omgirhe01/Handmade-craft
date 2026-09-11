@@ -62,21 +62,23 @@
 
 <div class="panel" style="margin-top:20px;">
   <h4>Recent Orders</h4>
-  <table>
-    <thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
-    <tbody>
-      {% for o in recent_orders %}
-      <tr>
-        <td>#{{ o.order_code }}</td>
-        <td>{{ o.customer_name }}</td>
-        <td>₹{{ '%.0f'|format(o.total_price) }}</td>
-        <td><span class="badge badge-{{ o.status|lower }}">{{ o.status }}</span></td>
-      </tr>
-      {% else %}
-      <tr><td colspan="4" style="text-align:center; color:var(--ink-600);">No orders yet.</td></tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for o in recent_orders %}
+        <tr>
+          <td>#{{ o.order_code }}</td>
+          <td>{{ o.customer_name }}</td>
+          <td>₹{{ '%.0f'|format(o.total_price) }}</td>
+          <td><span class="badge badge-{{ o.status|lower }}">{{ o.status }}</span></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="text-align:center; color:var(--ink-600);">No orders yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </div>
 
 {% endblock %}

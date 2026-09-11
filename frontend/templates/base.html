@@ -54,7 +54,6 @@
         <a href="{{ url_for('public.products') }}" class="{{ 'active' if request.endpoint in ['public.products','public.product_detail'] }}">{{ t('Products') }}</a>
         <a href="{{ url_for('public.custom_order') }}" class="{{ 'active' if request.endpoint=='public.custom_order' }}">{{ t('Custom Order') }}</a>
         <a href="{{ url_for('public.my_orders') }}" class="{{ 'active' if request.endpoint=='public.my_orders' }}">{{ t('My Orders') }}</a>
-        <a href="{{ url_for('public.wishlist') }}" class="{{ 'active' if request.endpoint=='public.wishlist' }}">{{ t('Wishlist') }} <span id="wishlistCount" style="font-size:.75em; color:var(--gold-500);"></span></a>
         <a href="{{ url_for('public.about') }}" class="{{ 'active' if request.endpoint=='public.about' }}">{{ t('About Us') }}</a>
         <a href="{{ url_for('public.contact') }}" class="{{ 'active' if request.endpoint=='public.contact' }}">{{ t('Contact') }}</a>
         <span style="display:inline-flex; gap:6px; margin-left:6px; font-size:.8rem;">
@@ -128,42 +127,6 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 
-// ---- Wishlist (stored locally in this browser, per store) ----
-var WISHLIST_KEY = 'wishlist_{{ VENDOR.slug if VENDOR else "store" }}';
-
-function getWishlist() {
-  try {
-    return JSON.parse(localStorage.getItem(WISHLIST_KEY)) || [];
-  } catch (e) {
-    return [];
-  }
-}
-
-function toggleWishlist(btn) {
-  var id = parseInt(btn.getAttribute('data-product-id'));
-  var list = getWishlist();
-  var idx = list.indexOf(id);
-  if (idx === -1) {
-    list.push(id);
-    btn.classList.add('active');
-  } else {
-    list.splice(idx, 1);
-    btn.classList.remove('active');
-  }
-  localStorage.setItem(WISHLIST_KEY, JSON.stringify(list));
-  var countEl = document.getElementById('wishlistCount');
-  if (countEl) { countEl.textContent = list.length > 0 ? list.length : ''; }
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  var list = getWishlist();
-  document.querySelectorAll('.wishlist-btn').forEach(function (btn) {
-    var id = parseInt(btn.getAttribute('data-product-id'));
-    if (list.indexOf(id) !== -1) { btn.classList.add('active'); }
-  });
-  var countEl = document.getElementById('wishlistCount');
-  if (countEl && list.length > 0) { countEl.textContent = list.length; }
-});
 </script>
 
 <script src="{{ url_for('static', filename='js/script.js') }}"></script>
