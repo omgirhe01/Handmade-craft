@@ -106,39 +106,44 @@ var PRODUCT_DISCOUNT_PERCENT = {{ product.discount_percent or 0 }};
 var DISCOUNTED_BASE_PRICE = {{ product.discounted_price }};
 var DELIVERY_CHARGE = {{ VENDOR.delivery_charge or 0 }};
 
-function currentUnitPrice() {
+// Returns the original (undiscounted) and discounted unit price for
+// whichever option is currently selected. Variants have their own fixed
+// price and are not discounted further -- only the plain base price is.
+function currentUnitPrices() {
   var variantSelect = document.getElementById('variantSelect');
   if (variantSelect && variantSelect.value) {
     var opt = variantSelect.options[variantSelect.selectedIndex];
-    return parseFloat(opt.getAttribute('data-price')) || BASE_PRICE;
+    var vPrice = parseFloat(opt.getAttribute('data-price')) || BASE_PRICE;
+    return { original: vPrice, discounted: vPrice };
   }
-  return BASE_PRICE;
+  return { original: BASE_PRICE, discounted: DISCOUNTED_BASE_PRICE };
 }
 
 function refreshSummary() {
   var qty = parseInt(document.getElementById('quantityInput').value) || 1;
-  var unit = currentUnitPrice();
-  document.getElementById('unitPriceDisplay').textContent = '₹' + unit.toFixed(0);
-  var subtotal = unit * qty;
+  var unit = currentUnitPrices();
+  document.getElementById('unitPriceDisplay').textContent = '₹' + unit.discounted.toFixed(0);
+
+  var subtotal = unit.original * qty;
+  var productDiscount = (unit.original - unit.discounted) * qty;
   document.getElementById('sumSubtotal').textContent = '₹' + subtotal.toFixed(0);
-  document.getElementById('sumTotal').textContent = '₹' + (subtotal + DELIVERY_CHARGE).toFixed(0);
-  
+
   // Show product discount if applicable
-  if (PRODUCT_DISCOUNT_PERCENT > 0) {
-    var productDiscount = (BASE_PRICE - DISCOUNTED_BASE_PRICE) * qty;
+  if (productDiscount > 0) {
     document.getElementById('sumDiscountLabel').textContent = 'Product Discount (' + PRODUCT_DISCOUNT_PERCENT + '%)';
     document.getElementById('sumDiscount').textContent = '-₹' + productDiscount.toFixed(0);
     document.getElementById('discountRow').style.display = 'flex';
   } else {
     document.getElementById('discountRow').style.display = 'none';
   }
-  
-  // Hide coupon discount on quantity change (unless user just applied coupon)
+
+  // Hide coupon discount on quantity/variant change (unless user just applied a coupon)
   document.getElementById('couponDiscountRow').style.display = 'none';
-  
-  if (DELIVERY_CHARGE > 0 || subtotal > 0) {
-    document.getElementById('orderSummary').style.display = 'block';
-  }
+
+  var total = subtotal - productDiscount + DELIVERY_CHARGE;
+  document.getElementById('sumTotal').textContent = '₹' + total.toFixed(0);
+
+  document.getElementById('orderSummary').style.display = 'block';
 }
 
 var variantSelectEl = document.getElementById('variantSelect');
@@ -181,39 +186,29 @@ document.getElementById('applyCouponBtn').addEventListener('click', function () 
       msgEl.textContent = '✓ ' + data.message;
       msgEl.style.color = '#2C7A3D';
       document.getElementById('sumSubtotal').textContent = '₹' + data.subtotal.toFixed(0);
-      
+
       // Show product discount if applicable
-      if (PRODUCT_DISCOUNT_PERCENT > 0) {
-        var qty = parseInt(document.getElementById('quantityInput').value) || 1;
-        var productDiscount = (BASE_PRICE - DISCOUNTED_BASE_PRICE) * qty;
+      if (data.product_discount_amount > 0) {
         document.getElementById('sumDiscountLabel').textContent = 'Product Discount (' + PRODUCT_DISCOUNT_PERCENT + '%)';
-        document.getElementById('sumDiscount').textContent = '-₹' + productDiscount.toFixed(0);
+        document.getElementById('sumDiscount').textContent = '-₹' + data.product_discount_amount.toFixed(0);
         document.getElementById('discountRow').style.display = 'flex';
       } else {
         document.getElementById('discountRow').style.display = 'none';
       }
-      
+
       // Show coupon discount
       document.getElementById('sumCouponDiscountLabel').textContent = 'Coupon Discount (' + data.discount_percent + '%)';
       document.getElementById('sumCouponDiscount').textContent = '-₹' + data.discount_amount.toFixed(0);
       document.getElementById('couponDiscountRow').style.display = 'flex';
-      
+
       document.getElementById('sumTotal').textContent = '₹' + data.final_total.toFixed(0);
       summaryEl.style.display = 'block';
     } else {
       msgEl.textContent = '✗ ' + (data.message || 'Invalid coupon code.');
       msgEl.style.color = '#B23A48';
       // Keep product discount visible, hide coupon discount
-      if (PRODUCT_DISCOUNT_PERCENT > 0) {
-        var qty = parseInt(document.getElementById('quantityInput').value) || 1;
-        var productDiscount = (BASE_PRICE - DISCOUNTED_BASE_PRICE) * qty;
-        document.getElementById('sumDiscountLabel').textContent = 'Product Discount (' + PRODUCT_DISCOUNT_PERCENT + '%)';
-        document.getElementById('sumDiscount').textContent = '-₹' + productDiscount.toFixed(0);
-        document.getElementById('discountRow').style.display = 'flex';
-      } else {
-        document.getElementById('discountRow').style.display = 'none';
-      }
       document.getElementById('couponDiscountRow').style.display = 'none';
+      refreshSummary();
     }
   })
   .catch(function () {

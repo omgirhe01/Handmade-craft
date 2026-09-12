@@ -248,6 +248,13 @@ def check_coupon(product_id):
     subtotal = unit_price * quantity
     delivery_charge = float(g.vendor.delivery_charge or 0)
 
+    # Product's own discount (only applies when no variant is selected --
+    # variants carry their own fixed price and are not discounted further).
+    product_discount_amount = 0.0
+    if not variant_id and product.discount_percent and product.discount_percent > 0:
+        product_discount_amount = round(subtotal * product.discount_percent / 100, 2)
+    subtotal_after_product_discount = subtotal - product_discount_amount
+
     if not code:
         return jsonify({"valid": False, "message": "Enter a coupon code first."})
 
@@ -255,13 +262,14 @@ def check_coupon(product_id):
     if not coupon or not coupon.is_valid():
         return jsonify({"valid": False, "message": "This coupon code is not valid."})
 
-    discount_amount = round(subtotal * coupon.discount_percent / 100, 2)
-    final_total = round(subtotal - discount_amount + delivery_charge, 2)
+    discount_amount = round(subtotal_after_product_discount * coupon.discount_percent / 100, 2)
+    final_total = round(subtotal_after_product_discount - discount_amount + delivery_charge, 2)
 
     return jsonify({
         "valid": True,
         "discount_percent": coupon.discount_percent,
         "subtotal": subtotal,
+        "product_discount_amount": product_discount_amount,
         "discount_amount": discount_amount,
         "delivery_charge": delivery_charge,
         "final_total": final_total,
@@ -299,18 +307,28 @@ def place_order(product_id):
             return render_template("order_form.html", product=product)
 
         subtotal = unit_price * quantity
-        discount_amount = 0.0
+
+        # Product's own discount (only when no variant selected -- variants
+        # have their own fixed price and aren't discounted further).
+        product_discount_amount = 0.0
+        if not variant_id and product.discount_percent and product.discount_percent > 0:
+            product_discount_amount = (subtotal * product.discount_percent) / 100
+        subtotal_after_product_discount = subtotal - product_discount_amount
+
+        coupon_discount_amount = 0.0
         applied_coupon = ""
 
         if coupon_input:
             coupon = Coupon.query.filter_by(vendor_id=g.vendor.id, code=coupon_input.upper()).first()
             if coupon and coupon.is_valid():
-                discount_amount = (subtotal * coupon.discount_percent) / 100
+                coupon_discount_amount = (subtotal_after_product_discount * coupon.discount_percent) / 100
                 applied_coupon = coupon.code
                 coupon.times_used += 1
             else:
                 flash("That coupon code is invalid or has expired.", "danger")
                 return render_template("order_form.html", product=product)
+
+        discount_amount = product_discount_amount + coupon_discount_amount
 
         delivery_charge = float(g.vendor.delivery_charge or 0)
 
