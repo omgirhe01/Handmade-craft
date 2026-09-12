@@ -12,7 +12,7 @@
 <div class="admin-shell">
   <aside class="admin-sidebar" id="adminSidebar">
     <div class="brand-mini">
-      <div class="name">{{ current_user.business_name }}</div>
+      <div class="name" style="font-weight:600; font-size:1.05rem; color:#1A1A1A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.4;">{{ current_user.business_name }}</div>
     </div>
     <nav>
       <a href="{{ url_for('vendor.dashboard') }}" class="{{ 'active' if request.endpoint=='vendor.dashboard' }}">{{ icon('chart', 18) }} Dashboard</a>

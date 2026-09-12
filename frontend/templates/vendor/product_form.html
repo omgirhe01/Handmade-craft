@@ -88,6 +88,11 @@
         <label>Price (₹) <span class="req">*</span></label>
         <input type="number" step="0.01" name="price" required value="{{ product.price if product else '' }}">
       </div>
+      <div class="form-group">
+        <label>Discount (%)</label>
+        <input type="number" name="discount_percent" min="0" max="100" value="{{ product.discount_percent if product else 0 }}">
+        <span style="font-size:.78rem; color:var(--ink-600);">Leave blank or 0 for no discount</span>
+      </div>
     </div>
 
     <div class="form-group">

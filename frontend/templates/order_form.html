@@ -6,7 +6,13 @@
     <h2 class="text-center">Order Now</h2>
     <p class="text-center" style="color:var(--ink-600); margin-top:-8px;">
       {{ product.name }} —
+      {% if product.discount_percent and product.discount_percent > 0 %}
+      <span style="text-decoration:line-through; color:var(--ink-400);">₹{{ '%.0f'|format(product.price) }}</span>
+      <span id="unitPriceDisplay">₹{{ '%.0f'|format(product.discounted_price) }}</span> each
+      <span style="font-size:.85rem; color:#B23A48;">({{ product.discount_percent }}% off)</span>
+      {% else %}
       <span id="unitPriceDisplay">₹{{ '%.0f'|format(product.price) }}</span> each
+      {% endif %}
     </p>
 
     <form method="post" style="margin-top:24px;">
@@ -52,13 +58,33 @@
         <div id="couponMessage" style="font-size:.85rem; margin-top:8px;"></div>
       </div>
 
-      <div id="orderSummary" class="filter-card" style="{{ 'display:block;' if VENDOR.delivery_charge else 'display:none;' }} margin-bottom:18px; background:var(--cream-200);">
-        <div style="display:flex; justify-content:space-between; font-size:.85rem;"><span>Subtotal</span><span id="sumSubtotal">₹{{ '%.0f'|format(product.price) }}</span></div>
-        <div id="discountRow" style="display:none; justify-content:space-between; font-size:.85rem; color:#2C7A3D;"><span id="sumDiscountLabel">Discount</span><span id="sumDiscount"></span></div>
+      <div id="orderSummary" class="filter-card" style="{{ 'display:block;' if VENDOR.delivery_charge else 'display:none;' }} margin-bottom:18px; background:var(--cream-200); padding:16px;">
+        <div style="display:flex; justify-content:space-between; font-size:.95rem; margin-bottom:8px;">
+          <span style="font-weight:600;">Price</span>
+          <span id="sumSubtotal" style="font-weight:600;">₹{{ '%.0f'|format(product.price) }}</span>
+        </div>
+        
+        <div id="discountRow" style="display:none; justify-content:space-between; font-size:.95rem; color:#2C7A3D; margin-bottom:8px;">
+          <span id="sumDiscountLabel">Discount</span>
+          <span id="sumDiscount"></span>
+        </div>
+        
+        <div id="couponDiscountRow" style="display:none; justify-content:space-between; font-size:.95rem; color:#2C7A3D; margin-bottom:8px;">
+          <span id="sumCouponDiscountLabel">Coupon Discount</span>
+          <span id="sumCouponDiscount"></span>
+        </div>
+        
         {% if VENDOR.delivery_charge %}
-        <div style="display:flex; justify-content:space-between; font-size:.85rem;"><span>Delivery Charge</span><span id="sumDelivery">₹{{ '%.0f'|format(VENDOR.delivery_charge) }}</span></div>
+        <div style="display:flex; justify-content:space-between; font-size:.95rem; margin-bottom:8px;">
+          <span>Delivery Charge</span>
+          <span id="sumDelivery">₹{{ '%.0f'|format(VENDOR.delivery_charge) }}</span>
+        </div>
         {% endif %}
-        <div style="display:flex; justify-content:space-between; font-weight:700; margin-top:6px; border-top:1px solid var(--line); padding-top:6px;"><span>Total</span><span id="sumTotal">₹{{ '%.0f'|format(product.price + (VENDOR.delivery_charge or 0)) }}</span></div>
+        
+        <div style="display:flex; justify-content:space-between; font-weight:700; margin-top:12px; border-top:1px solid var(--line); padding-top:12px; font-size:1.1rem;">
+          <span>Total</span>
+          <span id="sumTotal">₹{{ '%.0f'|format(product.price + (VENDOR.delivery_charge or 0)) }}</span>
+        </div>
       </div>
 
       {# UPI QR "pay now" block is turned off for now (future scope) -- there is
@@ -76,6 +102,8 @@
 {% block scripts %}
 <script>
 var BASE_PRICE = {{ product.price }};
+var PRODUCT_DISCOUNT_PERCENT = {{ product.discount_percent or 0 }};
+var DISCOUNTED_BASE_PRICE = {{ product.discounted_price }};
 var DELIVERY_CHARGE = {{ VENDOR.delivery_charge or 0 }};
 
 function currentUnitPrice() {
@@ -94,7 +122,20 @@ function refreshSummary() {
   var subtotal = unit * qty;
   document.getElementById('sumSubtotal').textContent = '₹' + subtotal.toFixed(0);
   document.getElementById('sumTotal').textContent = '₹' + (subtotal + DELIVERY_CHARGE).toFixed(0);
-  document.getElementById('discountRow').style.display = 'none';
+  
+  // Show product discount if applicable
+  if (PRODUCT_DISCOUNT_PERCENT > 0) {
+    var productDiscount = (BASE_PRICE - DISCOUNTED_BASE_PRICE) * qty;
+    document.getElementById('sumDiscountLabel').textContent = 'Product Discount (' + PRODUCT_DISCOUNT_PERCENT + '%)';
+    document.getElementById('sumDiscount').textContent = '-₹' + productDiscount.toFixed(0);
+    document.getElementById('discountRow').style.display = 'flex';
+  } else {
+    document.getElementById('discountRow').style.display = 'none';
+  }
+  
+  // Hide coupon discount on quantity change (unless user just applied coupon)
+  document.getElementById('couponDiscountRow').style.display = 'none';
+  
   if (DELIVERY_CHARGE > 0 || subtotal > 0) {
     document.getElementById('orderSummary').style.display = 'block';
   }
@@ -136,15 +177,39 @@ document.getElementById('applyCouponBtn').addEventListener('click', function () 
       msgEl.textContent = '✓ ' + data.message;
       msgEl.style.color = '#2C7A3D';
       document.getElementById('sumSubtotal').textContent = '₹' + data.subtotal.toFixed(0);
-      document.getElementById('sumDiscountLabel').textContent = 'Discount (' + data.discount_percent + '%)';
-      document.getElementById('sumDiscount').textContent = '-₹' + data.discount_amount.toFixed(0);
-      document.getElementById('discountRow').style.display = 'flex';
+      
+      // Show product discount if applicable
+      if (PRODUCT_DISCOUNT_PERCENT > 0) {
+        var qty = parseInt(document.getElementById('quantityInput').value) || 1;
+        var productDiscount = (BASE_PRICE - DISCOUNTED_BASE_PRICE) * qty;
+        document.getElementById('sumDiscountLabel').textContent = 'Product Discount (' + PRODUCT_DISCOUNT_PERCENT + '%)';
+        document.getElementById('sumDiscount').textContent = '-₹' + productDiscount.toFixed(0);
+        document.getElementById('discountRow').style.display = 'flex';
+      } else {
+        document.getElementById('discountRow').style.display = 'none';
+      }
+      
+      // Show coupon discount
+      document.getElementById('sumCouponDiscountLabel').textContent = 'Coupon Discount (' + data.discount_percent + '%)';
+      document.getElementById('sumCouponDiscount').textContent = '-₹' + data.discount_amount.toFixed(0);
+      document.getElementById('couponDiscountRow').style.display = 'flex';
+      
       document.getElementById('sumTotal').textContent = '₹' + data.final_total.toFixed(0);
       summaryEl.style.display = 'block';
     } else {
       msgEl.textContent = '✗ ' + (data.message || 'Invalid coupon code.');
       msgEl.style.color = '#B23A48';
-      document.getElementById('discountRow').style.display = 'none';
+      // Keep product discount visible, hide coupon discount
+      if (PRODUCT_DISCOUNT_PERCENT > 0) {
+        var qty = parseInt(document.getElementById('quantityInput').value) || 1;
+        var productDiscount = (BASE_PRICE - DISCOUNTED_BASE_PRICE) * qty;
+        document.getElementById('sumDiscountLabel').textContent = 'Product Discount (' + PRODUCT_DISCOUNT_PERCENT + '%)';
+        document.getElementById('sumDiscount').textContent = '-₹' + productDiscount.toFixed(0);
+        document.getElementById('discountRow').style.display = 'flex';
+      } else {
+        document.getElementById('discountRow').style.display = 'none';
+      }
+      document.getElementById('couponDiscountRow').style.display = 'none';
     }
   })
   .catch(function () {

@@ -42,7 +42,15 @@
         {% if min_price == max_price %}₹{{ '%.0f'|format(min_price) }}{% else %}₹{{ '%.0f'|format(min_price) }} – ₹{{ '%.0f'|format(max_price) }}{% endif %}
       </div>
       {% else %}
-      <div class="price" style="font-size:1.5rem; margin:6px 0 16px; color:#1A1A1A; font-family:'Poppins', sans-serif;">₹{{ '%.0f'|format(product.price) }}</div>
+      <div style="display:flex; align-items:center; gap:12px; margin:6px 0 16px;">
+        {% if product.discount_percent and product.discount_percent > 0 %}
+        <span style="font-size:1.2rem; color:var(--ink-500); text-decoration:line-through;">₹{{ '%.0f'|format(product.price) }}</span>
+        <span style="font-size:1.8rem; color:#1A1A1A; font-family:'Poppins', sans-serif; font-weight:600;">₹{{ '%.0f'|format(product.discounted_price) }}</span>
+        <span style="font-size:.9rem; background:#FBE6E9; color:#B23A48; padding:4px 8px; border-radius:4px; font-weight:600;">Discount {{ product.discount_percent }}%</span>
+        {% else %}
+        <span style="font-size:1.8rem; color:#1A1A1A; font-family:'Poppins', sans-serif; font-weight:600;">₹{{ '%.0f'|format(product.price) }}</span>
+        {% endif %}
+      </div>
       {% endif %}
       <p style="color:var(--ink-600);">{{ product.description }}</p>
 
@@ -55,9 +63,9 @@
       </ul>
 
       {% if product.in_stock %}
-      <div style="display:flex; gap:14px; margin-top:10px; flex-wrap:wrap;">
-        <a href="{{ url_for('public.place_order', product_id=product.id) }}" class="btn btn-primary">{{ icon('cart', 18) }} Order Now</a>
-        <a href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hello%2C%20I%20want%20to%20order%20{{ product.name|urlencode }}.%20Please%20share%20details%20and%20price." target="_blank" class="btn btn-whatsapp">Order on WhatsApp</a>
+      <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+        <a href="{{ url_for('public.place_order', product_id=product.id) }}" class="btn btn-primary" style="flex:1; min-width:140px; text-align:center;">{{ icon('cart', 18) }} Order Now</a>
+        <a href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hello%2C%20I%20want%20to%20order%20{{ product.name|urlencode }}.%20Please%20share%20details%20and%20price." target="_blank" class="btn btn-whatsapp" style="flex:1; min-width:140px; text-align:center;">Order on WhatsApp</a>
       </div>
       {% else %}
       <a href="https://wa.me/{{ WHATSAPP_NUMBER }}?text=Hello%2C%20I%27m%20interested%20in%20{{ product.name|urlencode }}%2C%20please%20let%20me%20know%20when%20it%27s%20back%20in%20stock." target="_blank" class="btn btn-outline">Notify Me on WhatsApp</a>
@@ -65,7 +73,6 @@
 
       <div class="trust-row">
         <span>{{ icon('check-circle', 16) }} Premium Quality</span>
-        <span>{{ icon('heart', 16) }} Curated with Love</span>
         <span>{{ icon('undo', 16) }} Easy Returns</span>
       </div>
     </div>

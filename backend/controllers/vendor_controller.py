@@ -197,11 +197,15 @@ def add_product():
             flash("Invalid category.", "danger")
             return render_template("vendor/product_form.html", categories=categories, product=None)
 
+        discount_str = request.form.get("discount_percent", "0").strip()
+        discount = int(discount_str) if discount_str and discount_str.isdigit() else 0
+        
         product = Product(
             vendor_id=current_user.id,
             name=request.form.get("name", "").strip(),
             category_id=category_id,
             price=float(request.form.get("price", 0)),
+            discount_percent=discount,
             description=request.form.get("description", "").strip(),
             material=request.form.get("material", "").strip(),
             size=request.form.get("size", "").strip(),
@@ -246,6 +250,8 @@ def edit_product(product_id):
 
         product.name = request.form.get("name", "").strip()
         product.price = float(request.form.get("price", 0))
+        discount_str = request.form.get("discount_percent", "0").strip()
+        product.discount_percent = int(discount_str) if discount_str and discount_str.isdigit() else 0
         product.description = request.form.get("description", "").strip()
         product.material = request.form.get("material", "").strip()
         product.size = request.form.get("size", "").strip()

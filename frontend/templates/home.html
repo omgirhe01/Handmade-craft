@@ -9,7 +9,7 @@
       <h1>{{ VENDOR.hero_heading or SITE_NAME }}</h1>
       <div class="script-line">{{ SITE_TAGLINE or "Curated With Love" }}</div>
       <p class="lede" style="text-align:justify;">{{ VENDOR.hero_description or "Thoughtfully Curated, Beautifully Packed<br>Handpicked gift hampers for your home, festivals & every special occasion." | safe }}</p>
-      <a href="{{ url_for('public.products') }}" class="btn hero-cta">{{ t('Explore Product') }} →</a>
+      <a href="{{ url_for('public.products') }}" class="btn hero-cta">{{ t('Explore Hampers') }} →</a>
     </div>
     <div class="hero-image">
       {% if VENDOR.cover_filename %}
@@ -68,9 +68,9 @@
       {% endif %}
     </div>
     <div class="story-text">
-      <h2>{{ VENDOR.story_heading or "Every Product, Curated With Care" }}</h2>
+      <h2>{{ VENDOR.story_heading or "Every Hamper, Curated With Care" }}</h2>
       <p>
-        {{ VENDOR.story_description or "No two Products are exactly alike — each one is handpicked, arranged and packed with the same care you'd put into a gift for family. From choosing every item to the final ribbon, it's put together just for you." }}
+        {{ VENDOR.story_description or "No two hampers are exactly alike — each one is handpicked, arranged and packed with the same care you'd put into a gift for family. From choosing every item to the final ribbon, it's put together just for you." }}
       </p>
       <a href="{{ url_for('public.about') }}" class="btn btn-outline">Our Story →</a>
     </div>
