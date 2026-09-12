@@ -369,7 +369,11 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .admin-sidebar nav a.active { background: var(--maroon-700); color: #fff; }
 .admin-sidebar nav a.sidebar-logout { margin-top: auto; border-top: 1px solid rgba(255,255,255,.08); padding-top: 13px; }
 .admin-main { margin-left: 240px; padding: 30px 34px; background: var(--cream-100); min-width: 0; }
-.admin-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; }
+.admin-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: -30px -34px 26px; padding: 18px 34px;
+  background: var(--card-bg); border-bottom: 1px solid var(--line);
+}
 /* Mobile-only brand row (logo + business name) shown in the topbar in place
    of the page title -- see the max-width:960px block below. Hidden on
    desktop, where the sidebar's own brand-mini already shows the business
@@ -436,6 +440,7 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
   .admin-sidebar.open { left: 0; }
   .admin-toggle { display: flex; margin-right: 0; }
   .admin-main { margin-left: 0; padding: 22px 18px; }
+  .admin-topbar { margin: -22px -18px 22px; padding: 14px 18px; }
   /* Smaller nav rows so the whole menu fits one screen without needing to
      scroll inside the sidebar itself. */
   .admin-sidebar { padding: 14px 0; }
@@ -475,6 +480,7 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
   .form-row { grid-template-columns: 1fr; }
   .form-card { padding: 22px 18px; }
   .section { padding: 38px 0; }
+  .section + .section { padding-top: 38px; }
   .section-head { flex-direction: column; align-items: flex-start; }
   .container { padding: 0 16px; }
   .brand-text .name { font-size: 1rem; }

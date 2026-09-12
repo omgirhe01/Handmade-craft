@@ -32,7 +32,7 @@
 
 <header class="navbar">
   <div class="inner">
-    <a href="{{ url_for('public.home') }}" class="brand">
+    <div class="brand">
       {% if VENDOR.logo_filename %}
       <div class="logo-icon logo-icon-img"><img src="{{ image_url(VENDOR.logo_filename) }}" alt="{{ SITE_NAME }}"></div>
       {% else %}
@@ -42,7 +42,7 @@
         <div class="name">{{ SITE_NAME|upper }}</div>
         <div class="tagline">{{ SITE_TAGLINE }}</div>
       </div>
-    </a>
+    </div>
 
     <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navPanel">
       <span class="bar"></span>
