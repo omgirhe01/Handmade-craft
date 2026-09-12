@@ -58,7 +58,7 @@
         <div id="couponMessage" style="font-size:.85rem; margin-top:8px;"></div>
       </div>
 
-      <div id="orderSummary" class="filter-card" style="{{ 'display:block;' if VENDOR.delivery_charge else 'display:none;' }} margin-bottom:18px; background:var(--cream-200); padding:16px;">
+      <div id="orderSummary" class="filter-card" style="display:block; margin-bottom:18px; background:var(--cream-200); padding:16px;">
         <div style="display:flex; justify-content:space-between; font-size:.95rem; margin-bottom:8px;">
           <span style="font-weight:600;">Price</span>
           <span id="sumSubtotal" style="font-weight:600;">₹{{ '%.0f'|format(product.price) }}</span>
@@ -144,6 +144,10 @@ function refreshSummary() {
 var variantSelectEl = document.getElementById('variantSelect');
 if (variantSelectEl) { variantSelectEl.addEventListener('change', refreshSummary); }
 document.getElementById('quantityInput').addEventListener('input', refreshSummary);
+
+// Run once on page load so Price / Discount / Total are correct immediately,
+// without waiting for the user to touch quantity or variant first.
+refreshSummary();
 
 document.getElementById('applyCouponBtn').addEventListener('click', function () {
   var code = document.getElementById('couponInput').value.trim();

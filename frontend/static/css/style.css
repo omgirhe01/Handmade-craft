@@ -96,6 +96,14 @@ img { max-width: 100%; display: block; }
 
 /* Panel holds the page links + Admin button; on desktop it sits inline in the header */
 .nav-panel { display: flex; align-items: center; gap: 26px; }
+/* Business name shown at the top of the off-canvas mobile menu, above "Home".
+   Hidden on desktop since the header brand (logo + name) is already visible there. */
+.nav-panel-brand {
+  display: none; font-family: 'Playfair Display', serif; font-weight: 700;
+  font-size: 1.05rem; color: var(--maroon-900); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; width: 100%;
+  padding-bottom: 10px; margin-bottom: 8px; border-bottom: 1px solid var(--line);
+}
 .nav-links { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
 .nav-links a { font-size: .92rem; font-weight: 500; color: var(--ink-900); padding: 6px 2px; border-bottom: 2px solid transparent; }
 .nav-links a:hover, .nav-links a.active { color: var(--brand-accent); border-color: var(--gold-500); }
@@ -209,6 +217,9 @@ img { max-width: 100%; display: block; }
 .product-card .cat { font-size: .72rem; color: var(--gold-500); font-weight: 600; }
 .product-card h4 { font-size: 1rem; margin: 4px 0 6px; }
 .product-card .price { color: #1A1A1A; font-weight: 700; font-family: 'Poppins', sans-serif; }
+.product-card .price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.product-card .price-old { font-size: .82rem; color: var(--ink-500); text-decoration: line-through; font-weight: 500; }
+.product-card .discount-tag { font-size: .68rem; background: var(--ok-bg); color: var(--ok-fg); padding: 2px 6px; border-radius: 4px; font-weight: 600; }
 .product-card .stock-out { display:inline-block; font-size:.7rem; color:#B23A48; font-weight:600; margin-top:4px; }
 
 /* ---------- Story band (homepage craft image + text) ---------- */
@@ -467,6 +478,7 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
     transition: right .28s ease; z-index: 210; overflow-y: auto;
   }
   .nav-panel.open { right: 0; }
+  .nav-panel-brand { display: block; }
   .nav-links { flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; }
   .nav-links a { display: block; width: 100%; padding: 12px 8px; border-bottom: 1px solid var(--line); }
   .nav-panel .btn { width: 100%; margin-top: 10px; }

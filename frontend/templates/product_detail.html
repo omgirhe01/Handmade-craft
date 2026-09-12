@@ -44,11 +44,11 @@
       {% else %}
       <div style="display:flex; align-items:center; gap:12px; margin:6px 0 16px;">
         {% if product.discount_percent and product.discount_percent > 0 %}
-        <span style="font-size:1.2rem; color:var(--ink-500); text-decoration:line-through;">₹{{ '%.0f'|format(product.price) }}</span>
-        <span style="font-size:1.8rem; color:#1A1A1A; font-family:'Poppins', sans-serif; font-weight:600;">₹{{ '%.0f'|format(product.discounted_price) }}</span>
-        <span style="font-size:.9rem; background:#FBE6E9; color:#B23A48; padding:4px 8px; border-radius:4px; font-weight:600;">Discount {{ product.discount_percent }}%</span>
+        <span style="font-size:1.1rem; color:var(--ink-500); text-decoration:line-through;">₹{{ '%.0f'|format(product.price) }}</span>
+        <span style="font-size:1.4rem; color:#1A1A1A; font-family:'Poppins', sans-serif; font-weight:600;">₹{{ '%.0f'|format(product.discounted_price) }}</span>
+        <span style="font-size:.85rem; background:var(--ok-bg); color:var(--ok-fg); padding:4px 8px; border-radius:4px; font-weight:600;">{{ product.discount_percent }}% off</span>
         {% else %}
-        <span style="font-size:1.8rem; color:#1A1A1A; font-family:'Poppins', sans-serif; font-weight:600;">₹{{ '%.0f'|format(product.price) }}</span>
+        <span style="font-size:1.4rem; color:#1A1A1A; font-family:'Poppins', sans-serif; font-weight:600;">₹{{ '%.0f'|format(product.price) }}</span>
         {% endif %}
       </div>
       {% endif %}
@@ -104,7 +104,15 @@
       <div class="body">
         <div class="cat">{{ p.category.name }}</div>
         <h4>{{ p.name }}</h4>
+        {% if p.discount_percent and p.discount_percent > 0 %}
+        <div class="price-row">
+          <span class="price">₹{{ '%.0f'|format(p.discounted_price) }}</span>
+          <span class="price-old">₹{{ '%.0f'|format(p.price) }}</span>
+          <span class="discount-tag">{{ p.discount_percent }}% off</span>
+        </div>
+        {% else %}
         <div class="price">₹{{ '%.0f'|format(p.price) }}</div>
+        {% endif %}
       </div>
     </a>
     {% endfor %}

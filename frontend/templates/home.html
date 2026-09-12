@@ -46,7 +46,15 @@
       <div class="body">
         <div class="cat">{{ p.category.name }}</div>
         <h4>{{ p.name }}</h4>
+        {% if p.discount_percent and p.discount_percent > 0 %}
+        <div class="price-row">
+          <span class="price">₹{{ '%.0f'|format(p.discounted_price) }}</span>
+          <span class="price-old">₹{{ '%.0f'|format(p.price) }}</span>
+          <span class="discount-tag">{{ p.discount_percent }}% off</span>
+        </div>
+        {% else %}
         <div class="price">₹{{ '%.0f'|format(p.price) }}</div>
+        {% endif %}
         {% if p.is_featured %}<span class="badge-featured">Bestseller</span>{% endif %}
         {% if not p.in_stock %}<span class="stock-out">Out of Stock</span>{% endif %}
       </div>
