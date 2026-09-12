@@ -528,6 +528,36 @@ def settings():
         if new_password:
             current_user.set_password(new_password)
 
+        # Home page editable text sections
+        current_user.hero_heading = request.form.get("hero_heading", "").strip()
+        current_user.hero_description = request.form.get("hero_description", "").strip()
+
+        # Perks
+        current_user.perk1_title = request.form.get("perk1_title", "").strip()
+        current_user.perk1_desc = request.form.get("perk1_desc", "").strip()
+        current_user.perk2_title = request.form.get("perk2_title", "").strip()
+        current_user.perk2_desc = request.form.get("perk2_desc", "").strip()
+        current_user.perk3_title = request.form.get("perk3_title", "").strip()
+        current_user.perk3_desc = request.form.get("perk3_desc", "").strip()
+        current_user.perk4_title = request.form.get("perk4_title", "").strip()
+        current_user.perk4_desc = request.form.get("perk4_desc", "").strip()
+
+        # Best sellers section
+        current_user.bestsellers_heading = request.form.get("bestsellers_heading", "").strip()
+        current_user.bestsellers_desc = request.form.get("bestsellers_desc", "").strip()
+
+        # Story section
+        current_user.story_heading = request.form.get("story_heading", "").strip()
+        current_user.story_description = request.form.get("story_description", "").strip()
+
+        # Testimonials section
+        current_user.testimonials_heading = request.form.get("testimonials_heading", "").strip()
+        current_user.testimonials_desc = request.form.get("testimonials_desc", "").strip()
+
+        # Custom order section
+        current_user.custom_order_heading = request.form.get("custom_order_heading", "").strip()
+        current_user.custom_order_desc = request.form.get("custom_order_desc", "").strip()
+
         db.session.commit()
         flash("Store settings updated.", "success")
         return redirect(url_for("vendor.settings"))

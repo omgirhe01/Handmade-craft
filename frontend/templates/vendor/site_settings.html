@@ -88,6 +88,117 @@
     </div>
 
     <div class="panel">
+      <h4>Home Page Text Sections</h4>
+      
+      <div class="form-group">
+        <label>Hero Section Heading</label>
+        <input type="text" name="hero_heading" value="{{ current_user.hero_heading or '' }}" placeholder="e.g. Handmade Hampers">
+        <span style="font-size:.78rem; color:var(--ink-600);">Main title shown on your home page hero banner</span>
+      </div>
+
+      <div class="form-group">
+        <label>Hero Section Description</label>
+        <textarea name="hero_description" style="min-height:80px;" placeholder="e.g. Thoughtfully Curated, Beautifully Packed...">{{ current_user.hero_description or '' }}</textarea>
+      </div>
+
+      <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--ink-200);">
+        <label style="font-weight:600; display:block; margin-bottom:12px;">Four Perks Section</label>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Perk 1 Title</label>
+            <input type="text" name="perk1_title" value="{{ current_user.perk1_title or 'Handpicked & Curated' }}" placeholder="Handpicked & Curated">
+          </div>
+          <div class="form-group">
+            <label>Perk 1 Description</label>
+            <input type="text" name="perk1_desc" value="{{ current_user.perk1_desc or 'Every hamper put together with love' }}" placeholder="Every hamper put together with love">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Perk 2 Title</label>
+            <input type="text" name="perk2_title" value="{{ current_user.perk2_title or 'Custom Orders' }}" placeholder="Custom Orders">
+          </div>
+          <div class="form-group">
+            <label>Perk 2 Description</label>
+            <input type="text" name="perk2_desc" value="{{ current_user.perk2_desc or 'Get your own unique designs' }}" placeholder="Get your own unique designs">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Perk 3 Title</label>
+            <input type="text" name="perk3_title" value="{{ current_user.perk3_title or 'Premium Quality' }}" placeholder="Premium Quality">
+          </div>
+          <div class="form-group">
+            <label>Perk 3 Description</label>
+            <input type="text" name="perk3_desc" value="{{ current_user.perk3_desc or 'Best quality materials' }}" placeholder="Best quality materials">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Perk 4 Title</label>
+            <input type="text" name="perk4_title" value="{{ current_user.perk4_title or 'On Time Delivery' }}" placeholder="On Time Delivery">
+          </div>
+          <div class="form-group">
+            <label>Perk 4 Description</label>
+            <input type="text" name="perk4_desc" value="{{ current_user.perk4_desc or 'Timely delivery for every order' }}" placeholder="Timely delivery for every order">
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--ink-200);">
+        <label style="font-weight:600; display:block; margin-bottom:12px;">Best Sellers Section</label>
+        <div class="form-group">
+          <label>Heading</label>
+          <input type="text" name="bestsellers_heading" value="{{ current_user.bestsellers_heading or 'Our Best Sellers' }}" placeholder="Our Best Sellers">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" name="bestsellers_desc" value="{{ current_user.bestsellers_desc or 'Handpicked favourites, loved by our customers.' }}" placeholder="Handpicked favourites, loved by our customers.">
+        </div>
+      </div>
+
+      <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--ink-200);">
+        <label style="font-weight:600; display:block; margin-bottom:12px;">Story Section</label>
+        <div class="form-group">
+          <label>Heading</label>
+          <input type="text" name="story_heading" value="{{ current_user.story_heading or 'Every Hamper, Curated With Care' }}" placeholder="Every Hamper, Curated With Care">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="story_description" style="min-height:100px;" placeholder="No two hampers are exactly alike...">{{ current_user.story_description or '' }}</textarea>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--ink-200);">
+        <label style="font-weight:600; display:block; margin-bottom:12px;">Testimonials Section</label>
+        <div class="form-group">
+          <label>Heading</label>
+          <input type="text" name="testimonials_heading" value="{{ current_user.testimonials_heading or 'What Our Customers Say' }}" placeholder="What Our Customers Say">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" name="testimonials_desc" value="{{ current_user.testimonials_desc or 'Real feedback from real customers.' }}" placeholder="Real feedback from real customers.">
+        </div>
+      </div>
+
+      <div style="margin-top:20px; padding-top:20px; border-top:1px solid var(--ink-200);">
+        <label style="font-weight:600; display:block; margin-bottom:12px;">Custom Order Section</label>
+        <div class="form-group">
+          <label>Heading</label>
+          <input type="text" name="custom_order_heading" value="{{ current_user.custom_order_heading or 'Looking for something special?' }}" placeholder="Looking for something special?">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea name="custom_order_desc" style="min-height:80px;" placeholder="Tell us your idea...">{{ current_user.custom_order_desc or '' }}</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
       <h4>Story &amp; About</h4>
       <div class="form-group">
         <label>Our Story (shown on your About page)</label>

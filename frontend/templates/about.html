@@ -14,12 +14,12 @@
     </div>
 
     <div class="filter-card" style="padding:36px;">
-      <p style="font-size:1.02rem; color:var(--ink-900); white-space:pre-line;">
+      <p style="font-size:1.02rem; color:var(--ink-900); white-space:pre-line; text-align:justify;">
         {{ VENDOR.about_text if VENDOR.about_text else (SITE_NAME ~ " started with a simple idea — gifting should feel personal, not generic. We handpick every item that goes into a hamper, from festive treats to little luxuries, and arrange each one with care so it feels like it was put together just for the person receiving it. Every hamper is thoughtfully curated, beautifully packed and finished with a personal touch — because a good gift isn't just what's inside the box, it's how it makes someone feel when they open it.") }}
       </p>
       {% if VENDOR.story %}
       <h4 style="margin-top:24px;">Our Story</h4>
-      <p style="color:var(--ink-600); margin-top:10px; white-space:pre-line;">{{ VENDOR.story }}</p>
+      <p style="color:var(--ink-600); margin-top:10px; white-space:pre-line; text-align:justify;">{{ VENDOR.story }}</p>
       {% endif %}
       <div style="margin-top:24px;">
         <a href="{{ url_for('public.products') }}" class="btn btn-primary">Explore Our Products</a>

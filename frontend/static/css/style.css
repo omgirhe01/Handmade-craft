@@ -220,7 +220,7 @@ img { max-width: 100%; display: block; }
 .story-image { border-radius: 14px; overflow: hidden; aspect-ratio: 4/3; }
 .story-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .story-text h2 { margin-bottom: 14px; }
-.story-text p { color: var(--ink-600); margin-bottom: 20px; max-width: 46ch; }
+.story-text p { color: var(--ink-600); margin-bottom: 20px; max-width: 46ch; text-align: justify; }
 
 /* ---------- Layout: sidebar + content (products page) ---------- */
 .shop-layout { display: grid; grid-template-columns: 260px 1fr; gap: 28px; align-items: start; }
@@ -327,8 +327,9 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .pd-thumbs { display: flex; gap: 10px; margin-top: 12px; }
 .pd-thumbs div { width: 64px; height: 64px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
 .spec-list { list-style: none; padding: 0; margin: 20px 0; }
-.spec-list li { padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: .9rem; display: flex; justify-content: space-between; }
+.spec-list li { padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: .9rem; display: grid; grid-template-columns: minmax(90px, max-content) 1fr; gap: 18px; align-items: start; }
 .spec-list li span:first-child { color: var(--ink-600); }
+.spec-list li span:last-child { color: var(--ink-900); text-align: right; }
 .qty-input { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; width: fit-content; }
 .qty-input button { width: 36px; height: 36px; border: none; background: var(--cream-200); font-size: 1rem; cursor: pointer; }
 .qty-input input { width: 46px; text-align: center; border: none; background: transparent; font-size: .95rem; }
