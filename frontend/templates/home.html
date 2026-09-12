@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% block title %}{{ SITE_NAME }} — Handmade Decor{% endblock %}
+{% block title %}{{ SITE_NAME }} — Curated Gift Hampers{% endblock %}
 {% block content %}
 
 <section class="hero">
   <div class="container inner">
     <div>
       <h1>{{ SITE_NAME }}</h1>
-      <div class="script-line">{{ SITE_TAGLINE or "Handmade with Love" }}</div>
-      <p class="lede">Made with Love, Crafted by Hand<br>
-        Beautiful handmade decoration items for your home, festivals &amp; every special occasion.</p>
-      <a href="{{ url_for('public.products') }}" class="btn hero-cta">{{ t('Explore Products') }} →</a>
+      <div class="script-line">{{ SITE_TAGLINE or "Curated With Love" }}</div>
+      <p class="lede">Thoughtfully Curated, Beautifully Packed<br>
+        Handpicked gift hampers for your home, festivals &amp; every special occasion.</p>
+      <a href="{{ url_for('public.products') }}" class="btn hero-cta">{{ t('Explore Hampers') }} →</a>
     </div>
     <div class="hero-image">
       {% if VENDOR.cover_filename %}
@@ -69,11 +69,11 @@
       {% endif %}
     </div>
     <div class="story-text">
-      <h2>Every Piece, Made By Hand</h2>
+      <h2>Every Hamper, Curated With Care</h2>
       <p>
-        No two pieces are exactly alike — each one is shaped, coloured and finished by hand,
-        with patience and care that machines simply can't replicate. From the first thread to
-        the final knot, it's crafted just for you.
+        No two hampers are exactly alike — each one is handpicked, arranged and
+        packed with the same care you'd put into a gift for family. From choosing
+        every item to the final ribbon, it's put together just for you.
       </p>
       <a href="{{ url_for('public.about') }}" class="btn btn-outline">Our Story →</a>
     </div>
