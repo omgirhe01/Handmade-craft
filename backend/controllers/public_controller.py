@@ -1,6 +1,9 @@
+import os
+
 from flask import (
     Blueprint,
     abort,
+    current_app,
     flash,
     g,
     jsonify,
@@ -74,6 +77,44 @@ def inject_vendor_settings():
         "EMAIL": v.contact_email,
         "ADDRESS": v.address,
     }
+
+
+@public_bp.route("/favicon-circle/<path:stored_value>")
+def vendor_favicon(stored_value):
+    """Serves a locally-stored vendor logo cropped to a circle with a
+    transparent background, so it shows as a clean round icon in the
+    browser tab instead of a plain square. Cloudinary-hosted logos never
+    hit this route -- favicon_url() sends those straight to Cloudinary's
+    own on-the-fly transformation instead."""
+    import io
+
+    from PIL import Image, ImageDraw
+
+    path = os.path.join(current_app.config["UPLOAD_FOLDER"], stored_value)
+    if not os.path.isfile(path):
+        abort(404)
+
+    with Image.open(path) as img:
+        img = img.convert("RGBA")
+        w, h = img.size
+        side = min(w, h)
+        left, top = (w - side) // 2, (h - side) // 2
+        img = img.crop((left, top, left + side, top + side))
+        img = img.resize((128, 128), Image.LANCZOS)
+
+        mask = Image.new("L", (128, 128), 0)
+        ImageDraw.Draw(mask).ellipse((0, 0, 128, 128), fill=255)
+
+        circled = Image.new("RGBA", (128, 128), (0, 0, 0, 0))
+        circled.paste(img, (0, 0), mask=mask)
+
+        buf = io.BytesIO()
+        circled.save(buf, format="PNG")
+        buf.seek(0)
+
+    response = send_file(buf, mimetype="image/png")
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
 
 
 @public_bp.route("/")

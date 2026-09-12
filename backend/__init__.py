@@ -52,8 +52,9 @@ def create_app():
         # Used only by the Admin / Vendor panel templates.
         return {"PLATFORM_NAME": app.config["PLATFORM_NAME"]}
 
-    from backend.utils.helpers import image_url
+    from backend.utils.helpers import favicon_url, image_url
     app.jinja_env.globals["image_url"] = image_url
+    app.jinja_env.globals["favicon_url"] = favicon_url
 
     from backend.utils.translations import translate
     from flask import session as flask_session

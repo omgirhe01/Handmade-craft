@@ -11,11 +11,12 @@
 <meta property="og:image" content="{{ image_url(VENDOR.cover_filename or VENDOR.logo_filename, external=True) }}">
 {% endif %}
 {% if VENDOR.logo_filename %}
-<link rel="icon" type="image/png" href="{{ image_url(VENDOR.logo_filename) }}">
+<link rel="icon" type="image/png" href="{{ favicon_url(VENDOR.logo_filename) }}">
 {% else %}
-<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo-circle.png') }}">
 {% endif %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% if VENDOR.theme_color %}
 <style>
   /* Only the header brand accent and the hero section beside the banner
      follow the vendor's chosen theme colour -- headings, prices, the

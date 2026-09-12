@@ -137,3 +137,30 @@ def image_url(stored_value, external=False):
     if stored_value.startswith("http://") or stored_value.startswith("https://"):
         return stored_value
     return url_for("static", filename="uploads/" + stored_value, _external=external)
+
+
+def favicon_url(stored_value):
+    """Like image_url(), but returns a circular-cropped, transparent-background
+    version suitable for a browser tab favicon -- so a rectangular vendor
+    logo still shows as a clean circle in the tab, matching the platform's
+    own circular favicon.
+
+    - Cloudinary-hosted logos: handled entirely by Cloudinary's own on-the-fly
+      transformations (crop to a square, round the corners to a full circle,
+      output PNG) -- no extra server work, and it's CDN-cached.
+    - Local-disk logos (dev fallback): routed through
+      public.vendor_favicon, which crops the image the same way with Pillow.
+    """
+    from flask import url_for
+
+    if not stored_value:
+        return ""
+    if stored_value.startswith("http://") or stored_value.startswith("https://"):
+        marker = "/upload/"
+        idx = stored_value.find(marker)
+        if idx == -1:
+            return stored_value
+        insert_at = idx + len(marker)
+        transform = "c_fill,g_auto,w_128,h_128,r_max,f_png/"
+        return stored_value[:insert_at] + transform + stored_value[insert_at:]
+    return url_for("public.vendor_favicon", stored_value=stored_value)
