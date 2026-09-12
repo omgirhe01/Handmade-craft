@@ -11,7 +11,7 @@
 <div class="admin-shell">
   <aside class="admin-sidebar" id="adminSidebar">
     <div class="brand-mini">
-      <div class="name">{{ PLATFORM_NAME|upper }}<br><span style="font-weight:400; font-size:.7em;">{{ current_user.business_name }}</span></div>
+      <div class="name">{{ current_user.business_name }}</div>
     </div>
     <nav>
       <a href="{{ url_for('vendor.dashboard') }}" class="{{ 'active' if request.endpoint=='vendor.dashboard' }}">{{ icon('chart', 18) }} Dashboard</a>
@@ -27,7 +27,7 @@
       <a href="{{ url_for('vendor.coupons') }}" class="{{ 'active' if request.endpoint in ['vendor.coupons','vendor.add_coupon'] }}">{{ icon('truck', 18) }} Coupons</a>
       <a href="{{ url_for('vendor.settings') }}" class="{{ 'active' if request.endpoint=='vendor.settings' }}">{{ icon('edit', 18) }} Store Settings</a>
       <a href="{{ url_for('public.home', slug=current_user.slug) }}" target="_blank">{{ icon('globe', 18) }} View My Store</a>
-      <a href="{{ url_for('vendor.logout') }}">{{ icon('logout', 18) }} Logout</a>
+      <a href="{{ url_for('vendor.logout') }}" class="sidebar-logout">{{ icon('logout', 18) }} Logout</a>
     </nav>
   </aside>
 
@@ -35,10 +35,17 @@
 
   <div class="admin-main">
     <div class="admin-topbar">
+      <a href="{{ url_for('vendor.dashboard') }}" class="admin-topbar-brand">
+        {% if current_user.logo_filename %}
+        <div class="logo-icon logo-icon-img"><img src="{{ image_url(current_user.logo_filename) }}" alt="{{ current_user.business_name }}"></div>
+        {% else %}
+        <div class="logo-icon">{{ current_user.business_name[0]|upper }}</div>
+        {% endif %}
+        <span class="admin-topbar-name">{{ current_user.business_name }}</span>
+      </a>
       <button class="admin-toggle" id="adminToggle" aria-label="Open menu" aria-controls="adminSidebar">
         <span class="bar"></span>
       </button>
-      <h2 class="mt-0">{% block page_title %}Dashboard{% endblock %}</h2>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}

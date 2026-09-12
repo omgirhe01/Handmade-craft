@@ -57,15 +57,15 @@
       <div class="dm-row"><span>Required Date</span><span>{{ c.required_date }}</span></div>
       <div class="dm-row"><span>Phone</span><span class="phone-text">{{ c.mobile }}</span></div>
       <div class="dm-row"><span>Status</span><span><span class="badge badge-{{ c.status|lower }}">{{ c.status }}</span></span></div>
+      <form method="post" action="{{ url_for('vendor.update_custom_order_status', order_id=c.id) }}" style="margin-top:10px;">
+        <select name="status" onchange="this.form.submit()" class="form-control" style="width:100%;">
+          {% for s in ['Pending','Confirmed','Preparing','Completed','Cancelled'] %}
+          <option value="{{ s }}" {{ 'selected' if c.status==s }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </form>
       <div class="dm-actions">
-        <form method="post" action="{{ url_for('vendor.update_custom_order_status', order_id=c.id) }}" style="flex:1 1 100%;">
-          <select name="status" onchange="this.form.submit()" class="form-control btn-block">
-            {% for s in ['Pending','Confirmed','Preparing','Completed','Cancelled'] %}
-            <option value="{{ s }}" {{ 'selected' if c.status==s }}>{{ s }}</option>
-            {% endfor %}
-          </select>
-        </form>
-        <a href="{{ url_for('vendor.download_custom_order_invoice', order_id=c.id) }}" class="btn btn-outline btn-sm">Download PDF</a>
+        <a href="{{ url_for('vendor.download_custom_order_invoice', order_id=c.id) }}" class="btn btn-outline btn-sm btn-block">Download PDF</a>
       </div>
     </div>
   </div>

@@ -57,15 +57,15 @@
       <div class="dm-row"><span>Amount</span><span>₹{{ '%.0f'|format(o.total_price) }}{% if o.discount_amount %} ({{ o.coupon_code }}){% endif %}</span></div>
       <div class="dm-row"><span>Phone</span><span class="phone-text">{{ o.phone }}</span></div>
       <div class="dm-row"><span>Status</span><span><span class="badge badge-{{ o.status|lower }}">{{ o.status }}</span></span></div>
+      <form method="post" action="{{ url_for('vendor.update_order_status', order_id=o.id) }}" style="margin-top:10px;">
+        <select name="status" onchange="this.form.submit()" class="form-control" style="width:100%;">
+          {% for s in ['Pending','Confirmed','Preparing','Completed','Cancelled'] %}
+          <option value="{{ s }}" {{ 'selected' if o.status==s }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </form>
       <div class="dm-actions">
-        <form method="post" action="{{ url_for('vendor.update_order_status', order_id=o.id) }}" style="flex:1 1 100%;">
-          <select name="status" onchange="this.form.submit()" class="form-control btn-block">
-            {% for s in ['Pending','Confirmed','Preparing','Completed','Cancelled'] %}
-            <option value="{{ s }}" {{ 'selected' if o.status==s }}>{{ s }}</option>
-            {% endfor %}
-          </select>
-        </form>
-        <a href="{{ url_for('vendor.download_order_invoice', order_id=o.id) }}" class="btn btn-outline btn-sm">Download PDF</a>
+        <a href="{{ url_for('vendor.download_order_invoice', order_id=o.id) }}" class="btn btn-outline btn-sm btn-block">Download PDF</a>
       </div>
     </div>
   </div>
