@@ -122,27 +122,45 @@ def save_vendor_upload(file, vendor_slug):
     return f"{vendor_slug}/{unique_name}"
 
 
-def image_url(stored_value, external=False, width=None):
+def image_url(stored_value, external=False):
     """Build the correct <img src> for a value saved by save_vendor_upload,
     regardless of whether it's a full Cloudinary URL or a local relative
     path. Use this in templates instead of manually building
     url_for('static', filename='uploads/' + value).
     Pass external=True for places needing an absolute URL (e.g. og:image) --
     Cloudinary URLs are always absolute already, so this only affects the
-    local-disk fallback.
-    Pass width=<px> for anything that isn't shown at full size (product
-    cards, logos, thumbnails) -- for Cloudinary-hosted images this asks
-    Cloudinary to serve an already-resized copy in whatever format is
-    smallest for the visitor's browser (WebP/AVIF) at auto quality, instead
-    of shipping the full ~1600px original everywhere. Local-disk images are
-    returned as-is (no transform support without Cloudinary)."""
+    local-disk fallback."""
     from flask import url_for
 
     if not stored_value:
         return ""
     if stored_value.startswith("http://") or stored_value.startswith("https://"):
-        if width and "res.cloudinary.com" in stored_value and "/upload/" in stored_value:
-            transform = f"f_auto,q_auto,w_{int(width)}"
-            return stored_value.replace("/upload/", f"/upload/{transform}/", 1)
         return stored_value
     return url_for("static", filename="uploads/" + stored_value, _external=external)
+
+
+def favicon_url(stored_value):
+    """Like image_url(), but returns a circular-cropped, transparent-background
+    version suitable for a browser tab favicon -- so a rectangular vendor
+    logo still shows as a clean circle in the tab, matching the platform's
+    own circular favicon.
+
+    - Cloudinary-hosted logos: handled entirely by Cloudinary's own on-the-fly
+      transformations (crop to a square, round the corners to a full circle,
+      output PNG) -- no extra server work, and it's CDN-cached.
+    - Local-disk logos (dev fallback): routed through
+      public.vendor_favicon, which crops the image the same way with Pillow.
+    """
+    from flask import url_for
+
+    if not stored_value:
+        return ""
+    if stored_value.startswith("http://") or stored_value.startswith("https://"):
+        marker = "/upload/"
+        idx = stored_value.find(marker)
+        if idx == -1:
+            return stored_value
+        insert_at = idx + len(marker)
+        transform = "c_fill,g_auto,w_128,h_128,r_max,f_png/"
+        return stored_value[:insert_at] + transform + stored_value[insert_at:]
+    return url_for("public.vendor_favicon", stored_value=stored_value)

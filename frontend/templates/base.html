@@ -4,13 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
-<meta name="description" content="{{ (VENDOR.meta_description or VENDOR.about_text or VENDOR.tagline or (SITE_NAME ~ ' - Handmade decor, made with love.'))[:300] }}">
+<meta name="description" content="{{ (VENDOR.meta_description or VENDOR.about_text or VENDOR.tagline or (SITE_NAME ~ ' - Beautifully curated gift hampers for festivals, celebrations & every special occasion, handpicked with love.'))[:300] }}">
 <meta property="og:title" content="{{ SITE_NAME }}">
 <meta property="og:description" content="{{ (VENDOR.meta_description or VENDOR.about_text or VENDOR.tagline or '')[:300] }}">
 {% if VENDOR.logo_filename or VENDOR.cover_filename %}
 <meta property="og:image" content="{{ image_url(VENDOR.cover_filename or VENDOR.logo_filename, external=True) }}">
 {% endif %}
-{% include "_fonts.html" %}
+{% if VENDOR.logo_filename %}
+<link rel="icon" type="image/png" href="{{ favicon_url(VENDOR.logo_filename) }}">
+{% else %}
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo-circle.png') }}">
+{% endif %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 {% if VENDOR.theme_color %}
 <style>
@@ -33,9 +37,9 @@
 
 <header class="navbar">
   <div class="inner">
-    <a href="{{ url_for('public.home') }}" class="brand">
+    <div class="brand">
       {% if VENDOR.logo_filename %}
-      <div class="logo-icon logo-icon-img"><img src="{{ image_url(VENDOR.logo_filename, width=100) }}" alt="{{ SITE_NAME }}" loading="eager"></div>
+      <div class="logo-icon logo-icon-img"><img src="{{ image_url(VENDOR.logo_filename) }}" alt="{{ SITE_NAME }}"></div>
       {% else %}
       <div class="logo-icon">{{ SITE_NAME[0]|upper }}</div>
       {% endif %}
@@ -43,13 +47,14 @@
         <div class="name">{{ SITE_NAME|upper }}</div>
         <div class="tagline">{{ SITE_TAGLINE }}</div>
       </div>
-    </a>
+    </div>
 
     <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navPanel">
       <span class="bar"></span>
     </button>
 
     <div class="nav-panel" id="navPanel">
+      <div class="nav-panel-brand">{{ SITE_NAME }}</div>
       <nav class="nav-links">
         <a href="{{ url_for('public.home') }}" class="{{ 'active' if request.endpoint=='public.home' }}">{{ t('Home') }}</a>
         <a href="{{ url_for('public.products') }}" class="{{ 'active' if request.endpoint in ['public.products','public.product_detail'] }}">{{ t('Products') }}</a>

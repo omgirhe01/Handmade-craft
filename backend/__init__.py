@@ -16,26 +16,6 @@ def create_app():
     )
     app.config.from_object(Config)
 
-    # Every response (HTML pages, style.css, script.js) is gzip/br-compressed
-    # on the way out. HTML text compresses ~70-80%, and this used to not
-    # happen at all -- the app was shipping full-size uncompressed text over
-    # the wire on every request.
-    app.config.setdefault("COMPRESS_MIMETYPES", [
-        "text/html", "text/css", "text/xml", "application/json",
-        "application/javascript", "text/javascript",
-    ])
-    try:
-        from flask_compress import Compress
-        Compress(app)
-    except ImportError:
-        pass  # falls back to uncompressed responses if the package isn't installed yet
-
-    # Let browsers cache /static/* (CSS, JS) for a day instead of
-    # re-downloading it on every single page view. (Flask's own config dict
-    # already contains this key set to None by default, so setdefault()
-    # would be a silent no-op here -- it has to be assigned directly.)
-    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400
-
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
     db.init_app(app)
@@ -72,8 +52,9 @@ def create_app():
         # Used only by the Admin / Vendor panel templates.
         return {"PLATFORM_NAME": app.config["PLATFORM_NAME"]}
 
-    from backend.utils.helpers import image_url
+    from backend.utils.helpers import favicon_url, image_url
     app.jinja_env.globals["image_url"] = image_url
+    app.jinja_env.globals["favicon_url"] = favicon_url
 
     from backend.utils.translations import translate
     from flask import session as flask_session

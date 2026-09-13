@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Login — {{ PLATFORM_NAME }}</title>
-{% include "_fonts.html" %}
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo-circle.png') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -13,7 +13,7 @@
     <div class="text-center" style="margin-bottom:20px;">
       <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:14px;">
         <div class="logo-icon logo-icon-img" style="width:56px; height:56px; flex-shrink:0;">
-          <img src="{{ url_for('static', filename='img/logo.png') }}" alt="{{ PLATFORM_NAME }}">
+          <img src="{{ url_for('static', filename='img/logo-circle.png') }}" alt="{{ PLATFORM_NAME }}">
         </div>
         <span style="font-family:'Playfair Display', serif; font-weight:700; font-size:1.15rem; color:var(--maroon-900); text-align:left; line-height:1.2;">{{ PLATFORM_NAME }}</span>
       </div>

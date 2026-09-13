@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}Admin — {{ PLATFORM_NAME }}{% endblock %}</title>
-{% include "_fonts.html" %}
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo-circle.png') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 {% from "_icons.html" import icon %}
