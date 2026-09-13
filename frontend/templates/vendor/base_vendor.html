@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}My Store — {{ PLATFORM_NAME }}{% endblock %}</title>
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo-circle.png') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ asset_url('css/style.css') }}">
 </head>
 {% from "_icons.html" import icon %}
 <body>
@@ -69,7 +69,7 @@
     {% block vendor_content %}{% endblock %}
   </div>
 </div>
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ asset_url('js/script.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

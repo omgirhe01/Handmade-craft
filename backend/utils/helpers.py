@@ -122,6 +122,34 @@ def save_vendor_upload(file, vendor_slug):
     return f"{vendor_slug}/{unique_name}"
 
 
+def asset_url(filename):
+    """url_for('static', filename=...) with a cache-busting ?v=<mtime>
+    appended, based on the file's last-modified time on disk.
+
+    Static files (css/js/uploads) are now cached in the *browser* for 7
+    days (see Config.SEND_FILE_MAX_AGE_DEFAULT) for speed. Without this,
+    that's a trap: the moment style.css or script.js is edited and
+    redeployed, anyone who already had the site open keeps getting the old
+    cached copy for up to 7 days -- showing exactly the kind of
+    "looks different / unstyled on this phone" inconsistency between
+    devices that long caching is supposed to prevent, not cause. Appending
+    the file's mtime as a query string makes the URL itself change
+    whenever the file changes, so the browser is forced to fetch the new
+    version immediately while still caching it long-term until the next
+    real change. Use this for css/js; product photos already get a fresh
+    random filename per upload so they don't need this.
+    """
+    from flask import current_app, url_for
+
+    try:
+        full_path = os.path.join(current_app.static_folder, filename)
+        mtime = int(os.path.getmtime(full_path))
+    except OSError:
+        mtime = 0
+
+    return url_for("static", filename=filename) + f"?v={mtime}"
+
+
 def image_url(stored_value, external=False):
     """Build the correct <img src> for a value saved by save_vendor_upload,
     regardless of whether it's a full Cloudinary URL or a local relative

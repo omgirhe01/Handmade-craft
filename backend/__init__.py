@@ -68,6 +68,9 @@ def create_app():
     app.jinja_env.globals["image_url"] = image_url
     app.jinja_env.globals["favicon_url"] = favicon_url
 
+    from backend.utils.helpers import asset_url
+    app.jinja_env.globals["asset_url"] = asset_url
+
     from backend.utils.translations import translate
     from flask import session as flask_session
 

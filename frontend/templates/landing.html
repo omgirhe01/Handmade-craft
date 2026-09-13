@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ PLATFORM_NAME }} — Build Your Own Handmade Business Website</title>
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo-circle.png') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ asset_url('css/style.css') }}">
 </head>
 {% from "_icons.html" import icon %}
 <body>
@@ -95,6 +95,6 @@
   <div class="foot-bottom">&copy; {{ PLATFORM_NAME }}. All rights reserved.</div>
 </footer>
 
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ asset_url('js/script.js') }}"></script>
 </body>
 </html>

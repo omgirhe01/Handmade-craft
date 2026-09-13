@@ -15,7 +15,7 @@
 {% else %}
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo-circle.png') }}">
 {% endif %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="stylesheet" href="{{ asset_url('css/style.css') }}">
 {% if VENDOR.theme_color %}
 <style>
   /* Only the header brand accent and the hero section beside the banner
@@ -137,7 +137,7 @@ function closeLightbox() {
 
 </script>
 
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ asset_url('js/script.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>
