@@ -15,11 +15,11 @@
       {% if product.gallery_images %}
       <div class="pd-thumbs">
         <div onclick="document.getElementById('pdMainImage').src=this.querySelector('img').src" style="cursor:pointer;">
-          <img src="{{ image_url(product.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=200&auto=format&fit=crop'">
+          <img src="{{ image_url(product.image_filename) }}" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=200&auto=format&fit=crop'">
         </div>
         {% for g in product.gallery_images %}
         <div onclick="document.getElementById('pdMainImage').src=this.querySelector('img').src" style="cursor:pointer;">
-          <img src="{{ image_url(g.image_filename) }}">
+          <img src="{{ image_url(g.image_filename) }}" loading="lazy" decoding="async">
         </div>
         {% endfor %}
       </div>
@@ -100,7 +100,7 @@
   <div class="grid-products">
     {% for p in related %}
     <a href="{{ url_for('public.product_detail', product_id=p.id) }}" class="product-card">
-      <div class="thumb"><img src="{{ image_url(p.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=400&auto=format&fit=crop'" alt="{{ p.name }}"></div>
+      <div class="thumb"><img src="{{ image_url(p.image_filename) }}" loading="lazy" decoding="async" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=400&auto=format&fit=crop'" alt="{{ p.name }}"></div>
       <div class="body">
         <div class="cat">{{ p.category.name }}</div>
         <h4>{{ p.name }}</h4>

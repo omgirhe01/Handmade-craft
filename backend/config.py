@@ -49,6 +49,21 @@ class Config:
         else:
             SQLALCHEMY_ENGINE_OPTIONS = {}
 
+        # ---- Connection pool tuning ----
+        # Without this, SQLAlchemy's default pool can hand out a connection
+        # that the managed DB host (Aiven) has silently closed for being
+        # idle too long -- the app then has to fail once and reconnect,
+        # which shows up as a slow/hanging request. pool_pre_ping does a
+        # cheap "is this connection still alive" check before reusing one,
+        # and pool_recycle proactively retires connections before Aiven's
+        # own idle timeout hits, so requests don't pay for that failure.
+        SQLALCHEMY_ENGINE_OPTIONS.update({
+            "pool_pre_ping": True,
+            "pool_recycle": 280,
+            "pool_size": 5,
+            "max_overflow": 10,
+        })
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # ---- Frontend paths (templates & static live outside backend/) ----
@@ -56,6 +71,14 @@ class Config:
     STATIC_FOLDER = os.path.join(BASE_DIR, "frontend", "static")
 
     UPLOAD_FOLDER = os.path.join(STATIC_FOLDER, "uploads")
+
+    # ---- Static file browser caching ----
+    # Product photos are saved under a random uuid filename and never
+    # overwritten in place (see save_vendor_upload), and CSS/JS rarely
+    # change day-to-day, so it's safe to tell browsers to keep them cached
+    # for a week instead of re-requesting every single asset on every page
+    # visit. This alone noticeably speeds up repeat visits.
+    SEND_FILE_MAX_AGE_DEFAULT = 7 * 24 * 60 * 60  # 7 days, in seconds
     # Raw photos (before our automatic compression) can be several MB each,
     # especially phone camera photos, and a product can have several gallery
     # photos uploaded in the same request -- so this needs real headroom.

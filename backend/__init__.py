@@ -18,6 +18,18 @@ def create_app():
 
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
+    # Gzip/br-compress every HTML/CSS/JS/JSON response before it goes out --
+    # pages with lots of product cards/text shrink a lot over the wire, which
+    # matters most for visitors on slower mobile connections. Wrapped in a
+    # try/except so the app still runs even if `pip install -r
+    # requirements.txt` hasn't been re-run yet after this change.
+    try:
+        from flask_compress import Compress
+
+        Compress(app)
+    except ImportError:
+        pass
+
     db.init_app(app)
     login_manager.init_app(app)
 
@@ -83,23 +95,56 @@ class CustomDomainMiddleware:
     needing the /store/<slug> path. Runs at the WSGI layer (before routing),
     since Flask has already matched the URL rule by the time any
     before_request hook would run.
+
+    PERFORMANCE: this used to run a fresh DB query for the Host header on
+    *every single request* -- including every /static/... file (CSS, JS,
+    every product photo) -- since only literal "localhost"/"127.0.0.1" were
+    skipped. On a real deploy the Host header is never "localhost", so every
+    asset on every page load was paying for a round-trip to the (remote)
+    database. That's the main thing that was making the site feel slow.
+
+    Fixed by:
+      1. Skipping static file requests entirely -- they can never need a
+         custom-domain rewrite.
+      2. Caching the host -> vendor-slug lookup in memory for a few minutes,
+         so a given host only costs one DB query occasionally instead of on
+         every request. Custom domains change extremely rarely, so a short
+         staleness window here is a non-issue in practice.
     """
+
+    _CACHE_TTL_SECONDS = 300  # re-check a given host at most every 5 minutes
 
     def __init__(self, wsgi_app, app):
         self.wsgi_app = wsgi_app
         self.app = app
+        self._cache = {}  # host -> (slug_or_None, expires_at_monotonic)
+
+    def _resolve_slug(self, host):
+        import time
+
+        cached = self._cache.get(host)
+        now = time.monotonic()
+        if cached is not None and cached[1] > now:
+            return cached[0]
+
+        with self.app.app_context():
+            from backend.models import Vendor
+
+            vendor = Vendor.query.filter_by(custom_domain=host, is_active=True).first()
+            slug = vendor.slug if vendor else None
+
+        self._cache[host] = (slug, now + self._CACHE_TTL_SECONDS)
+        return slug
 
     def __call__(self, environ, start_response):
+        path = environ.get("PATH_INFO", "/")
         host = environ.get("HTTP_HOST", "").split(":")[0].lower()
-        # Skip the lookup entirely for the platform's own domain / localhost
-        # so every normal request isn't slowed down by a DB query.
-        if host and host not in ("localhost", "127.0.0.1"):
-            with self.app.app_context():
-                from backend.models import Vendor
 
-                vendor = Vendor.query.filter_by(custom_domain=host, is_active=True).first()
-                if vendor:
-                    path = environ.get("PATH_INFO", "/")
-                    environ["PATH_INFO"] = f"/store/{vendor.slug}{path}"
+        # Static files (css/js/uploaded photos/etc) never need a domain
+        # rewrite -- skip the lookup entirely so they're never slowed down.
+        if host and host not in ("localhost", "127.0.0.1") and not path.startswith("/static/"):
+            slug = self._resolve_slug(host)
+            if slug:
+                environ["PATH_INFO"] = f"/store/{slug}{path}"
 
         return self.wsgi_app(environ, start_response)
