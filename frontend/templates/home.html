@@ -1,19 +1,20 @@
 {% extends "base.html" %}
 {% from "_icons.html" import icon %}
-{% block title %}{{ SITE_NAME }} — Curated Gift Hampers{% endblock %}
+{% block title %}{{ SITE_NAME }} — Handmade Decor{% endblock %}
 {% block content %}
 
 <section class="hero">
   <div class="container inner">
     <div>
-      <h1>{{ VENDOR.hero_heading or SITE_NAME }}</h1>
-      <div class="script-line">{{ SITE_TAGLINE or "Curated With Love" }}</div>
-      <p class="lede" style="text-align:justify;">{{ VENDOR.hero_description or "Thoughtfully Curated, Beautifully Packed<br>Handpicked gift hampers for your home, festivals & every special occasion." | safe }}</p>
-      <a href="{{ url_for('public.products') }}" class="btn hero-cta">{{ t('Explore Product') }} →</a>
+      <h1>{{ SITE_NAME }}</h1>
+      <div class="script-line">{{ SITE_TAGLINE or "Handmade with Love" }}</div>
+      <p class="lede">Made with Love, Crafted by Hand<br>
+        Beautiful handmade decoration items for your home, festivals &amp; every special occasion.</p>
+      <a href="{{ url_for('public.products') }}" class="btn hero-cta">{{ t('Explore Products') }} →</a>
     </div>
     <div class="hero-image">
       {% if VENDOR.cover_filename %}
-      <img src="{{ image_url(VENDOR.cover_filename) }}" alt="{{ SITE_NAME }}">
+      <img src="{{ image_url(VENDOR.cover_filename, width=1200) }}" alt="{{ SITE_NAME }}" loading="eager" fetchpriority="high">
       {% else %}
       <img src="{{ url_for('static', filename='img/default_banner.jpg') }}" alt="Handmade decorative craft being made by hand">
       {% endif %}
@@ -22,10 +23,10 @@
 
   <div class="container">
     <div class="perk-strip">
-      <div class="perk"><div class="icon">{{ icon('handmade') }}</div><div><strong>{{ VENDOR.perk1_title or "Handpicked & Curated" }}</strong><span>{{ VENDOR.perk1_desc or "Every hamper put together with love" }}</span></div></div>
-      <div class="perk"><div class="icon">{{ icon('truck') }}</div><div><strong>{{ VENDOR.perk2_title or "Custom Orders" }}</strong><span>{{ VENDOR.perk2_desc or "Get your own unique designs" }}</span></div></div>
-      <div class="perk"><div class="icon">{{ icon('shield-check') }}</div><div><strong>{{ VENDOR.perk3_title or "Premium Quality" }}</strong><span>{{ VENDOR.perk3_desc or "Best quality materials" }}</span></div></div>
-      <div class="perk"><div class="icon">{{ icon('clock') }}</div><div><strong>{{ VENDOR.perk4_title or "On Time Delivery" }}</strong><span>{{ VENDOR.perk4_desc or "Timely delivery for every order" }}</span></div></div>
+      <div class="perk"><div class="icon">{{ icon('handmade') }}</div><div><strong>100% Handmade</strong><span>Made with love and perfection</span></div></div>
+      <div class="perk"><div class="icon">{{ icon('truck') }}</div><div><strong>Custom Orders</strong><span>Get your own unique designs</span></div></div>
+      <div class="perk"><div class="icon">{{ icon('shield-check') }}</div><div><strong>Premium Quality</strong><span>Best quality materials</span></div></div>
+      <div class="perk"><div class="icon">{{ icon('clock') }}</div><div><strong>On Time Delivery</strong><span>Timely delivery for every order</span></div></div>
     </div>
   </div>
 </section>
@@ -33,8 +34,8 @@
 <section class="section container">
   <div class="section-head">
     <div>
-      <h2>{{ VENDOR.bestsellers_heading or "Our Best Sellers" }}</h2>
-      <p>{{ VENDOR.bestsellers_desc or "Handpicked favourites, loved by our customers." }}</p>
+      <h2>Our Best Sellers</h2>
+      <p>Handpicked favourites, loved by our customers.</p>
     </div>
     <a href="{{ url_for('public.products') }}" class="btn btn-outline btn-sm">View More Products</a>
   </div>
@@ -42,19 +43,11 @@
   <div class="grid-products">
     {% for p in featured %}
     <a href="{{ url_for('public.product_detail', product_id=p.id) }}" class="product-card">
-      <div class="thumb"><img src="{{ image_url(p.image_filename) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=400&auto=format&fit=crop'" alt="{{ p.name }}"></div>
+      <div class="thumb"><img src="{{ image_url(p.image_filename, width=400) }}" onerror="this.src='https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?q=80&w=400&auto=format&fit=crop'" alt="{{ p.name }}" loading="lazy" width="400" height="400"></div>
       <div class="body">
         <div class="cat">{{ p.category.name }}</div>
         <h4>{{ p.name }}</h4>
-        {% if p.discount_percent and p.discount_percent > 0 %}
-        <div class="price-row">
-          <span class="price">₹{{ '%.0f'|format(p.discounted_price) }}</span>
-          <span class="price-old">₹{{ '%.0f'|format(p.price) }}</span>
-          <span class="discount-tag">{{ p.discount_percent }}% off</span>
-        </div>
-        {% else %}
         <div class="price">₹{{ '%.0f'|format(p.price) }}</div>
-        {% endif %}
         {% if p.is_featured %}<span class="badge-featured">Bestseller</span>{% endif %}
         {% if not p.in_stock %}<span class="stock-out">Out of Stock</span>{% endif %}
       </div>
@@ -70,15 +63,17 @@
     <div class="story-image">
       {% set story_img = VENDOR.story_image_filename %}
       {% if story_img %}
-      <img src="{{ image_url(story_img) }}" alt="{{ SITE_NAME }} — handmade craft being made by hand">
+      <img src="{{ image_url(story_img, width=800) }}" alt="{{ SITE_NAME }} — handmade craft being made by hand" loading="lazy">
       {% else %}
       <img src="{{ url_for('static', filename='img/default_banner.jpg') }}" alt="Handmade craft being made by hand">
       {% endif %}
     </div>
     <div class="story-text">
-      <h2>{{ VENDOR.story_heading or "Every Hamper, Curated With Care" }}</h2>
+      <h2>Every Piece, Made By Hand</h2>
       <p>
-        {{ VENDOR.story_description or "No two hampers are exactly alike — each one is handpicked, arranged and packed with the same care you'd put into a gift for family. From choosing every item to the final ribbon, it's put together just for you." }}
+        No two pieces are exactly alike — each one is shaped, coloured and finished by hand,
+        with patience and care that machines simply can't replicate. From the first thread to
+        the final knot, it's crafted just for you.
       </p>
       <a href="{{ url_for('public.about') }}" class="btn btn-outline">Our Story →</a>
     </div>
@@ -89,8 +84,8 @@
 <section class="section container">
   <div class="section-head">
     <div>
-      <h2>{{ VENDOR.testimonials_heading or "What Our Customers Say" }}</h2>
-      <p>{{ VENDOR.testimonials_desc or "Real feedback from real customers." }}</p>
+      <h2>What Our Customers Say</h2>
+      <p>Real feedback from real customers.</p>
     </div>
   </div>
   <div class="testimonial-grid">
@@ -107,9 +102,9 @@
 
 <section class="section container">
   <div class="filter-card" style="text-align:center; padding:40px;">
-    <h3>{{ VENDOR.custom_order_heading or "Looking for something special?" }}</h3>
+    <h3>Looking for something special?</h3>
     <p style="color:var(--ink-600); max-width:52ch; margin:8px auto 20px;">
-      {{ VENDOR.custom_order_desc or "Tell us your idea and we'll craft it just for you — custom colours, size and design." }}
+      Tell us your idea and we'll craft it just for you — custom colours, size and design.
     </p>
     <a href="{{ url_for('public.custom_order') }}" class="btn btn-primary">Place a Custom Order</a>
   </div>

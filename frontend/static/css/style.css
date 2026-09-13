@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=Poppins:wght@300;400;500;600;700&family=Dancing+Script:wght@600;700&display=swap');
+/* Google Fonts are now loaded via <link rel="preconnect"> + <link rel="stylesheet">
+   in every page's <head> (see _fonts include) instead of @import here --
+   @import blocks the page waterfall (style.css must load & parse before the
+   browser even discovers the font stylesheet), which was adding a serial
+   round-trip delay to every single page load. */
 
 :root {
   --maroon-900: #5E1836;
@@ -96,14 +100,6 @@ img { max-width: 100%; display: block; }
 
 /* Panel holds the page links + Admin button; on desktop it sits inline in the header */
 .nav-panel { display: flex; align-items: center; gap: 26px; }
-/* Business name shown at the top of the off-canvas mobile menu, above "Home".
-   Hidden on desktop since the header brand (logo + name) is already visible there. */
-.nav-panel-brand {
-  display: none; font-family: 'Playfair Display', serif; font-weight: 700;
-  font-size: 1.05rem; color: var(--maroon-900); white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis; width: 100%;
-  padding-bottom: 10px; margin-bottom: 8px; border-bottom: 1px solid var(--line);
-}
 .nav-links { display: flex; gap: 26px; align-items: center; flex-wrap: wrap; }
 .nav-links a { font-size: .92rem; font-weight: 500; color: var(--ink-900); padding: 6px 2px; border-bottom: 2px solid transparent; }
 .nav-links a:hover, .nav-links a.active { color: var(--brand-accent); border-color: var(--gold-500); }
@@ -217,9 +213,6 @@ img { max-width: 100%; display: block; }
 .product-card .cat { font-size: .72rem; color: var(--gold-500); font-weight: 600; }
 .product-card h4 { font-size: 1rem; margin: 4px 0 6px; }
 .product-card .price { color: #1A1A1A; font-weight: 700; font-family: 'Poppins', sans-serif; }
-.product-card .price-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.product-card .price-old { font-size: .82rem; color: var(--ink-500); text-decoration: line-through; font-weight: 500; }
-.product-card .discount-tag { font-size: .68rem; background: var(--ok-bg); color: var(--ok-fg); padding: 2px 6px; border-radius: 4px; font-weight: 600; }
 .product-card .stock-out { display:inline-block; font-size:.7rem; color:#B23A48; font-weight:600; margin-top:4px; }
 
 /* ---------- Story band (homepage craft image + text) ---------- */
@@ -231,7 +224,7 @@ img { max-width: 100%; display: block; }
 .story-image { border-radius: 14px; overflow: hidden; aspect-ratio: 4/3; }
 .story-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .story-text h2 { margin-bottom: 14px; }
-.story-text p { color: var(--ink-600); margin-bottom: 20px; max-width: 46ch; text-align: justify; }
+.story-text p { color: var(--ink-600); margin-bottom: 20px; max-width: 46ch; }
 
 /* ---------- Layout: sidebar + content (products page) ---------- */
 .shop-layout { display: grid; grid-template-columns: 260px 1fr; gap: 28px; align-items: start; }
@@ -338,9 +331,8 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .pd-thumbs { display: flex; gap: 10px; margin-top: 12px; }
 .pd-thumbs div { width: 64px; height: 64px; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); }
 .spec-list { list-style: none; padding: 0; margin: 20px 0; }
-.spec-list li { padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: .9rem; display: grid; grid-template-columns: minmax(90px, max-content) 1fr; gap: 18px; align-items: start; }
+.spec-list li { padding: 8px 0; border-bottom: 1px dashed var(--line); font-size: .9rem; display: flex; justify-content: space-between; }
 .spec-list li span:first-child { color: var(--ink-600); }
-.spec-list li span:last-child { color: var(--ink-900); text-align: right; }
 .qty-input { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; width: fit-content; }
 .qty-input button { width: 36px; height: 36px; border: none; background: var(--cream-200); font-size: 1rem; cursor: pointer; }
 .qty-input input { width: 46px; text-align: center; border: none; background: transparent; font-size: .95rem; }
@@ -381,11 +373,7 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
 .admin-sidebar nav a.active { background: var(--maroon-700); color: #fff; }
 .admin-sidebar nav a.sidebar-logout { margin-top: auto; border-top: 1px solid rgba(255,255,255,.08); padding-top: 13px; }
 .admin-main { margin-left: 240px; padding: 30px 34px; background: var(--cream-100); min-width: 0; }
-.admin-topbar {
-  display: flex; justify-content: space-between; align-items: center;
-  margin: -30px -34px 26px; padding: 18px 34px;
-  background: var(--card-bg); border-bottom: 1px solid var(--line);
-}
+.admin-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 26px; }
 /* Mobile-only brand row (logo + business name) shown in the topbar in place
    of the page title -- see the max-width:960px block below. Hidden on
    desktop, where the sidebar's own brand-mini already shows the business
@@ -452,7 +440,6 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
   .admin-sidebar.open { left: 0; }
   .admin-toggle { display: flex; margin-right: 0; }
   .admin-main { margin-left: 0; padding: 22px 18px; }
-  .admin-topbar { margin: -22px -18px 22px; padding: 14px 18px; }
   /* Smaller nav rows so the whole menu fits one screen without needing to
      scroll inside the sidebar itself. */
   .admin-sidebar { padding: 14px 0; }
@@ -478,7 +465,6 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
     transition: right .28s ease; z-index: 210; overflow-y: auto;
   }
   .nav-panel.open { right: 0; }
-  .nav-panel-brand { display: block; }
   .nav-links { flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; }
   .nav-links a { display: block; width: 100%; padding: 12px 8px; border-bottom: 1px solid var(--line); }
   .nav-panel .btn { width: 100%; margin-top: 10px; }
@@ -493,7 +479,6 @@ footer .foot-bottom { text-align: center; font-size: .78rem; color: #D6A9B7; mar
   .form-row { grid-template-columns: 1fr; }
   .form-card { padding: 22px 18px; }
   .section { padding: 38px 0; }
-  .section + .section { padding-top: 38px; }
   .section-head { flex-direction: column; align-items: flex-start; }
   .container { padding: 0 16px; }
   .brand-text .name { font-size: 1rem; }

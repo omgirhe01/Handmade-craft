@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% block title %}My Store — {{ PLATFORM_NAME }}{% endblock %}</title>
-<link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo-circle.png') }}">
+{% include "_fonts.html" %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 {% from "_icons.html" import icon %}
@@ -12,7 +12,7 @@
 <div class="admin-shell">
   <aside class="admin-sidebar" id="adminSidebar">
     <div class="brand-mini">
-      <div class="name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ current_user.business_name }}</div>
+      <div class="name">{{ current_user.business_name }}</div>
     </div>
     <nav>
       <a href="{{ url_for('vendor.dashboard') }}" class="{{ 'active' if request.endpoint=='vendor.dashboard' }}">{{ icon('chart', 18) }} Dashboard</a>
@@ -36,14 +36,14 @@
 
   <div class="admin-main">
     <div class="admin-topbar">
-      <div class="admin-topbar-brand">
+      <a href="{{ url_for('vendor.dashboard') }}" class="admin-topbar-brand">
         {% if current_user.logo_filename %}
         <div class="logo-icon logo-icon-img"><img src="{{ image_url(current_user.logo_filename) }}" alt="{{ current_user.business_name }}"></div>
         {% else %}
         <div class="logo-icon">{{ current_user.business_name[0]|upper }}</div>
         {% endif %}
         <span class="admin-topbar-name">{{ current_user.business_name }}</span>
-      </div>
+      </a>
       <button class="admin-toggle" id="adminToggle" aria-label="Open menu" aria-controls="adminSidebar">
         <span class="bar"></span>
       </button>
